@@ -50,7 +50,7 @@ temperature_c = 100.0
 predictions_f = model.predict([temperature_c])
 print("{} degrees Celsius = {} degrees Fahrenheit".format(temperature_c, predictions_f))
 
-# print wights for each layer
+# print weights for each layer
 print("These are the layer_0 variables: {}\n".format(layer_0.get_weights()))
 print("These are the layer_1 variables: {}\n".format(layer_1.get_weights()))
 print("These are the layer_2 variables: {}\n".format(layer_2.get_weights()))
