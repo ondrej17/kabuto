@@ -7,6 +7,8 @@ import time
 import sys
 import os
 
+from descriptors import Descriptors
+
 
 class Kabuto:
 
@@ -20,6 +22,7 @@ class Kabuto:
         self.option = option
         self.phase = phase
         self.output_dir = 'prepared_for_learning'
+        self.tmp_dir = 'temporary'
 
         # based on option, call correct method
         if self.action == "prepare":
@@ -60,13 +63,13 @@ class Kabuto:
             > usage:
                 prepare(phase, file)
         """
-        print("ACTION: prepare")                # this must be here
-        print("preparing phase:", phase)
-        print("preparing from file:", file)
-        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        info = "ACTION: prepare\n"\
+               "preparing phase: {}\n"\
+               "preparing from file: {}\n"\
+               "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(phase, file)
+        print(info)  # this must be here
 
-        ###############################
-        # processing of file goes here ->
+        # processing of file ...
         with open(file, "r") as input_file:
 
             # main dictionary that stores individual timesteps (timestep: atoms)
@@ -101,7 +104,7 @@ class Kabuto:
 
                 elif scan_number_of_atoms:
                     # print("Number of atoms:", repr(line))
-                    number_of_atoms = int(line)
+                    # number_of_atoms = int(line)
                     scan_number_of_atoms = False
 
                 elif line == "ITEM: ATOMS id type xs ys zs":
@@ -112,26 +115,40 @@ class Kabuto:
                 elif scan_atoms:
                     # print("Atom:", repr(line))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    timesteps[current_timestep][atom_id] = [float(atom_x), float(atom_y), float(atom_z)]
+                    timesteps[current_timestep][atom_id] = [float(atom_x), float(atom_y), float(atom_z), None]
 
                 else:
                     # skipping useless lines
                     pass
+        # all atoms are loaded in dictionary
+
+        # save dictionary to json file
+        with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
+            json.dump(timesteps, json_file)
+            print("dictionary 'timesteps' was saved to: dict_timesteps.json")
+
+        # calculating the values of 14 functions for each atoms
+        for timestep in timesteps.keys():
+            print("timestep:", timestep)
+            for id in timesteps[timestep].keys():
+                # coordinates of current atom
+                x = timesteps[timestep][id][0]
+                y = timesteps[timestep][id][1]
+                z = timesteps[timestep][id][2]
+                print("\tid: {}, [{}, {}, {}]".format(id, x, y, z))
+                # calculate descriptors for current atom
+                descriptors = Descriptors(id, x, y, z, timesteps[timestep]).values_of_14_functions()
+                # add descriptors the dictionary
+                timesteps[timestep][id][3] = descriptors
+                # print("Descriptors:", descriptors)
+
+        # save dictionary to json file
+        with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
+            json.dump(timesteps, json_file)
+            print("dictionary 'timesteps' was saved to: dict_timesteps.json")
 
         # print timesteps-dictionary
         # self.print_timesteps(timesteps)
-
-        # save dictionary to json file
-        with open("dict_timesteps.json", "w") as json_file:
-            json.dump(timesteps, json_file)
-            print("dictionary 'timesteps' was saved to: dict_timesteps.json")
-        # all atoms are loaded
-        # processing of fil ended
-        ###############################
-        # TODO: calculating values of 14 functions for each atoms comes here -->
-
-        ###############################
-        ##################################################################
 
     def learn(self):
         print("ACTION: learn")
