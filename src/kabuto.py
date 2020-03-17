@@ -1,11 +1,6 @@
 import json
-
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-import time
-import sys
 import os
+import sys
 
 from descriptors import Descriptors
 
@@ -14,7 +9,6 @@ class Kabuto:
 
     # constructor of class
     def __init__(self, action, option, phase):
-        # print("Kabuto was born.")  # replace with a function that draws a nice logo of kabuto (like NOXIA)
         self.print_intro()
 
         # initialize attributes
@@ -63,9 +57,9 @@ class Kabuto:
             > usage:
                 prepare(phase, file)
         """
-        info = "ACTION: prepare\n"\
-               "preparing phase: {}\n"\
-               "preparing from file: {}\n"\
+        info = "ACTION: prepare\n" \
+               "preparing phase: {}\n" \
+               "preparing from file: {}\n" \
                "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(phase, file)
         print(info)  # this must be here
 
@@ -135,10 +129,10 @@ class Kabuto:
                 x = timesteps[timestep][id][0]
                 y = timesteps[timestep][id][1]
                 z = timesteps[timestep][id][2]
-                print("\tid: {}, [{}, {}, {}]".format(id, x, y, z))
+                print("\tid: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
                 descriptors = Descriptors(id, x, y, z, timesteps[timestep]).values_of_14_functions()
-                # add descriptors the dictionary
+                # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
                 # print("Descriptors:", descriptors)
 
@@ -151,14 +145,16 @@ class Kabuto:
         # self.print_timesteps(timesteps)
 
     def learn(self):
-        print("ACTION: learn")
-
-        print("learning ...")
+        info = "ACTION: learn\n" \
+               "learning ...\n" \
+               "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        print(info)  # this must be here
 
     def predict(self, option):
-        print("ACTION: predict")
-
-        print("predicting:", option)
+        info = "ACTION: predict\n" \
+               "predicting ...\n" \
+               "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+        print(info)  # this must be here
 
     @staticmethod
     def print_timesteps(timesteps):
