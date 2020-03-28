@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import datetime
 
 from descriptors import Descriptors
 
@@ -116,20 +117,15 @@ class Kabuto:
                     pass
         # all atoms are loaded in dictionary
 
-        # save dictionary to json file
-        with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
-            json.dump(timesteps, json_file)
-            print("dictionary 'timesteps' was saved to: dict_timesteps.json")
-
         # calculating the values of 14 functions for each atoms
         for timestep in timesteps.keys():
-            print("timestep:", timestep)
+            print("... processing timestep #", timestep)
             for id in timesteps[timestep].keys():
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
                 y = timesteps[timestep][id][1]
                 z = timesteps[timestep][id][2]
-                print("\tid: {}: [{}, {}, {}]".format(id, x, y, z))
+                # print("\tid: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
                 descriptors = Descriptors(id, x, y, z, timesteps[timestep]).values_of_14_functions()
                 # add descriptors to the dictionary
@@ -139,10 +135,50 @@ class Kabuto:
         # save dictionary to json file
         with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
             json.dump(timesteps, json_file)
-            print("dictionary 'timesteps' was saved to: dict_timesteps.json")
+            print("INFO: dictionary 'timesteps' was saved to: dict_timesteps.json")
 
         # print timesteps-dictionary
         # self.print_timesteps(timesteps)
+
+        # save timesteps to separate files in 'prepared_for_learning' directory ---?
+        # create directory for saving timesteps (if it does not exist)
+        directory = 'prepared_for_learning'
+        if os.path.isdir(directory):
+            print("INFO: directory {} already exists.".format(directory))
+        else:
+            try:
+                os.mkdir(directory)
+            except OSError:
+                print("ERROR: Creation of the directory {} failed".format(directory))
+            else:
+                print("INFO: Successfully created the directory {}".format(directory))
+
+        # each timestep is saved to different file
+        # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
+
+        for timestep in timesteps.keys():
+            # create specific filename
+            filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
+            path_to_file = os.path.join(directory, filename)
+            print("... saving timestep #{} to file {}".format(timestep, path_to_file))
+
+            # open file
+            with open(path_to_file, 'w') as file:
+                # print informative header
+                info_header = "# timestep {}\n" \
+                              "# phase {}\n" \
+                              "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep, phase)
+                file.write(info_header)
+
+                # print descriptors for each atom
+                for id in timesteps[timestep].keys():
+                    # prepare string to be written
+                    descriptor_line = str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n'
+                    # write this line to file
+                    file.write(descriptor_line)
+
+        # all files are prepared in 'prepared_for_learning' folder
+        print("INFO: all timesteps were saved in \'prepared_for_learning\' folder")
 
     def learn(self):
         info = "ACTION: learn\n" \
