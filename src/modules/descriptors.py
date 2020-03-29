@@ -4,10 +4,10 @@ from scipy.special import sph_harm
 
 class Descriptors:
     def __init__(self, id, x, y, z, atoms):
-        self.id = id
-        self.x, self.y, self.z = x, y, z
-        self.r_min, self.r_max = self.set_r_min_max()
-        self.atoms = self.create_atoms_in_cutoff(atoms)
+        self.id = id                                        # id of actual atom
+        self.x, self.y, self.z = x, y, z                    # coordination of actual atom
+        self.r_min, self.r_max = self.set_r_min_max()       # set cutoff parameters
+        self.atoms = self.create_atoms_in_cutoff(atoms)     # consider only atoms in cutoff
 
         # dictionary of parameters for symmetry functions
         self.symmetry_functions_parameters = {
@@ -178,6 +178,15 @@ class Descriptors:
             if r_ij < self.r_max:
                 res[id] = items
         return res
+
+    @staticmethod
+    def info_header(timestep, phase):
+        """
+        returns informative header that is to be written at the beginning of file with descriptors
+        """
+        return "# timestep {}\n" \
+               "# phase {}\n" \
+               "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep, phase)
 
 # TODO: calculation of descriptors takes tool long, I must shorten it
 # TODO: all function must be tested whether they give proper output
