@@ -20,6 +20,7 @@ class Kabuto:
         self.phase = phase
         self.output_dir = 'prepared_for_learning'
         self.tmp_dir = 'temporary'
+        self.saved_nn_dir = 'saved_nn'
 
         # based on option, call correct method
         if self.action == "prepare":
@@ -190,8 +191,9 @@ class Kabuto:
     def list_nn(self):
         """
         Documentation for 'list_nn' function:
-            > ...
-            > ...
+            > lists all nn models saved in 'saved_nn' directory
+            > only nn from this list can be taught
+            > using self.create_nn, new nn can be added to this directory
             > usage:
                 list_nn()
         """
@@ -199,6 +201,33 @@ class Kabuto:
                "listing all saved neural networks ...\n" \
                "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
         print(info)  # this must be here
+
+        # list all files in self.saved_nn_dir
+        # saved model has extension .h5
+        # create saved_nn_dir for saving models of NN (if it does not exist)
+        if os.path.isdir(self.saved_nn_dir):
+            print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
+        else:
+            try:
+                os.mkdir(self.saved_nn_dir)
+            except OSError:
+                print("ERROR: Creation of directory \'{}\' failed".format(self.saved_nn_dir))
+            else:
+                print("INFO: Successfully created directory \'{}\'".format(self.saved_nn_dir))
+
+        # list all files in saved_nn_dir and save it to models
+        models = []
+        model_extension = ".h5"
+        for item in os.listdir(self.saved_nn_dir):
+            # print(item)
+            if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
+                # cut the extension out
+                models.append(item.replace(model_extension, ""))
+
+        # print models out
+        print("INFO: listing all saved neural networks")
+        self.print_nn_models(models)
+        print("INFO: listing ended")
 
     def create_nn(self, name):
         """
@@ -270,6 +299,14 @@ class Kabuto:
         print("******************************************************")
         print()
 
+    @staticmethod
+    def print_nn_models(models):
+        to_print = ""
+        for model in models:
+            to_print += "... {}\n".format(model)
+        print(to_print.strip())
+
+
 
 ################################################################
 # create Kabuto Machine iff there is correct number of arguments
@@ -299,5 +336,5 @@ else:
           "    kabuto.py list_nn\n"
           "    kabuto.py create_nn <name_of_nn>\n"
           "    kabuto.py learn <name_of_nn>\n"
-          "    kabuto.py predict <path_to_file_with_structure>\n"
+          "    kabuto.py predict <dump.file>\n"
           "******************************************************\n")
