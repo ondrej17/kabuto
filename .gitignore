@@ -1,6 +1,7 @@
 # Default ignored files
 .idea
 kabuto_machine.iml
+# Custom ignored files
 savedNNmodel
 src/temporary
-src/prepared_for_learning
+src/prepared_for_training

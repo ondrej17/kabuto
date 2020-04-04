@@ -3,11 +3,20 @@ from scipy.special import sph_harm
 
 
 class Descriptors:
+    """
+    class Descriptors
+        > it can be changed to calculate whatever descriptors you choose, but
+        > the function 'get_descriptors()' must return an array of floats
+        > number of descriptors affects the neural network (# of its input nodes), so be careful
+        > the function 'info_header' returns header for output file that contains descriptors
+        >   ... it must be changed adequately
+    """
+
     def __init__(self, id, x, y, z, atoms):
-        self.id = id                                        # id of actual atom
-        self.x, self.y, self.z = x, y, z                    # coordination of actual atom
-        self.r_min, self.r_max = self.set_r_min_max()       # set cutoff parameters
-        self.atoms = self.create_atoms_in_cutoff(atoms)     # consider only atoms in cutoff
+        self.id = id  # id of actual atom
+        self.x, self.y, self.z = x, y, z  # coordination of actual atom
+        self.r_min, self.r_max = self.set_r_min_max()  # set cutoff parameters
+        self.atoms = self.create_atoms_in_cutoff(atoms)  # consider only atoms in cutoff
 
         # dictionary of parameters for symmetry functions
         self.symmetry_functions_parameters = {
@@ -23,6 +32,15 @@ class Descriptors:
             10: [4.5],
             11: [7.0]
         }
+
+    def get_descriptors(self):
+        """
+        returns descriptors
+            > it can be changed
+            > it must returns an array of floats
+            > number of descriptors affects the NN
+        """
+        return self.values_of_14_functions()
 
     def values_of_14_functions(self):
         """

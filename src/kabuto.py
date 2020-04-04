@@ -4,6 +4,7 @@ import sys
 import datetime
 
 from modules.descriptors import Descriptors
+from modules.neural_network import NeuralNetwork
 
 
 class Kabuto:
@@ -15,12 +16,14 @@ class Kabuto:
         self.print_intro()
 
         # initialize attributes
+        self.nn = None
         self.action = action
         self.option = option
         self.phase = phase
-        self.output_dir = 'prepared_for_learning'
+        self.output_dir = 'prepared_for_training'
         self.tmp_dir = 'temporary'
         self.saved_nn_dir = 'saved_nn'
+        self.trained_dir = 'trained'
 
         # based on option, call correct method
         if self.action == "prepare":
@@ -42,9 +45,9 @@ class Kabuto:
             else:
                 print("ERROR: either no name of neural network given or more arguments given")
 
-        elif self.action == "learn":
+        elif self.action == "train":
             if self.option is not None and self.phase is None:
-                self.learn(self.option)
+                self.train(self.option)
             else:
                 print("ERROR: either no name of neural network given or more arguments given")
 
@@ -60,15 +63,15 @@ class Kabuto:
                   "    prepare <name_of_phase> <dump_file>\n"
                   "    list_nn\n"
                   "    create_nn <name_of_nn>\n"
-                  "    learn <name_of_nn>\n"
+                  "    train <name_of_nn>\n"
                   "    predict <path_to_file_with_structure>\n".format(self.action))
 
     def prepare(self, phase, file):
         """
         Documentation for 'prepare' function:
-            > prepares files for learning from dump-file
+            > prepares files for training from dump-file
             > parses all atomic positions and calculates values of 14 functions for each atom
-            > for each timestamp creates corresponding file in 'prepared_for_learning' folder
+            > for each timestamp creates corresponding file in 'prepared_for_training' folder
             > those file are then used to feed the NN (teaching of NN to identify given phase)
             > usage:
                 prepare(phase, file)
@@ -142,7 +145,7 @@ class Kabuto:
                 z = timesteps[timestep][id][2]
                 print("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
-                descriptors = Descriptors(id, x, y, z, timesteps[timestep]).values_of_14_functions()
+                descriptors = Descriptors(id, x, y, z, timesteps[timestep]).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
                 # print("Descriptors:", descriptors)
@@ -155,7 +158,7 @@ class Kabuto:
         # print timesteps-dictionary
         # self.print_timesteps(timesteps)
 
-        # save timesteps to separate files in 'prepared_for_learning' output_dir ---?
+        # save timesteps to separate files in 'prepared_for_training' output_dir ---?
         # create output_dir for saving timesteps (if it does not exist)
         if os.path.isdir(self.output_dir):
             print("INFO: output_dir {} already exists.".format(self.output_dir))
@@ -185,8 +188,8 @@ class Kabuto:
                 for id in timesteps[timestep].keys():
                     file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
 
-        # all files are prepared in 'prepared_for_learning' folder
-        print("INFO: all timesteps were saved in \'prepared_for_learning\' folder")
+        # all files are prepared in 'prepared_for_training' folder
+        print("INFO: all timesteps were saved in \'prepared_for_training\' folder")
 
     def list_nn(self):
         """
@@ -232,8 +235,8 @@ class Kabuto:
     def create_nn(self, name):
         """
         Documentation for 'create_nn' function:
-            > ...
-            > ...
+            > creates a new model in 'saved_nn' directory
+            > it is a raw neural network, no teaching yet
             > usage:
                 create_nn(name)
         """
@@ -242,34 +245,80 @@ class Kabuto:
                "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name)
         print(info)  # this must be here
 
-    def learn(self, name):
+        # create saved_nn_dir for saving models of NN (if it does not exist)
+        if os.path.isdir(self.saved_nn_dir):
+            print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
+        else:
+            try:
+                os.mkdir(self.saved_nn_dir)
+            except OSError:
+                print("ERROR: Creation of directory \'{}\' failed".format(self.saved_nn_dir))
+            else:
+                print("INFO: Successfully created directory \'{}\'".format(self.saved_nn_dir))
+
+        # find all files in saved_nn_dir and save it to models
+        models = []
+        model_extension = ".h5"
+        for item in os.listdir(self.saved_nn_dir):
+            # print(item)
+            if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
+                # cut the extension out
+                models.append(item.replace(model_extension, ""))
+
+        if name in models:
+            # if 'name' is in 'saved_nn' directory, do nothing
+            print("INFO: Neural network \'{}\' already exists.".format(name))
+        else:
+            # else, create a new neural network and save its model to <name>.h5 file in 'saved_nn' directory
+            NeuralNetwork(name).create_model().save_model()
+
+    def train(self, name):
         """
-        Documentation for 'learn' function:
+        Documentation for 'train' function:
             > ...
             > ...
             > usage:
-                learn(name)
+                train(name)
         """
-        info = "ACTION: learn\n" \
-               "\'{}\' is learning from \'prepared_for_learning\' directory\n" \
+        info = "ACTION: train\n" \
+               "\'{}\' is training from \'prepared_for_training\' directory\n" \
                "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name)
         print(info)  # this must be here
 
         # prepare two lists, one with descriptors, second one with vector q_i
+        first_array, second_array = self.prepare_input_arrays(name)
 
         # prepare NN
+        self.nn = NeuralNetwork(name).load_model()
 
-        # let the NN learn
+        # let the NN train
+        self.nn.train(first_array, second_array)
 
         # at the end, save the model
+        self.nn.save_model()
 
-        # move learned files to another directory
+        # create output_dir for saving timesteps (if it does not exist)
+        if os.path.isdir(self.trained_dir):
+            print("INFO: trained_dir {} already exists.".format(self.trained_dir))
+        else:
+            try:
+                os.mkdir(self.output_dir)
+            except OSError:
+                print("ERROR: Creation of the trained_dir {} failed".format(self.trained_dir))
+            else:
+                print("INFO: Successfully created the trained_dir {}".format(self.trained_dir))
+
+        # move all files from 'prepare_to_training' dir to 'trained' dir
+        self.move_files_from_to(self.output_dir, self.trained_dir)
 
     def predict(self, option):
         info = "ACTION: predict\n" \
                "predicting ...\n" \
                "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
         print(info)  # this must be here
+
+        # similar to 'train' function
+        # prediction = model.predict([array of descriptors])
 
     @staticmethod
     def print_timesteps(timesteps):
@@ -306,6 +355,20 @@ class Kabuto:
             to_print += "... {}\n".format(model)
         print(to_print.strip())
 
+    @staticmethod
+    def move_files_from_to(from_dir, to_dir):
+        """
+        moves all files from 'from_dir' to 'to_dir'
+        """
+        # TODO: make this function
+        pass
+
+    def prepare_input_arrays(self, name):
+        """
+        prepares two arrays, input data, from all files in 'prepared_for_training' directory
+        """
+        # TODO: make this function using numpy
+        return [], []
 
 
 ################################################################
@@ -335,6 +398,6 @@ else:
           "    kabuto.py prepare <name_of_phase> <dump_file>\n"
           "    kabuto.py list_nn\n"
           "    kabuto.py create_nn <name_of_nn>\n"
-          "    kabuto.py learn <name_of_nn>\n"
+          "    kabuto.py train <name_of_nn>\n"
           "    kabuto.py predict <dump.file>\n"
           "******************************************************\n")
