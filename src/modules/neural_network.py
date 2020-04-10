@@ -12,6 +12,8 @@ class NeuralNetwork:
         self.model = None
         self.models_dir = os.path.join("..", "saved_nn")
         self.model_extension = ".h5"
+        self.number_of_phases = None
+        self.number_of_descriptors = None
 
     def train(self, first_array, second_array):
         """
@@ -37,10 +39,13 @@ class NeuralNetwork:
         self.model = tf.keras.models.load_model(path_to_model, compile=True)
         print("INFO: \'{}\' is loaded.".format(self.name))
 
-    def create_model(self):
+    def create_model(self, number_of_descriptors, number_of_phases):
         """
         creates a new model with 'self.name'
         """
+        self.number_of_descriptors = number_of_descriptors
+        self.number_of_phases = number_of_phases
+
         # define the layers
         layers = self.create_layers()
 
@@ -59,8 +64,9 @@ class NeuralNetwork:
         model.add(Dense(12, input_dim=8, init='uniform', activation='relu'))
         It means 8 input parameters, with 12 neurons in the FIRST hidden layer.
         """
-        output_size = self.get_number_of_phases()
-        input_size = self.get_number_of_descriptors()
+        output_size = self.number_of_phases
+        input_size = self.number_of_descriptors
+
         nodes_in_hidden = 25
 
         layers = [tf.keras.layers.Dense(units=nodes_in_hidden, input_dim=input_size),
@@ -68,21 +74,3 @@ class NeuralNetwork:
                   tf.keras.layers.Dense(units=nodes_in_hidden),
                   tf.keras.layers.Dense(units=output_size)]
         return layers
-
-    @staticmethod
-    def get_number_of_phases():
-        """
-        returns number of phases that our NN can identify
-        currently available phases:
-            ... (5)
-        """
-        # TODO: add a list of available phases
-        return 5
-
-    @staticmethod
-    def get_number_of_descriptors():
-        """
-        returns a number of descriptors that are going to be input to input layer
-        see 'descriptors.py'
-        """
-        return 14

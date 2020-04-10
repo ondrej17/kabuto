@@ -10,7 +10,10 @@ class Descriptors:
         > number of descriptors affects the neural network (# of its input nodes), so be careful
         > the function 'info_header' returns header for output file that contains descriptors
         >   ... it must be changed adequately
+        > class attribute 'number_of_descriptors' holds the number of descriptors
     """
+    # important class attribute; update it, when descriptors are changed
+    number_of_descriptors = 14
 
     def __init__(self, id, x, y, z, atoms):
         self.id = id  # id of actual atom

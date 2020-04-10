@@ -1,0 +1,6 @@
+# this file contains name s of phases
+bcc
+fcc
+phase2
+phase3
+phase4
