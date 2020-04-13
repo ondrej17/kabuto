@@ -10,7 +10,7 @@ class NeuralNetwork:
         """
         self.name = name
         self.model = None
-        self.models_dir = os.path.join("..", "saved_nn")
+        self.models_dir = "saved_nn"
         self.model_extension = ".h5"
         self.number_of_phases = None
         self.number_of_descriptors = None
@@ -19,9 +19,19 @@ class NeuralNetwork:
         """
         makes the current nn train data from input arrays
         """
+        print("INFO: first_array:", first_array)
+        print("INFO: second_array:", second_array)
         # TODO: to what should the number of epochs be equal?
         self.model.fit(first_array, second_array, epochs=500, verbose=True)
         print("INFO: Finished training!")
+
+    def predict(self, input_array):
+        """
+        predicts the vector_q for each atom in input_array
+            input_array is a matrix [num_of_atoms, num_of_descriptors]
+            returns a matrix [num_of_atoms, num_of_phases]
+        """
+        return self.model.predict(input_array)
 
     def save_model(self):
         path_to_model = os.path.join(self.models_dir, self.name + self.model_extension)
@@ -60,16 +70,12 @@ class NeuralNetwork:
     def create_layers(self):
         """
         returns an array of keras layers
-
-        model.add(Dense(12, input_dim=8, init='uniform', activation='relu'))
-        It means 8 input parameters, with 12 neurons in the FIRST hidden layer.
         """
         output_size = self.number_of_phases
         input_size = self.number_of_descriptors
-
         nodes_in_hidden = 25
 
-        layers = [tf.keras.layers.Dense(units=nodes_in_hidden, input_dim=input_size),
+        layers = [tf.keras.layers.Dense(units=nodes_in_hidden, input_shape=[input_size]),
                   tf.keras.layers.Dense(units=nodes_in_hidden),
                   tf.keras.layers.Dense(units=nodes_in_hidden),
                   tf.keras.layers.Dense(units=output_size)]

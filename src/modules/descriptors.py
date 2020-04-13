@@ -78,13 +78,6 @@ class Descriptors:
             self.q_8()
         ]
 
-    @staticmethod
-    def set_r_min_max():
-        """
-        returns r_min and r_max in Angstroms
-        """
-        return 6.2, 6.4
-
     def f_c(self, r):
         """
         cutoff function, returns a value between 0 and 1
@@ -104,9 +97,11 @@ class Descriptors:
         """
         res = 0.
         for id, items in self.atoms.items():
-            if id != self.id:  # exclude myself
-                r_ij = math.sqrt((items[0] - self.x) ** 2 + (items[1] - self.y) ** 2 + (items[2] - self.z) ** 2)
-                res += self.f_c(r_ij) * math.exp(-eta * (r_ij - r_s) ** 2)
+            if id != self.id:  # skip myself
+                r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
+                                 math.pow(items[1] - self.y, 2) +
+                                 math.pow(items[2] - self.z, 2))
+                res += self.f_c(r_ij) * math.exp(-eta * math.pow(r_ij - r_s, 2))
         return res
 
     def g_3(self, kappa):
@@ -117,7 +112,9 @@ class Descriptors:
         res = 0.
         for id, items in self.atoms.items():
             if id != self.id:  # exclude myself
-                r_ij = math.sqrt((items[0] - self.x) ** 2 + (items[1] - self.y) ** 2 + (items[2] - self.z) ** 2)
+                r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
+                                 math.pow(items[1] - self.y, 2) +
+                                 math.pow(items[2] - self.z, 2))
                 res += self.f_c(r_ij) * math.cos(kappa * r_ij)
         return res
 
@@ -125,33 +122,33 @@ class Descriptors:
         """
         Steinhardt parameter with l = 6
         """
-        l = 6
+        l_param = 6
         res = 0
-        for m in range(-l, l + 1, 1):
-            res += abs(self.q_lm(l, m)) ** 2
-        return math.sqrt(res * 4 * math.pi / (2 * l + 1))
+        for m in range(-l_param, l_param + 1, 1):
+            res += math.pow(abs(self.q_lm(l_param, m)), 2)
+        return math.sqrt(res * 4 * math.pi / (2 * l_param + 1))
 
     def q_7(self):
         """
         Steinhardt parameter with l = 7
         """
-        l = 7
+        l_param = 7
         res = 0
-        for m in range(-l, l + 1, 1):
-            res += abs(self.q_lm(l, m)) ** 2
-        return math.sqrt(res * 4 * math.pi / (2 * l + 1))
+        for m in range(-l_param, l_param + 1, 1):
+            res += math.pow(abs(self.q_lm(l_param, m)), 2)
+        return math.sqrt(res * 4 * math.pi / (2 * l_param + 1))
 
     def q_8(self):
         """
         Steinhardt parameter with l = 8
         """
-        l = 8
+        l_param = 8
         res = 0
-        for m in range(-l, l + 1, 1):
-            res += abs(self.q_lm(l, m)) ** 2
-        return math.sqrt(res * 4 * math.pi / (2 * l + 1))
+        for m in range(-l_param, l_param + 1, 1):
+            res += math.pow(abs(self.q_lm(l_param, m)), 2)
+        return math.sqrt(res * 4 * math.pi / (2 * l_param + 1))
 
-    def q_lm(self, l, m):
+    def q_lm(self, l_param, m):
         """
         returns value of function Q_lm
         """
@@ -160,19 +157,23 @@ class Descriptors:
         for id, items in self.atoms.items():
             if id != self.id:  # exclude myself
                 x_other, y_other, z_other = items[0], items[1], items[2]
-                r_ij = math.sqrt((x_other - self.x) ** 2 + (y_other - self.y) ** 2 + (z_other - self.z) ** 2)
-                nom += self.f_c(r_ij) * self.y_lm(l, m, x_other, y_other, z_other)
+                r_ij = math.sqrt(math.pow(x_other - self.x, 2) +
+                                 math.pow(y_other - self.y, 2) +
+                                 math.pow(z_other - self.z, 2))
+                nom += self.f_c(r_ij) * self.y_lm(l_param, m, x_other, y_other, z_other)
         # denominator
         den = 0
         for id, items in self.atoms.items():
             if id != self.id:  # exclude myself
                 x_other, y_other, z_other = items[0], items[1], items[2]
-                r_ij = math.sqrt((x_other - self.x) ** 2 + (y_other - self.y) ** 2 + (z_other - self.z) ** 2)
+                r_ij = math.sqrt(math.pow(x_other - self.x, 2) +
+                                 math.pow(y_other - self.y, 2) +
+                                 math.pow(z_other - self.z, 2))
                 den += self.f_c(r_ij)
 
         return nom / den
 
-    def y_lm(self, l, m, x2, y2, z2):
+    def y_lm(self, l_param, m, x2, y2, z2):
         """
         returns value of spherical harmonics for given l and m
         [x2, y2, z2] are coordinates of other atom
@@ -182,12 +183,12 @@ class Descriptors:
         dx, dy, dz = self.x - x2, self.y - y2, self.z - z2
 
         # spherical coordinates of vector r_ij
-        r = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+        r = math.sqrt(math.pow(dx, 2) + math.pow(dy, 2) + math.pow(dz, 2))
         phi = math.atan2(dy, dx)
         theta = math.acos(dz / r)
 
         # return spherical harmonics
-        return sph_harm(m, l, phi, theta)
+        return sph_harm(m, l_param, phi, theta)
 
     def create_atoms_in_cutoff(self, atoms):
         """
@@ -195,19 +196,32 @@ class Descriptors:
         """
         res = dict()
         for id, items in atoms.items():
-            r_ij = math.sqrt((items[0] - self.x) ** 2 + (items[1] - self.y) ** 2 + (items[2] - self.z) ** 2)
+            r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
+                             math.pow(items[1] - self.y, 2) +
+                             math.pow(items[2] - self.z, 2))
             if r_ij < self.r_max:
                 res[id] = items
         return res
+
+    @staticmethod
+    def set_r_min_max():
+        """
+        returns r_min and r_max in Angstroms
+        """
+        return 6.2, 6.4
 
     @staticmethod
     def info_header(timestep, phase):
         """
         returns informative header that is to be written at the beginning of file with descriptors
         """
-        return "# timestep {}\n" \
-               "# phase {}\n" \
-               "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep, phase)
+        if phase is not None:
+            return "# timestep {}\n" \
+                   "# phase {}\n" \
+                   "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep, phase)
+        else:
+            return "# timestep {}\n" \
+                   "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep)
 
 # TODO: calculation of descriptors takes tool long, I must shorten it
 # TODO: all function must be tested whether they give proper output

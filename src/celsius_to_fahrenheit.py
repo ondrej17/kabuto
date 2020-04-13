@@ -39,7 +39,7 @@ history = model.fit(celsius_q, fahrenheit_a, epochs=500, verbose=False)
 print("Finished training the model")
 
 # display training statistics
-#   the 'fit' funcion returns history object
+#   the 'fit' function returns history object
 plt.xlabel('Epoch Number')
 plt.ylabel('Loss Magnitude')
 plt.plot(history.history['loss'])
