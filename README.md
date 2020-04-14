@@ -2,7 +2,7 @@
 ## About
 Developed by **Ondrej Bily**, Faculty of Mathematics, Physics and Informatics, Comenius University in Bratislava, Slovakia. 
 
-It is an implementation of `tensorflow` neural network in `Python` for Diploma thesis in Condensed Matter Physics.
+It is an implementation of `tensorflow`'s `keras` neural network in `Python` for Diploma thesis in Condensed Matter Physics.
 
 ## Code Structure
 * README.md
@@ -10,12 +10,24 @@ It is an implementation of `tensorflow` neural network in `Python` for Diploma t
     * modules
         * descriptors.py
         * neural_network.py
+        * phases_to_learn.txt
     * saved_nn
         * nn1.h5
         * ...
-    * prepared_for_training
+    * dir_to_train
         * to_train1.txt
         * ...
+    * dir_to_predict
+        * to_predict1.txt
+        * ...
+    * dir_trained
+        * trained1.txt
+        * ...
+    * dir_predicted
+        * predicted1.txt
+        * ...
+    * temporary
+        * dict_timesteps.json
     * kabuto.py
 
 ## Features
@@ -25,7 +37,7 @@ Prepares a file containing descriptors of each atom for each timestep of simulat
 
     dump myDump all atom 100 dump.atom
     
-Output files (from which neural network will be taught) are stored in `prepared_for_training` directory.
+Output files (from which neural network will be taught) are stored in `dir_to_train` directory.
 
 ### Listing neural networks
 List all available models that are stored in `saved_nn` directory. These models are `tensorflow.keral.model` objects that contains information about neural network. 
@@ -34,7 +46,7 @@ List all available models that are stored in `saved_nn` directory. These models 
 Creates a new neural network and stores its model in `saved_nn` directory.
 
 ### Training
-Trains everything from files in `prepared_for_training` directory. 
+Trains everything from files in `dir_to_train` directory.
 
 ### Predicting
 Predicts the percentage of each phase that neural network knows. 
@@ -50,7 +62,7 @@ In `src` folder:
     
     python kabuto.py train <name_of_nn>
     
-    python kabuto.py predict <dump.file>
+    python kabuto.py predict <name_of_nn> <dump.file>
     
 ## Requirements
 * `Python3.6`

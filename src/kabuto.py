@@ -9,6 +9,7 @@ from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
 
 
+# TODO: add printing to log file as well
 class Kabuto:
 
     def __init__(self, action, option1, option2):
@@ -18,17 +19,22 @@ class Kabuto:
         self.print_intro()
 
         # initialize attributes
-        self.nn = None
+        self.nn = None  # neural network object
         self.action = action
         self.option1 = option1
         self.option2 = option2
-        self.output_dir = 'prepared_for_training'
+
+        # directory names that will be used
+        self.to_train_dir = 'dir_to_train'
+        self.trained_dir = 'dir_trained'
+        self.to_predict_dir = "dir_to_predict"
+        self.predicted_dir = "dir_predicted"
         self.tmp_dir = 'temporary'
         self.saved_nn_dir = 'saved_nn'
-        self.trained_dir = 'trained'
+        self.result_dir = "results"
+
+        # file with phases that will be identified
         self.phase_file = os.path.join("modules", "phases_to_learn.txt")
-        self.to_predict_dir = "prepared_for_predicting"
-        self.predicted_dir = "predicted"
 
         # these parameters are specific for each nn, change it in your case
         # dictionary of phases and positions in vector_q
@@ -38,6 +44,18 @@ class Kabuto:
             return
         self.number_of_phases = len(self.phases_available)
         self.number_of_descriptors = Descriptors.number_of_descriptors
+
+        # create 'results' directory if it does not exist
+        if os.path.isdir(self.result_dir):
+            print("INFO: Directory \'{}\' already exists.".format(self.result_dir))
+        else:
+            try:
+                os.mkdir(self.result_dir)
+            except OSError:
+                print("ERROR: Creation of the \'{}\' directory failed".format(self.result_dir))
+
+            else:
+                print("INFO: Successfully created the \'{}\' directory".format(self.result_dir))
 
         # based on option, call correct method
         if self.action == "prepare":
@@ -91,7 +109,7 @@ class Kabuto:
         Documentation for 'prepare' function:
             > prepares files for training from dump-file
             > parses all atomic positions and calculates values of 14 functions for each atom
-            > for each timestamp creates corresponding file in 'prepared_for_training' folder
+            > for each timestamp creates corresponding file in 'dir_to_train' folder
             > those file are then used to feed the NN (teaching of NN to identify given phase)
             > usage:
                 prepare(phase, file)
@@ -177,17 +195,17 @@ class Kabuto:
         # print timesteps-dictionary
         # self.print_timesteps(timesteps)
 
-        # save timesteps to separate files in 'prepared_for_training' output_dir ---?
+        # save timesteps to separate files in 'dir_to_train' output_dir ---?
         # create output_dir for saving timesteps (if it does not exist)
-        if os.path.isdir(self.output_dir):
-            print("INFO: output_dir {} already exists.".format(self.output_dir))
+        if os.path.isdir(self.to_train_dir):
+            print("INFO: output_dir {} already exists.".format(self.to_train_dir))
         else:
             try:
-                os.mkdir(self.output_dir)
+                os.mkdir(self.to_train_dir)
             except OSError:
-                print("ERROR: Creation of the output_dir {} failed".format(self.output_dir))
+                print("ERROR: Creation of the output_dir {} failed".format(self.to_train_dir))
             else:
-                print("INFO: Successfully created the output_dir {}".format(self.output_dir))
+                print("INFO: Successfully created the output_dir {}".format(self.to_train_dir))
 
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
@@ -195,7 +213,7 @@ class Kabuto:
         for timestep in timesteps.keys():
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
-            path_to_file = os.path.join(self.output_dir, filename)
+            path_to_file = os.path.join(self.to_train_dir, filename)
             print("... saving timestep #{} to file {}".format(timestep, path_to_file))
 
             # open file
@@ -207,8 +225,8 @@ class Kabuto:
                 for id in timesteps[timestep].keys():
                     file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
 
-        # all files are prepared in 'prepared_for_training' folder
-        print("INFO: all timesteps were saved in \'prepared_for_training\' folder")
+        # all files are prepared in 'dir_to_train' folder
+        print("INFO: all timesteps were saved in \'dir_to_train\' folder")
 
     def list_nn(self):
         """
@@ -300,7 +318,7 @@ class Kabuto:
                 train(name)
         """
         print("ACTION: train\n"
-              "\'{}\' is training from \'prepared_for_training\' directory\n"
+              "\'{}\' is training from \'dir_to_train\' directory\n"
               "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name))
 
         # check whether the name is in saved_nn directory
@@ -327,7 +345,7 @@ class Kabuto:
         if name in models:
 
             # prepare two lists, one with descriptors, second one with vector q_i
-            first_array, second_array = self.prepare_arrays(self.output_dir)
+            first_array, second_array = self.prepare_arrays(self.to_train_dir)
             if first_array is None or second_array is None:
                 print("ERROR: The interrupting of the training NN!")
                 return
@@ -342,22 +360,22 @@ class Kabuto:
             # at the end, save the model
             self.nn.save_model()
 
-            print("here I am")
-
-            # move all files from 'prepare_to_training' dir to 'trained' dir
-            self.move_files_from_to(self.output_dir, self.trained_dir)
+            # move all files from 'prepare_to_training' dir to 'dir_trained' dir
+            self.move_files_from_to(self.to_train_dir, self.trained_dir)
 
         else:
             # if 'name' is in 'saved_nn' directory, do nothing
             print("ERROR: Neural network \'{}\' does not exist!".format(name))
 
-    # TODO: add more comments, documentary string and more prints
     def predict(self, name, filename):
+        """
+        predicts the global structure at each timestep that is in given file
+            > returns a dictionary {phase:percentage}
+        """
         print("ACTION: predict\n"
               "predicting ...\n"
               "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
-        # 1. prepare given file, i.e. make a file for each timestep and save it to 'prepared_for_predicting' directory
         # processing of file ...
         with open(filename, "r") as input_file:
 
@@ -411,7 +429,7 @@ class Kabuto:
                     pass
         # all atoms are loaded in dictionary
 
-        # calculating the values of 14 functions for each atoms
+        # calculating the descriptors for each atoms
         for timestep in timesteps.keys():
             print("... processing timestep #", timestep)
             for id in timesteps[timestep].keys():
@@ -434,7 +452,7 @@ class Kabuto:
         # print timesteps-dictionary
         # self.print_timesteps(timesteps)
 
-        # save timesteps to separate files in 'prepared_for_predicting' to_predict_dir ---?
+        # save timesteps to separate files in 'dir_to_predict' to_predict_dir ---?
         # create to_predict_dir for saving timesteps (if it does not exist)
         if os.path.isdir(self.to_predict_dir):
             print("INFO: Directory {} already exists.".format(self.to_predict_dir))
@@ -464,14 +482,10 @@ class Kabuto:
                 for id in timesteps[timestep].keys():
                     file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
 
-        # all files are prepared in 'prepared_for_predicting' folder
-        print("INFO: all timesteps were saved in \'prepared_for_predicting\' folder")
-
-        # 2. prepare arrays
-        # load NN model with 'name'
+        # all files are prepared in 'dir_to_predict' folder
+        print("INFO: all timesteps were saved in \'{}\' folder".format(self.to_predict_dir))
 
         # check whether the name is in saved_nn directory
-        # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
             print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
         else:
@@ -490,9 +504,10 @@ class Kabuto:
         # we have existing NN
         if name in models:
             for root, directories, files in os.walk(self.to_predict_dir):
+                # for each file in 'dir_to_predict' directory do this
                 for filename in sorted(files):
 
-                    # prepare two lists, one with descriptors, second one with vector q_i
+                    # prepare two lists, one with descriptors, second one with None
                     input_array, second_array = self.prepare_arrays(self.to_predict_dir, filename)
                     if input_array is None or second_array is not None:
                         print("ERROR: The interrupting of the predicting!")
@@ -503,28 +518,26 @@ class Kabuto:
                     self.nn.load_model()
 
                     # let the NN predict something
-                    # output is vector q for each atom in file at that timestep
-                    #   i.e. a matrix [num_atoms, num_phases], type = numpy.ndarray
+                    # output is vector q (local structure) for each atom in file at that timestep
+                    #   i.e. a numpy.ndarray [num_atoms, num_phases]
                     prediction = self.nn.predict(input_array)
 
                     # I have a prediction!
-                    # TODO: do something with the prediction
                     # print("... prediction for file \'{}\'\n{}".format(filename, prediction))
 
-                    # calculate vector_Q
+                    # calculate the vector_Q (global structure)
                     vector_big_q = self.calculate_vector_big_q(prediction)
 
                     # I have vector Q that has information about global structure at given timestep
-                    # TODO: do something with the vector Q
                     # print("Q = {}".format(vector_big_q))
 
                     # create dictionary [phase:percentage]
                     global_structure_dict = self.create_dict_phase_percentage(vector_big_q)
 
                     # print result (global structure info)
-                    print("RESULT: global structure:\n{}".format(self.dict_to_string(global_structure_dict)))
+                    print("RESULT: Global structure:\n{}".format(self.dict_to_string(global_structure_dict)))
 
-            # move all files from 'prepare_to_predicting' dir to 'predicted' dir
+            # move all files from 'prepare_to_predicting' dir to 'dir_predicted' dir
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
             print("INFO: End of predicting.")
 
@@ -532,64 +545,16 @@ class Kabuto:
             # if 'name' is in 'saved_nn' directory, do nothing
             print("ERROR: Neural network \'{}\' does not exist!".format(name))
 
-    @staticmethod
-    def print_timesteps(timesteps):
+    def test(self):
         """
-        prints timesteps dictionary in well arranged way
+        a method for the testing of the features
         """
-        print("Timesteps:")
-        for timestep, atoms in timesteps.items():
-            print("\tTimestep:", timestep)
+        print("ACTION: test\n"
+              "Entering TEST mode. Object KABUTO created. ...\n"
+              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
-            for atom, coords in atoms.items():
-                print("\t\tAtom #{}:\t{}".format(atom, coords))
-
-    @staticmethod
-    def print_intro():
-        """
-        prints logo of KABUTO in nice way
-        """
-        print("******************************************************")
-        print("                   ___            _______    ____")
-        print("   | /     /\\     |   |   |    |     |      /    \\")
-        print("   |<     /__\\    |--<    |    |     |     |      |")
-        print("   | \\   /    \\   |___|    \\__/      |      \\____/")
-        print("******************************************************")
-        print("                   Ondrej Bily")
-        print("                  Diploma Thesis")
-        print("                       2020")
-        print("******************************************************")
-        print()
-
-    @staticmethod
-    def print_nn_models(models):
-        to_print = ""
-        for model in models:
-            to_print += "... {}\n".format(model)
-        print(to_print.strip())
-
-    @staticmethod
-    def move_files_from_to(from_dir, to_dir):
-        """
-        moves all files from 'from_dir' to 'to_dir'
-        """
-        print("INFO: Moving files ...")
-        # create to_dir if it does not exist)
-        if os.path.isdir(to_dir):
-            print("INFO: {} already exists.".format(to_dir))
-        else:
-            try:
-                os.mkdir(to_dir)
-            except OSError:
-                print("ERROR: Creation of the trained_dir {} failed".format(to_dir))
-
-            else:
-                print("INFO: Successfully created the trained_dir {}".format(to_dir))
-        files = os.listdir(from_dir)
-        for filename in files:
-            shutil.move(os.path.join(from_dir, filename), to_dir)
-
-        print("INFO: files from \'{}\' successfully moved to \'{}\'".format(from_dir, to_dir))
+        # add tests of features here -->
+        self.move_files_from_to(self.to_train_dir, self.trained_dir)
 
     def prepare_arrays(self, directory=None, filename=None):
         """
@@ -724,36 +689,93 @@ class Kabuto:
         print(phases_dict)
         return phases_dict
 
-    def test(self):
-        """
-        a method for the testing of the features
-        """
-        print("ACTION: test\n"
-              "Entering TEST mode. Object KABUTO created. ...\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-
-        # add tests of features here -->
-        self.move_files_from_to(self.output_dir, self.trained_dir)
-
-    # TODO: add documentary string and comments
     def calculate_vector_big_q(self, prediction):
+        """
+        returns the vector Q, that contains information about global structure
+            len(Q) = self.number_of_phases
+            each component is an average percentage of particular phase in all system
+        """
         vector = [0] * self.number_of_phases
         n = len(prediction.tolist())
-
         for i, q_i in enumerate(prediction.tolist()):  # rows
             for j, q_ij in enumerate(q_i):  # columns
                 vector[j] += q_ij
         return [q_i / n for q_i in vector]
 
-    # TODO: add documentary string and comments
     def create_dict_phase_percentage(self, vector_big_q):
+        """
+        returns a dictionary {phase:percentage}
+            percentage is from vector Q (global structure)
+        """
         result_dict = dict()
         for phase, index in self.phases_available.items():
             result_dict[phase] = vector_big_q[index]
         return result_dict
 
     @staticmethod
+    def print_timesteps(timesteps):
+        """
+        prints timesteps dictionary in well arranged way
+        """
+        print("Timesteps:")
+        for timestep, atoms in timesteps.items():
+            print("\tTimestep:", timestep)
+
+            for atom, coords in atoms.items():
+                print("\t\tAtom #{}:\t{}".format(atom, coords))
+
+    @staticmethod
+    def print_intro():
+        """
+        prints logo of KABUTO in nice way
+        """
+        print("******************************************************")
+        print("                   ___            _______    ____")
+        print("   | /     /\\     |   |   |    |     |      /    \\")
+        print("   |<     /__\\    |--<    |    |     |     |      |")
+        print("   | \\   /    \\   |___|    \\__/      |      \\____/")
+        print("******************************************************")
+        print("                   Ondrej Bily")
+        print("                  Diploma Thesis")
+        print("                       2020")
+        print("******************************************************")
+        print()
+
+    @staticmethod
+    def print_nn_models(models):
+        to_print = ""
+        for model in models:
+            to_print += "... {}\n".format(model)
+        print(to_print.strip())
+
+    @staticmethod
+    def move_files_from_to(from_dir, to_dir):
+        """
+        moves all files from 'from_dir' to 'to_dir'
+        """
+        print("INFO: Moving files ...")
+        # create to_dir if it does not exist)
+        if os.path.isdir(to_dir):
+            print("INFO: {} already exists.".format(to_dir))
+        else:
+            try:
+                os.mkdir(to_dir)
+            except OSError:
+                print("ERROR: Creation of the trained_dir {} failed".format(to_dir))
+
+            else:
+                print("INFO: Successfully created the trained_dir {}".format(to_dir))
+        files = os.listdir(from_dir)
+        for filename in files:
+            shutil.move(os.path.join(from_dir, filename), to_dir)
+
+        print("INFO: files from \'{}\' successfully moved to \'{}\'".format(from_dir, to_dir))
+
+    @staticmethod
     def dict_to_string(dictionary):
+        """
+        returns a string representation of a dictionary
+        """
         result = ''
         for key, value in dictionary.items():
             result += "--> {} : {}\n".format(key, value)

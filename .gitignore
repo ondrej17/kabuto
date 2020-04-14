@@ -3,8 +3,9 @@
 kabuto_machine.iml
 # Custom ignored files
 src/temporary
-src/prepared_for_training
-src/trained
-src/prepared_for_predicting
-src/predicted
 src/saved_nn
+src/dir_predicted
+src/dir_to_predict
+src/dir_to_train
+src/dir_trained
+src/results
