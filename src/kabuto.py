@@ -2,8 +2,9 @@ import json
 import os
 import sys
 import datetime
-import numpy as np
 import shutil
+import numpy as np
+
 
 from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
@@ -19,7 +20,7 @@ class Kabuto:
         self.print_intro()
 
         # initialize attributes
-        self.nn = None  # neural network object
+        self.nn = None  # neural-network object
         self.action = action
         self.option1 = option1
         self.option2 = option2
@@ -345,7 +346,7 @@ class Kabuto:
         if name in models:
 
             # prepare two lists, one with descriptors, second one with vector q_i
-            first_array, second_array = self.prepare_arrays(self.to_train_dir)
+            first_array, second_array, timestep = self.prepare_arrays(self.to_train_dir)
             if first_array is None or second_array is None:
                 print("ERROR: The interrupting of the training NN!")
                 return
@@ -501,15 +502,19 @@ class Kabuto:
                 # cut the extension out
                 models.append(item.replace(model_extension, ""))
 
+        # initialize a dictionary that holds result
+        global_structure_dict = dict()
+
         # we have existing NN
         if name in models:
             for root, directories, files in os.walk(self.to_predict_dir):
+
                 # for each file in 'dir_to_predict' directory do this
                 for filename in sorted(files):
 
                     # prepare two lists, one with descriptors, second one with None
-                    input_array, second_array = self.prepare_arrays(self.to_predict_dir, filename)
-                    if input_array is None or second_array is not None:
+                    input_array, second_array, timestep = self.prepare_arrays(self.to_predict_dir, filename)
+                    if input_array is None or second_array is not None or timestep is None:
                         print("ERROR: The interrupting of the predicting!")
                         return
 
@@ -532,13 +537,17 @@ class Kabuto:
                     # print("Q = {}".format(vector_big_q))
 
                     # create dictionary [phase:percentage]
-                    global_structure_dict = self.create_dict_phase_percentage(vector_big_q)
-
-                    # print result (global structure info)
-                    print("RESULT: Global structure:\n{}".format(self.dict_to_string(global_structure_dict)))
+                    global_structure_dict[timestep] = self.create_dict_phase_percentage(vector_big_q)
 
             # move all files from 'prepare_to_predicting' dir to 'dir_predicted' dir
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
+
+            # print result (global structure info)
+            print("RESULT:\n{}".format(global_structure_dict))
+
+            # save results to 'results' dir
+            self.save_results(global_structure_dict, filename)
+
             print("INFO: End of predicting.")
 
         else:
@@ -572,7 +581,7 @@ class Kabuto:
             for root, directories, files in os.walk(directory):
                 if not files:
                     print("ERROR: No files in \'{}\'".format(directory))
-                    return None, None
+                    return None, None, None
                 for filename in sorted(files):
                     # process each file
                     print("... processing file: {}".format(filename))
@@ -588,7 +597,7 @@ class Kabuto:
                                     output_vector = self.create_output_vector(phase)
                                     if output_vector is None:
                                         print("ERROR: The interrupting of the preparing of arrays!")
-                                        return None, None
+                                        return None, None, None
                             else:
                                 # processing a line with descriptors: [id, **descriptors]
                                 items = line.split()
@@ -606,12 +615,12 @@ class Kabuto:
             print("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
 
             # return numpy array, tensorflow likes it
-            return np.array(input_array, dtype=float), np.array(output_array, dtype=float)
+            return np.array(input_array, dtype=float), np.array(output_array, dtype=float), None
 
         elif filename is not None and directory is not None:
             print("INFO: Preparing only input array from the file: \'{}\'".format(os.path.join(directory, filename)))
 
-            input_array, output_array = [], None
+            input_array, output_array, timestep = [], None, None
 
             # processing a file
             try:
@@ -619,7 +628,9 @@ class Kabuto:
                     for line in file:
                         if line[0] == '#':
                             # processing info header
-                            pass
+                            if "timestep" in line:
+                                # find phase that is about to be learned
+                                timestep = line.split()[2]
                         else:
                             # processing a line with descriptors: [id, **descriptors]
                             items = line.split()
@@ -632,15 +643,15 @@ class Kabuto:
                 # print("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
 
                 # return numpy array, tensorflow likes it
-                return np.array(input_array, dtype=float), None
+                return np.array(input_array, dtype=float), None, timestep
 
             except FileNotFoundError:
                 print("ERROR: File {} not found!".format(filename))
-                return None, None
+                return None, None, None
 
         else:
             print("ERROR: Wrong use of \'prepare_arrays()\' function!")
-            return None, None
+            return None, None, None
 
     def create_output_vector(self, phase):
         """
@@ -781,6 +792,34 @@ class Kabuto:
             result += "--> {} : {}\n".format(key, value)
         return result.strip()
 
+    def save_results(self, global_structure_dict, filename):
+        """
+        saves results (dictionary [timestep:[phase:percentage]]) to file in format:
+            # timestep phase1 phase2 .... phaseN
+            ...
+        """
+        # create specific filename
+        filename = datetime.datetime.today().strftime("results_%Y_%m_%d_%H_%M_%S") + ".txt"
+        path_to_file = os.path.join(self.result_dir, filename)
+
+        print("INFO: Saving results to file: \'{}\'".format(path_to_file))
+
+        # prepare first descriptive line
+        first_line = "timestep\t" + '\t'.join(self.phases_available.keys()) + "\n"
+
+        try:
+            with open(path_to_file, "w") as file:
+                # write first line that describes each column
+                file.write(first_line)
+
+                # write other lines from dictionary
+                for timestep in global_structure_dict.keys():
+                    line = str(timestep) + "\t"
+                    line += '\t'.join(list(map(str, global_structure_dict[timestep].values()))) + '\n'
+                    file.write(line)
+        except FileNotFoundError:
+            print("ERROR: Problem with opening the file: {}".format(path_to_file))
+
 
 ################################################################
 # create Kabuto Machine iff there is correct number of arguments
@@ -795,7 +834,6 @@ elif len(sys.argv) == 4:
     # script called with three arguments (action, phase/name, file)
     Kabuto(action=sys.argv[1], option1=sys.argv[2], option2=sys.argv[3])
 else:
-    # TODO: here could be the test whether all necessary packages are installed
     # script called without action
     print("******************************************************\n"
           "                   ___            _______    ____\n"

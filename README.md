@@ -28,6 +28,8 @@ It is an implementation of `tensorflow`'s `keras` neural network in `Python` for
         * ...
     * temporary
         * dict_timesteps.json
+    * results
+        * ...
     * kabuto.py
 
 ## Features
@@ -49,7 +51,7 @@ Creates a new neural network and stores its model in `saved_nn` directory.
 Trains everything from files in `dir_to_train` directory.
 
 ### Predicting
-Predicts the percentage of each phase that neural network knows. 
+Predicts the percentage of each phase that neural network knows. Determines global structure in given dump file for each timestep. 
 
 ## Usage
 In `src` folder:
