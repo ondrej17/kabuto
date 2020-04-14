@@ -68,4 +68,4 @@ In `src` folder:
     
 ## Requirements
 * `Python3.6`
-* `tensorflow`, `matplotlib` and `numpy` packages
+* `tensorflow`, `scipy` and `numpy` packages
