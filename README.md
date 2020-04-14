@@ -2,35 +2,7 @@
 ## About
 Developed by **Ondrej Bily**, Faculty of Mathematics, Physics and Informatics, Comenius University in Bratislava, Slovakia. 
 
-It is an implementation of `tensorflow`'s `keras` neural network in `Python` for Diploma thesis in Condensed Matter Physics.
-
-## Code Structure
-* README.md
-* src
-    * modules
-        * descriptors.py
-        * neural_network.py
-        * phases_to_learn.txt
-    * saved_nn
-        * nn1.h5
-        * ...
-    * dir_to_train
-        * to_train1.txt
-        * ...
-    * dir_to_predict
-        * to_predict1.txt
-        * ...
-    * dir_trained
-        * trained1.txt
-        * ...
-    * dir_predicted
-        * predicted1.txt
-        * ...
-    * temporary
-        * dict_timesteps.json
-    * results
-        * ...
-    * kabuto.py
+It is an implementation of `tensorflow`'s `keras` neural network in `Python` for Diploma thesis in Condensed Matter Physics. The neural network (NN) is used to identify the structural phases during structural phase transitions in crystalline systems. 
 
 ## Features
 
@@ -65,7 +37,35 @@ In `src` folder:
     python kabuto.py train <name_of_nn>
     
     python kabuto.py predict <name_of_nn> <dump.file>
-    
+  
+ ## Code Structure
+ * README.md
+ * src
+     * modules
+         * descriptors.py
+         * neural_network.py
+         * phases_to_learn.txt
+     * saved_nn
+         * nn1.h5
+         * ...
+     * dir_to_train
+         * to_train1.txt
+         * ...
+     * dir_to_predict
+         * to_predict1.txt
+         * ...
+     * dir_trained
+         * trained1.txt
+         * ...
+     * dir_predicted
+         * predicted1.txt
+         * ...
+     * temporary
+         * dict_timesteps.json
+     * results
+         * ...
+     * kabuto.py
+  
 ## Requirements
 * `Python3.6`
 * `tensorflow`, `scipy` and `numpy` packages
