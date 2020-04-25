@@ -1,6 +1,8 @@
 import os
-
+import logging
 import tensorflow as tf
+
+logger = logging.getLogger('kabuto.neural_networks')
 
 
 class NeuralNetwork:
@@ -17,13 +19,13 @@ class NeuralNetwork:
 
     def train(self, first_array, second_array):
         """
-        makes the current nn train data from input arrays
+        trains the current nn from input arrays
         """
-        print("INFO: first_array:", first_array)
-        print("INFO: second_array:", second_array)
+        logger.debug("First_array:", first_array)
+        logger.debug("Second_array:", second_array)
         # TODO: to what should the number of epochs be equal?
         self.model.fit(first_array, second_array, epochs=500, verbose=True)
-        print("INFO: Finished training!")
+        logger.info("Finished training!")
 
     def predict(self, input_array):
         """
@@ -37,9 +39,9 @@ class NeuralNetwork:
         path_to_model = os.path.join(self.models_dir, self.name + self.model_extension)
         if self.model is not None:
             self.model.save(path_to_model)
-            print("INFO: Model \'{}\' saved to file: {}".format(self.name, path_to_model))
+            logger.info("Model \'{}\' saved to file: {}".format(self.name, path_to_model))
         else:
-            print("ERROR: Model \'{}\' was not saved.".format(self.name))
+            logger.error("Model \'{}\' was not saved.".format(self.name))
 
     def load_model(self):
         """
@@ -47,7 +49,7 @@ class NeuralNetwork:
         """
         path_to_model = os.path.join(self.models_dir, self.name + self.model_extension)
         self.model = tf.keras.models.load_model(path_to_model, compile=True)
-        print("INFO: \'{}\' is loaded.".format(self.name))
+        logger.info("NN \'{}\' is loaded.".format(self.name))
 
     def create_model(self, number_of_descriptors, number_of_phases):
         """
@@ -65,7 +67,7 @@ class NeuralNetwork:
         # compile the model
         self.model.compile(loss='mean_squared_error',
                            optimizer=tf.keras.optimizers.Adam(0.1))
-        print("INFO: Model \'{}\' created.".format(self.name))
+        logger.info("Model \'{}\' created.".format(self.name))
 
     def create_layers(self):
         """

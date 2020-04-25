@@ -1,5 +1,11 @@
+import cmath
+import logging
 import math
+import logging
 from scipy.special import sph_harm
+
+# create logger
+logger = logging.getLogger('kabuto.descriptors')
 
 
 class Descriptors:
@@ -11,6 +17,7 @@ class Descriptors:
         > the function 'info_header' returns header for output file that contains descriptors
         >   ... it must be changed adequately
         > class attribute 'number_of_descriptors' holds the number of descriptors
+        > r_min and r_max are different for Steinhardt parameters and symmetry functions!
     """
     # important class attribute; update it, when descriptors are changed
     number_of_descriptors = 14
@@ -18,8 +25,8 @@ class Descriptors:
     def __init__(self, id, x, y, z, atoms):
         self.id = id  # id of actual atom
         self.x, self.y, self.z = x, y, z  # coordination of actual atom
-        self.r_min, self.r_max = self.set_r_min_max()  # set cutoff parameters
-        self.atoms = self.create_atoms_in_cutoff(atoms)  # consider only atoms in cutoff
+        self.atoms_for_g = self.create_atoms_in_cutoff_for_g_functions(atoms)
+        self.atoms_for_q = self.create_atoms_in_cutoff_for_q_functions(atoms)
 
         # dictionary of parameters for symmetry functions
         self.symmetry_functions_parameters = {
@@ -78,30 +85,32 @@ class Descriptors:
             self.q_8()
         ]
 
-    def f_c(self, r):
+    @staticmethod
+    def f_c(r, r_min, r_max):
         """
         cutoff function, returns a value between 0 and 1
-        'r' is distance between current atom and the other one, i. e. r_ij
+            'r' is distance between current atom and the other one, i. e. r_ij
         """
-        if r <= self.r_min:
-            return 1
-        elif self.r_min < r <= self.r_max:
-            return 0.5 + 0.5 * math.cos(math.pi * (r - self.r_min) / (self.r_max - self.r_min))
-        elif self.r_max < r:
-            return 0
+        if r <= r_min:
+            return 1.0
+        elif r_min < r <= r_max:
+            return 0.5 + 0.5 * math.cos(math.pi * (r - r_min) / (r_max - r_min))
+        elif r_max < r:
+            return 0.0
 
     def g_2(self, r_s, eta):
         """
         symmetry function G_2
         it takes two parameters, eta and R_s
         """
+        r_min, r_max = self.set_r_min_max_g_functions()
         res = 0.
-        for id, items in self.atoms.items():
+        for id, items in self.atoms_for_g.items():
             if id != self.id:  # skip myself
                 r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
                                  math.pow(items[1] - self.y, 2) +
                                  math.pow(items[2] - self.z, 2))
-                res += self.f_c(r_ij) * math.exp(-eta * math.pow(r_ij - r_s, 2))
+                res += self.f_c(r_ij, r_min, r_max) * math.exp(-eta * math.pow(r_ij - r_s, 2))
         return res
 
     def g_3(self, kappa):
@@ -109,13 +118,14 @@ class Descriptors:
         symmetry function G_3
         it takes one parameters, kappa
         """
+        r_min, r_max = self.set_r_min_max_g_functions()
         res = 0.
-        for id, items in self.atoms.items():
+        for id, items in self.atoms_for_g.items():
             if id != self.id:  # exclude myself
                 r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
                                  math.pow(items[1] - self.y, 2) +
                                  math.pow(items[2] - self.z, 2))
-                res += self.f_c(r_ij) * math.cos(kappa * r_ij)
+                res += self.f_c(r_ij, r_min, r_max) * math.cos(kappa * r_ij)
         return res
 
     def q_6(self):
@@ -152,24 +162,25 @@ class Descriptors:
         """
         returns value of function Q_lm
         """
+        r_min, r_max = self.set_r_min_max_q_functions()
         # numerator
         nom = 0
-        for id, items in self.atoms.items():
+        for id, items in self.atoms_for_q.items():
             if id != self.id:  # exclude myself
                 x_other, y_other, z_other = items[0], items[1], items[2]
                 r_ij = math.sqrt(math.pow(x_other - self.x, 2) +
                                  math.pow(y_other - self.y, 2) +
                                  math.pow(z_other - self.z, 2))
-                nom += self.f_c(r_ij) * self.y_lm(l_param, m, x_other, y_other, z_other)
+                nom += self.f_c(r_ij, r_min, r_max) * self.y_lm(l_param, m, x_other, y_other, z_other)
         # denominator
         den = 0
-        for id, items in self.atoms.items():
+        for id, items in self.atoms_for_q.items():
             if id != self.id:  # exclude myself
                 x_other, y_other, z_other = items[0], items[1], items[2]
                 r_ij = math.sqrt(math.pow(x_other - self.x, 2) +
                                  math.pow(y_other - self.y, 2) +
                                  math.pow(z_other - self.z, 2))
-                den += self.f_c(r_ij)
+                den += self.f_c(r_ij, r_min, r_max)
 
         return nom / den
 
@@ -187,28 +198,44 @@ class Descriptors:
         phi = math.atan2(dy, dx)
         theta = math.acos(dz / r)
 
-        # return spherical harmonics
-        return sph_harm(m, l_param, phi, theta)
+        # return real form spherical harmonics in form Y_lm
+        #   sph_harm() returns Y_l^m --> wikipedia
+        if m < 0:
+            return (-1)**m * math.sqrt(2) * (sph_harm(abs(m), l_param, phi, theta)).imag
+        elif m == 0:
+            return sph_harm(0, l_param, phi, theta)
+        elif m > 0:
+            return (-1)**m * math.sqrt(2) * (sph_harm(m, l_param, phi, theta)).real
 
-    def create_atoms_in_cutoff(self, atoms):
+    def create_atoms_in_cutoff_for_g_functions(self, atoms):
         """
         creates a new dictionary, which contains only atoms that are in cutoff of current atom
+            cutoff is for G functions (symmetry functions)
         """
+        r_min, r_max = self.set_r_min_max_g_functions()
         res = dict()
         for id, items in atoms.items():
             r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
                              math.pow(items[1] - self.y, 2) +
                              math.pow(items[2] - self.z, 2))
-            if r_ij < self.r_max:
+            if r_ij < r_max:
                 res[id] = items
         return res
 
-    @staticmethod
-    def set_r_min_max():
+    def create_atoms_in_cutoff_for_q_functions(self, atoms):
         """
-        returns r_min and r_max in Angstroms
+        creates a new dictionary, which contains only atoms that are in cutoff of current atom
+            cutoff is for Steinhardt parameters
         """
-        return 6.2, 6.4
+        r_min, r_max = self.set_r_min_max_q_functions()
+        res = dict()
+        for id, items in atoms.items():
+            r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
+                             math.pow(items[1] - self.y, 2) +
+                             math.pow(items[2] - self.z, 2))
+            if r_ij < r_max:
+                res[id] = items
+        return res
 
     @staticmethod
     def info_header(timestep, phase):
@@ -223,5 +250,18 @@ class Descriptors:
             return "# timestep {}\n" \
                    "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep)
 
-# TODO: calculation of descriptors takes tool long, I must shorten it
-# TODO: all function must be tested whether they give proper output
+    @staticmethod
+    def set_r_min_max_q_functions():
+        """
+        return r_min and r_max for cutoff function for Steinhardt bond parameters q
+            units = Angstroms
+        """
+        return 3.8, 4.0
+
+    @staticmethod
+    def set_r_min_max_g_functions():
+        """
+        return r_min and r_max for cutoff function for symmetry functions G_2 and G_3
+            units = Angstroms
+        """
+        return 6.2, 6.4

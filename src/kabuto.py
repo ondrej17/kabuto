@@ -1,16 +1,44 @@
 import json
+import math
 import os
 import sys
 import datetime
 import shutil
+import logging
 import numpy as np
-
+import scipy
 
 from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
 
 
-# TODO: add printing to log file as well
+def get_logger():
+    """
+    returns customized logger
+    """
+    # create logger with 'spam_application'
+    custom_logger = logging.getLogger('kabuto')
+    custom_logger.setLevel(logging.INFO)
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler('kabuto.log')
+    fh.setLevel(logging.INFO)
+    # create console handler with a INFO log level
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('[%(asctime)s] : %(levelname)s: %(name)s : %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    custom_logger.addHandler(fh)
+    custom_logger.addHandler(ch)
+    return custom_logger
+
+
+# setting up a logger --> to file and to stdout
+logger = get_logger()
+
+
 class Kabuto:
 
     def __init__(self, action, option1, option2):
@@ -41,22 +69,22 @@ class Kabuto:
         # dictionary of phases and positions in vector_q
         self.phases_available = self.load_available_phases()
         if self.phases_available is None:
-            print("ERROR: Available phases were not loaded!")
+            logger.error("Available phases were not loaded!")
             return
         self.number_of_phases = len(self.phases_available)
         self.number_of_descriptors = Descriptors.number_of_descriptors
 
         # create 'results' directory if it does not exist
         if os.path.isdir(self.result_dir):
-            print("INFO: Directory \'{}\' already exists.".format(self.result_dir))
+            logger.info("Directory \'{}\' already exists.".format(self.result_dir))
         else:
             try:
                 os.mkdir(self.result_dir)
             except OSError:
-                print("ERROR: Creation of the \'{}\' directory failed".format(self.result_dir))
+                logger.error("Creation of the \'{}\' directory failed".format(self.result_dir))
 
             else:
-                print("INFO: Successfully created the \'{}\' directory".format(self.result_dir))
+                logger.info("Successfully created the \'{}\' directory".format(self.result_dir))
 
         # based on option, call correct method
         if self.action == "prepare":
@@ -64,46 +92,46 @@ class Kabuto:
             if self.option1 is not None and self.option2 is not None:
                 self.prepare(self.option1, self.option2)
             else:
-                print("ERROR: Either phase or file not given")
+                logger.error("Either phase or file not given")
 
         elif self.action == "list_nn":
             if self.option1 is None and self.option2 is None:
                 self.list_nn()
             else:
-                print("ERROR: action \'list_nn\' takes no arguments")
+                logger.error("Action \'{}\' takes no arguments".format(self.action))
 
         elif self.action == "create_nn":
             if self.option1 is not None and self.option2 is None:
                 self.create_nn(self.option1)
             else:
-                print("ERROR: either no name of neural network given or more arguments given")
+                logger.error("Either no name of neural network given or more arguments given")
 
         elif self.action == "train":
             if self.option1 is not None and self.option2 is None:
                 self.train(self.option1)
             else:
-                print("ERROR: either no name of neural network given or more arguments given")
+                logger.error("Either no name of neural network given or more arguments given")
 
         elif self.action == "predict":
             if self.option1 is not None and self.option2 is not None:
                 self.predict(self.option1, self.option2)
             else:
-                print("ERROR: either no file given or name of nn not given")
+                logger.error("Either no file given or name of nn not given")
 
         elif self.action == "test":
             if self.option1 is None and self.option2 is None:
                 self.test()
             else:
-                print("ERROR: action \'list_nn\' takes no arguments")
+                logger.error("Action \'{}\' takes no arguments".format(self.action))
 
         else:
-            print("You entered wrong action: {}\n"
-                  "Possible actions:\n"
-                  "    prepare <name_of_phase> <dump_file>\n"
-                  "    list_nn\n"
-                  "    create_nn <name_of_nn>\n"
-                  "    train <name_of_nn>\n"
-                  "    predict <path_to_file_with_structure>\n".format(self.action))
+            logger.error("You entered wrong action: {}\n"
+                         "Possible actions:\n"
+                         "    prepare <name_of_phase> <dump_file>\n"
+                         "    list_nn\n"
+                         "    create_nn <name_of_nn>\n"
+                         "    train <name_of_nn>\n"
+                         "    predict <path_to_file_with_structure>\n".format(self.action))
 
     def prepare(self, phase, file):
         """
@@ -115,10 +143,10 @@ class Kabuto:
             > usage:
                 prepare(phase, file)
         """
-        print("ACTION: prepare\n"
-              "preparing phase: {}\n"
-              "preparing from file: {}\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(phase, file))
+        logger.info("ACTION: prepare\n"
+                    "preparing phase: {}\n"
+                    "preparing from file: {}\n"
+                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(phase, file))
 
         # processing of file ...
         with open(file, "r") as input_file:
@@ -144,7 +172,7 @@ class Kabuto:
                     scan_atoms = False
 
                 elif scan_timestep:
-                    # print("Timestamp:", repr(line))
+                    logger.debug("Timestep: {}".format(repr(line)))
                     timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
@@ -154,7 +182,7 @@ class Kabuto:
                     scan_number_of_atoms = True
 
                 elif scan_number_of_atoms:
-                    # print("Number of atoms:", repr(line))
+                    logger.debug("Number of atoms: {}".format(repr(line)))
                     # number_of_atoms = int(line)
                     scan_number_of_atoms = False
 
@@ -164,7 +192,7 @@ class Kabuto:
                     scan_atoms = True
 
                 elif scan_atoms:
-                    # print("Atom:", repr(line))
+                    logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
                     timesteps[current_timestep][atom_id] = [float(atom_x), float(atom_y), float(atom_z), None]
 
@@ -175,38 +203,35 @@ class Kabuto:
 
         # calculating the values of 14 functions for each atoms
         for timestep in timesteps.keys():
-            print("... processing timestep #", timestep)
+            logger.debug("... processing timestep #{}".format(timestep))
             for id in timesteps[timestep].keys():
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
                 y = timesteps[timestep][id][1]
                 z = timesteps[timestep][id][2]
-                print("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
+                logger.debug("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
                 descriptors = Descriptors(id, x, y, z, timesteps[timestep]).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                # print("Descriptors:", descriptors)
+                logger.debug("Descriptors: {}".format(descriptors))
 
         # save dictionary to json file
         with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
             json.dump(timesteps, json_file)
-            print("INFO: dictionary 'timesteps' was saved to: dict_timesteps.json")
+            logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
-        # print timesteps-dictionary
-        # self.print_timesteps(timesteps)
-
-        # save timesteps to separate files in 'dir_to_train' output_dir ---?
+        # save timesteps to separate files in 'dir_to_train' output_dir
         # create output_dir for saving timesteps (if it does not exist)
         if os.path.isdir(self.to_train_dir):
-            print("INFO: output_dir {} already exists.".format(self.to_train_dir))
+            logger.info("Directory {} already exists.".format(self.to_train_dir))
         else:
             try:
                 os.mkdir(self.to_train_dir)
             except OSError:
-                print("ERROR: Creation of the output_dir {} failed".format(self.to_train_dir))
+                logger.error("Creation of the directory {} failed".format(self.to_train_dir))
             else:
-                print("INFO: Successfully created the output_dir {}".format(self.to_train_dir))
+                logger.info("Successfully created the directory {}".format(self.to_train_dir))
 
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
@@ -215,7 +240,7 @@ class Kabuto:
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
             path_to_file = os.path.join(self.to_train_dir, filename)
-            print("... saving timestep #{} to file {}".format(timestep, path_to_file))
+            logger.debug("... saving timestep #{} to file {}".format(timestep, path_to_file))
 
             # open file
             with open(path_to_file, 'w') as file:
@@ -227,7 +252,7 @@ class Kabuto:
                     file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
 
         # all files are prepared in 'dir_to_train' folder
-        print("INFO: all timesteps were saved in \'dir_to_train\' folder")
+        logger.info("All timesteps were saved in \'{}\' folder".format(self.to_train_dir))
 
     def list_nn(self):
         """
@@ -238,36 +263,35 @@ class Kabuto:
             > usage:
                 list_nn()
         """
-        print("ACTION: list_nn\n"
-              "listing all saved neural networks ...\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        logger.info("ACTION: list_nn\n"
+                    "listing all saved neural networks ...\n"
+                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
         # list all files in self.saved_nn_dir
         # saved model has extension .h5
         # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
-            print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
+            logger.info("Directory \'{}\' already exists.".format(self.saved_nn_dir))
         else:
             try:
                 os.mkdir(self.saved_nn_dir)
             except OSError:
-                print("ERROR: Creation of directory \'{}\' failed".format(self.saved_nn_dir))
+                logger.error("Creation of directory \'{}\' failed".format(self.saved_nn_dir))
             else:
-                print("INFO: Successfully created directory \'{}\'".format(self.saved_nn_dir))
+                logger.info("Successfully created directory \'{}\'".format(self.saved_nn_dir))
 
         # list all files in saved_nn_dir and save it to models
         models = []
         model_extension = ".h5"
         for item in os.listdir(self.saved_nn_dir):
-            # print(item)
             if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
                 # cut the extension out
                 models.append(item.replace(model_extension, ""))
 
         # print models out
-        print("INFO: listing all saved neural networks")
+        logger.info("Listing all saved neural networks")
         self.print_nn_models(models)
-        print("INFO: listing ended")
+        logger.info("Listing ended")
 
     def create_nn(self, name):
         """
@@ -277,33 +301,32 @@ class Kabuto:
             > usage:
                 create_nn(name)
         """
-        print("ACTION: create_nn\n"
-              "creating neural network \'{}\' ...\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name))
+        logger.info("ACTION: create_nn\n"
+                    "creating neural network \'{}\' ...\n"
+                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name))
 
         # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
-            print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
+            logger.info("Directory \'{}\' already exists.".format(self.saved_nn_dir))
         else:
             try:
                 os.mkdir(self.saved_nn_dir)
             except OSError:
-                print("ERROR: Creation of directory \'{}\' failed".format(self.saved_nn_dir))
+                logger.error("Creation of directory \'{}\' failed".format(self.saved_nn_dir))
             else:
-                print("INFO: Successfully created directory \'{}\'".format(self.saved_nn_dir))
+                logger.info("Successfully created directory \'{}\'".format(self.saved_nn_dir))
 
         # find all files in saved_nn_dir and save it to models
         models = []
         model_extension = ".h5"
         for item in os.listdir(self.saved_nn_dir):
-            # print(item)
             if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
                 # cut the extension out
                 models.append(item.replace(model_extension, ""))
 
         if name in models:
             # if 'name' is in 'saved_nn' directory, do nothing
-            print("INFO: Neural network \'{}\' already exists.".format(name))
+            logger.info("Neural network \'{}\' already exists.".format(name))
         else:
             # else, create a new neural network and save its model to <name>.h5 file in 'saved_nn' directory
             nn = NeuralNetwork(name)
@@ -318,27 +341,26 @@ class Kabuto:
             > usage:
                 train(name)
         """
-        print("ACTION: train\n"
-              "\'{}\' is training from \'dir_to_train\' directory\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name))
+        logger.info("ACTION: train\n"
+                    "\'{}\' is training from \'{}\' directory\n"
+                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name, self.to_train_dir))
 
         # check whether the name is in saved_nn directory
         # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
-            print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
+            logger.info("Directory \'{}\' already exists.".format(self.saved_nn_dir))
         else:
             try:
                 os.mkdir(self.saved_nn_dir)
             except OSError:
-                print("ERROR: Creation of directory \'{}\' failed".format(self.saved_nn_dir))
+                logger.error("Creation of directory \'{}\' failed".format(self.saved_nn_dir))
             else:
-                print("INFO: Successfully created directory \'{}\'".format(self.saved_nn_dir))
+                logger.info("Successfully created directory \'{}\'".format(self.saved_nn_dir))
 
         # find all files in saved_nn_dir and save it to models
         models = []
         model_extension = ".h5"
         for item in os.listdir(self.saved_nn_dir):
-            # print(item)
             if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
                 # cut the extension out
                 models.append(item.replace(model_extension, ""))
@@ -348,7 +370,7 @@ class Kabuto:
             # prepare two lists, one with descriptors, second one with vector q_i
             first_array, second_array, timestep = self.prepare_arrays(self.to_train_dir)
             if first_array is None or second_array is None:
-                print("ERROR: The interrupting of the training NN!")
+                logger.error("The interrupting of the training NN!")
                 return
 
             # prepare NN
@@ -366,16 +388,16 @@ class Kabuto:
 
         else:
             # if 'name' is in 'saved_nn' directory, do nothing
-            print("ERROR: Neural network \'{}\' does not exist!".format(name))
+            logger.error("Neural network \'{}\' does not exist!".format(name))
 
     def predict(self, name, filename):
         """
         predicts the global structure at each timestep that is in given file
             > returns a dictionary {phase:percentage}
         """
-        print("ACTION: predict\n"
-              "predicting ...\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        logger.info("ACTION: predict\n"
+                    "predicting ...\n"
+                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
         # processing of file ...
         with open(filename, "r") as input_file:
@@ -401,7 +423,7 @@ class Kabuto:
                     scan_atoms = False
 
                 elif scan_timestep:
-                    # print("Timestamp:", repr(line))
+                    logger.debug("Timestep: {}".format(repr(line)))
                     timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
@@ -411,7 +433,7 @@ class Kabuto:
                     scan_number_of_atoms = True
 
                 elif scan_number_of_atoms:
-                    # print("Number of atoms:", repr(line))
+                    logger.debug("Number of atoms: {}".format(repr(line)))
                     # number_of_atoms = int(line)
                     scan_number_of_atoms = False
 
@@ -421,7 +443,7 @@ class Kabuto:
                     scan_atoms = True
 
                 elif scan_atoms:
-                    # print("Atom:", repr(line))
+                    logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
                     timesteps[current_timestep][atom_id] = [float(atom_x), float(atom_y), float(atom_z), None]
 
@@ -432,23 +454,23 @@ class Kabuto:
 
         # calculating the descriptors for each atoms
         for timestep in timesteps.keys():
-            print("... processing timestep #", timestep)
+            logger.debug("... processing timestep #{}".format(timestep))
             for id in timesteps[timestep].keys():
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
                 y = timesteps[timestep][id][1]
                 z = timesteps[timestep][id][2]
-                print("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
+                logger.debug("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
                 descriptors = Descriptors(id, x, y, z, timesteps[timestep]).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                # print("Descriptors:", descriptors)
+                logger.debug("... ... Descriptors:".format(descriptors))
 
         # save dictionary to json file
         with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
             json.dump(timesteps, json_file)
-            print("INFO: dictionary 'timesteps' was saved to: dict_timesteps.json")
+            logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
         # print timesteps-dictionary
         # self.print_timesteps(timesteps)
@@ -456,14 +478,14 @@ class Kabuto:
         # save timesteps to separate files in 'dir_to_predict' to_predict_dir ---?
         # create to_predict_dir for saving timesteps (if it does not exist)
         if os.path.isdir(self.to_predict_dir):
-            print("INFO: Directory {} already exists.".format(self.to_predict_dir))
+            logger.info("Directory {} already exists.".format(self.to_predict_dir))
         else:
             try:
                 os.mkdir(self.to_predict_dir)
             except OSError:
-                print("ERROR: Creation of the directory {} failed".format(self.to_predict_dir))
+                logger.error("Creation of the directory {} failed".format(self.to_predict_dir))
             else:
-                print("INFO: Successfully created directory {}".format(self.to_predict_dir))
+                logger.info("Successfully created directory {}".format(self.to_predict_dir))
 
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
@@ -472,7 +494,7 @@ class Kabuto:
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
             path_to_file = os.path.join(self.to_predict_dir, filename)
-            print("... saving timestep #{} to file {}".format(timestep, path_to_file))
+            logger.debug("... saving timestep #{} to file {}".format(timestep, path_to_file))
 
             # open file
             with open(path_to_file, 'w') as file:
@@ -484,22 +506,21 @@ class Kabuto:
                     file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
-        print("INFO: all timesteps were saved in \'{}\' folder".format(self.to_predict_dir))
+        logger.info("All timesteps were saved in \'{}\' folder".format(self.to_predict_dir))
 
         # check whether the name is in saved_nn directory
         if os.path.isdir(self.saved_nn_dir):
-            print("INFO: directory \'{}\' already exists.".format(self.saved_nn_dir))
+            logger.info("Directory \'{}\' already exists.".format(self.saved_nn_dir))
         else:
-            print("ERROR: directory \'{}\' does not exist!".format(self.saved_nn_dir))
+            logger.error("Directory \'{}\' does not exist!".format(self.saved_nn_dir))
             return None
 
         # find all files in saved_nn_dir and save it to models
         models = []
         model_extension = ".h5"
         for item in os.listdir(self.saved_nn_dir):
-            # print(item)
             if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
-                # cut the extension out
+                # cut the extension out and save name to list
                 models.append(item.replace(model_extension, ""))
 
         # initialize a dictionary that holds result
@@ -515,7 +536,7 @@ class Kabuto:
                     # prepare two lists, one with descriptors, second one with None
                     input_array, second_array, timestep = self.prepare_arrays(self.to_predict_dir, filename)
                     if input_array is None or second_array is not None or timestep is None:
-                        print("ERROR: The interrupting of the predicting!")
+                        logger.error("The interrupting of the predicting!")
                         return
 
                     # prepare NN, load model
@@ -528,13 +549,13 @@ class Kabuto:
                     prediction = self.nn.predict(input_array)
 
                     # I have a prediction!
-                    # print("... prediction for file \'{}\'\n{}".format(filename, prediction))
+                    logger.debug("... prediction for file \'{}\'\n{}".format(filename, prediction))
 
                     # calculate the vector_Q (global structure)
                     vector_big_q = self.calculate_vector_big_q(prediction)
 
                     # I have vector Q that has information about global structure at given timestep
-                    # print("Q = {}".format(vector_big_q))
+                    logger.debug("... Q = {}".format(vector_big_q))
 
                     # create dictionary [phase:percentage]
                     global_structure_dict[timestep] = self.create_dict_phase_percentage(vector_big_q)
@@ -543,27 +564,39 @@ class Kabuto:
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
 
             # print result (global structure info)
-            print("RESULT:\n{}".format(global_structure_dict))
+            logger.info("\nRESULT:\n{}".format(global_structure_dict))
 
             # save results to 'results' dir
-            self.save_results(global_structure_dict, filename)
+            self.save_results(global_structure_dict)
 
-            print("INFO: End of predicting.")
+            logger.info("End of predicting.")
 
         else:
             # if 'name' is in 'saved_nn' directory, do nothing
-            print("ERROR: Neural network \'{}\' does not exist!".format(name))
+            logger.error("Neural network \'{}\' does not exist!".format(name))
 
     def test(self):
         """
         a method for the testing of the features
         """
-        print("ACTION: test\n"
-              "Entering TEST mode. Object KABUTO created. ...\n"
-              "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+        logger.info("ACTION: test\n"
+                    "Entering TEST mode. Object KABUTO created. ...\n"
+                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
-        # add tests of features here -->
-        self.move_files_from_to(self.to_train_dir, self.trained_dir)
+        # test return values of functions in descriptors module
+        # test_descriptors = Descriptors(id=1, x=0, y=0, z=0, atoms=dict())
+        # logger.info("symmetry function parameters dictionary:\n{}"
+        #             .format(test_descriptors.symmetry_functions_parameters))
+        # logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
+        # logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
+        # logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
+        # logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
+        # logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
+        # logger.info("scipy version = {}".format(scipy.__version__))
+        # logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
+        # logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
+        # logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
+        # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
 
     def prepare_arrays(self, directory=None, filename=None):
         """
@@ -576,15 +609,15 @@ class Kabuto:
 
         if filename is None and directory is not None:
             input_array, output_array = [], []
-            print("INFO: Preparing arrays from directory: \'{}\'".format(directory))
+            logger.info("Preparing arrays from directory: \'{}\'".format(directory))
 
             for root, directories, files in os.walk(directory):
                 if not files:
-                    print("ERROR: No files in \'{}\'".format(directory))
+                    logger.error("No files in \'{}\'".format(directory))
                     return None, None, None
                 for filename in sorted(files):
                     # process each file
-                    print("... processing file: {}".format(filename))
+                    logger.debug("... processing file: {}".format(filename))
                     output_vector = None
 
                     with open(os.path.join(directory, filename)) as file:
@@ -596,13 +629,13 @@ class Kabuto:
                                     phase = line.split()[2]
                                     output_vector = self.create_output_vector(phase)
                                     if output_vector is None:
-                                        print("ERROR: The interrupting of the preparing of arrays!")
+                                        logger.error("The interrupting of the preparing of arrays!")
                                         return None, None, None
                             else:
                                 # processing a line with descriptors: [id, **descriptors]
                                 items = line.split()
                                 descriptors = list(map(float, items[1:]))
-                                # print("{} : {}".format(id, descriptors))
+                                logger.debug("{} : {}".format(id, descriptors))
 
                                 # add output_vector to output array
                                 output_array.append(output_vector)
@@ -610,15 +643,17 @@ class Kabuto:
                                 # add descriptors to input array
                                 input_array.append(descriptors)
 
-            print("INFO: input and output arrays have the same length:", len(input_array) == len(output_array))
-            print("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
-            print("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
+            logger.info("Input and output arrays have the same length: {}"
+                        .format(len(input_array) == len(output_array)))
+
+            logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
+            logger.debug("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
 
             # return numpy array, tensorflow likes it
             return np.array(input_array, dtype=float), np.array(output_array, dtype=float), None
 
         elif filename is not None and directory is not None:
-            print("INFO: Preparing only input array from the file: \'{}\'".format(os.path.join(directory, filename)))
+            logger.info("Preparing only input array from the file: \'{}\'".format(os.path.join(directory, filename)))
 
             input_array, output_array, timestep = [], None, None
 
@@ -635,22 +670,22 @@ class Kabuto:
                             # processing a line with descriptors: [id, **descriptors]
                             items = line.split()
                             descriptors = list(map(float, items[1:]))
-                            # print("{} : {}".format(id, descriptors))
+                            logger.debug("{} : {}".format(id, descriptors))
 
                             # add descriptors to input array
                             input_array.append(descriptors)
 
-                # print("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
+                logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
 
                 # return numpy array, tensorflow likes it
                 return np.array(input_array, dtype=float), None, timestep
 
             except FileNotFoundError:
-                print("ERROR: File {} not found!".format(filename))
+                logger.error("File {} not found!".format(filename))
                 return None, None, None
 
         else:
-            print("ERROR: Wrong use of \'prepare_arrays()\' function!")
+            logger.error("Wrong use of \'prepare_arrays()\' function!")
             return None, None, None
 
     def create_output_vector(self, phase):
@@ -661,7 +696,7 @@ class Kabuto:
         """
 
         if phase not in self.phases_available.keys():
-            print("ERROR: Given phase is not one of the available phases!")
+            logger.error("Given phase is not one of the available phases!")
             return None
 
         # create output vector
@@ -671,10 +706,10 @@ class Kabuto:
         try:
             vector_q[self.phases_available[phase]] = 1
         except IndexError:
-            print("ERROR: Problem with available_phases attribute in Kabuto class!")
+            logger.error("Problem with available_phases attribute in Kabuto class!")
             return None
 
-        # print("vector_q: {}".format(vector_q))
+        logger.debug("vector_q: {}".format(vector_q))
         return vector_q
 
     def load_available_phases(self):
@@ -694,10 +729,10 @@ class Kabuto:
                         phases_dict[line.strip()] = index
                         index += 1
         except FileNotFoundError:
-            print("ERROR: File \'{}\' not found!".format(self.phase_file))
+            logger.error("File \'{}\' not found!".format(self.phase_file))
             return None
 
-        print(phases_dict)
+        logger.info("Available phases: {}".format(phases_dict))
         return phases_dict
 
     def calculate_vector_big_q(self, prediction):
@@ -728,59 +763,57 @@ class Kabuto:
         """
         prints timesteps dictionary in well arranged way
         """
-        print("Timesteps:")
+        logger.debug("Timesteps:")
         for timestep, atoms in timesteps.items():
-            print("\tTimestep:", timestep)
-
+            logger.debug("... Timestep: {}".format(timestep))
             for atom, coords in atoms.items():
-                print("\t\tAtom #{}:\t{}".format(atom, coords))
+                logger.debug("... ... Atom #{}:\t{}".format(atom, coords))
 
     @staticmethod
     def print_intro():
         """
         prints logo of KABUTO in nice way
         """
-        print("******************************************************")
-        print("                   ___            _______    ____")
-        print("   | /     /\\     |   |   |    |     |      /    \\")
-        print("   |<     /__\\    |--<    |    |     |     |      |")
-        print("   | \\   /    \\   |___|    \\__/      |      \\____/")
-        print("******************************************************")
-        print("                   Ondrej Bily")
-        print("                  Diploma Thesis")
-        print("                       2020")
-        print("******************************************************")
-        print()
+        logger.info("\n******************************************************\n"
+                    "                   ___            _______    ____\n"
+                    "   | /     /\\     |   |   |    |     |      /    \\\n"
+                    "   |<     /__\\    |--<    |    |     |     |     |\n"
+                    "   | \\   /    \\   |___|    \\__/      |      \\____/\n"
+                    "******************************************************\n"
+                    "                   Ondrej Bily\n"
+                    "                  Diploma Thesis\n"
+                    "                       2020\n"
+                    "******************************************************\n")
 
     @staticmethod
     def print_nn_models(models):
         to_print = ""
         for model in models:
             to_print += "... {}\n".format(model)
-        print(to_print.strip())
+        logger.info("\n{}".format(to_print.strip()))
 
     @staticmethod
     def move_files_from_to(from_dir, to_dir):
         """
         moves all files from 'from_dir' to 'to_dir'
         """
-        print("INFO: Moving files ...")
+        logger.info("Moving files ...")
         # create to_dir if it does not exist)
         if os.path.isdir(to_dir):
-            print("INFO: {} already exists.".format(to_dir))
+            logger.info("Directory {} already exists.".format(to_dir))
         else:
             try:
                 os.mkdir(to_dir)
             except OSError:
-                print("ERROR: Creation of the trained_dir {} failed".format(to_dir))
+                logger.error("Creation of the directory {} failed".format(to_dir))
 
             else:
-                print("INFO: Successfully created the trained_dir {}".format(to_dir))
+                logger.info("Successfully created the directory {}".format(to_dir))
         files = os.listdir(from_dir)
         for filename in files:
             shutil.move(os.path.join(from_dir, filename), to_dir)
 
-        print("INFO: files from \'{}\' successfully moved to \'{}\'".format(from_dir, to_dir))
+        logger.info("Files from \'{}\' successfully moved to \'{}\'".format(from_dir, to_dir))
 
     @staticmethod
     def dict_to_string(dictionary):
@@ -792,7 +825,7 @@ class Kabuto:
             result += "--> {} : {}\n".format(key, value)
         return result.strip()
 
-    def save_results(self, global_structure_dict, filename):
+    def save_results(self, global_structure_dict):
         """
         saves results (dictionary [timestep:[phase:percentage]]) to file in format:
             # timestep phase1 phase2 .... phaseN
@@ -802,7 +835,7 @@ class Kabuto:
         filename = datetime.datetime.today().strftime("results_%Y_%m_%d_%H_%M_%S") + ".txt"
         path_to_file = os.path.join(self.result_dir, filename)
 
-        print("INFO: Saving results to file: \'{}\'".format(path_to_file))
+        logger.info("Saving results to file: \'{}\'".format(path_to_file))
 
         # prepare first descriptive line
         first_line = "timestep\t" + '\t'.join(self.phases_available.keys()) + "\n"
@@ -818,12 +851,36 @@ class Kabuto:
                     line += '\t'.join(list(map(str, global_structure_dict[timestep].values()))) + '\n'
                     file.write(line)
         except FileNotFoundError:
-            print("ERROR: Problem with opening the file: {}".format(path_to_file))
+            logger.error("Problem with opening the file: {}".format(path_to_file))
+
+
+# global function
+def print_kabuto_intro():
+    result = "\n******************************************************\n" \
+             "                   ___            _______    ____\n" \
+             "   | /     /\\     |   |   |    |     |      /    \\\n" \
+             "   |<     /__\\    |--<    |    |     |     |     |\n" \
+             "   | \\   /    \\   |___|    \\__/      |      \\____/\n" \
+             "******************************************************\n" \
+             "                   Ondrej Bily\n" \
+             "                  Diploma Thesis\n" \
+             "                       2020\n" \
+             "******************************************************\n" \
+             "Usage:\n" \
+             "    kabuto.py prepare <name_of_phase> <dump_file>\n" \
+             "    kabuto.py list_nn\n" \
+             "    kabuto.py create_nn <name_of_nn>\n" \
+             "    kabuto.py train <name_of_nn>\n" \
+             "    kabuto.py predict <name_of_nn> <dump.file>\n" \
+             "    kabuto.py test\n" \
+             "******************************************************\n"
+    return result
 
 
 ################################################################
 # create Kabuto Machine iff there is correct number of arguments
 ################################################################
+logger.info("Command line arguments:\n{}".format(' '.join(sys.argv)))
 if len(sys.argv) == 2:
     # script called with one argument (action)
     Kabuto(action=sys.argv[1], option1=None, option2=None)
@@ -835,21 +892,4 @@ elif len(sys.argv) == 4:
     Kabuto(action=sys.argv[1], option1=sys.argv[2], option2=sys.argv[3])
 else:
     # script called without action
-    print("******************************************************\n"
-          "                   ___            _______    ____\n"
-          "   | /     /\\     |   |   |    |     |      /    \\\n"
-          "   |<     /__\\    |--<    |    |     |     |     |\n"
-          "   | \\   /    \\   |___|    \\__/      |      \\____/\n"
-          "******************************************************\n"
-          "                   Ondrej Bily\n"
-          "                  Diploma Thesis\n"
-          "                       2020\n"
-          "******************************************************\n"
-          "Usage:\n"
-          "    kabuto.py prepare <name_of_phase> <dump_file>\n"
-          "    kabuto.py list_nn\n"
-          "    kabuto.py create_nn <name_of_nn>\n"
-          "    kabuto.py train <name_of_nn>\n"
-          "    kabuto.py predict <name_of_nn> <dump.file>\n"
-          "    kabuto.py test\n"
-          "******************************************************\n")
+    logger.info(print_kabuto_intro())
