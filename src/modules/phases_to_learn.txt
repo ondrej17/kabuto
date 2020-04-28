@@ -2,8 +2,8 @@
 # one line means one phase
 # comments and empty lines are allowed
 
-fcc
 bcc
-phase2
-phase3
-phase4
+fcc
+hcp
+A15
+dis

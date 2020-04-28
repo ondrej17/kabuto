@@ -1,5 +1,3 @@
-import cmath
-import logging
 import math
 import logging
 from scipy.special import sph_harm

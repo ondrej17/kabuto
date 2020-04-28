@@ -1,12 +1,10 @@
 import json
-import math
 import os
 import sys
 import datetime
 import shutil
 import logging
 import numpy as np
-import scipy
 
 from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
@@ -14,7 +12,7 @@ from modules.neural_network import NeuralNetwork
 
 def get_logger():
     """
-    returns customized logger
+    returns customized logger that is used in all script
     """
     # create logger with 'spam_application'
     custom_logger = logging.getLogger('kabuto')
@@ -200,10 +198,11 @@ class Kabuto:
                     # skipping useless lines
                     pass
         # all atoms are loaded in dictionary
+        logger.info("Calculating of descriptors begins")
 
         # calculating the values of 14 functions for each atoms
         for timestep in timesteps.keys():
-            logger.debug("... processing timestep #{}".format(timestep))
+            logger.info("... processing timestep #{}".format(timestep))
             for id in timesteps[timestep].keys():
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
@@ -215,6 +214,8 @@ class Kabuto:
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
                 logger.debug("Descriptors: {}".format(descriptors))
+
+        logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
         with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -236,11 +237,13 @@ class Kabuto:
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
 
+        logger.info("Saving timesteps to separate file begins")
+
         for timestep in timesteps.keys():
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
             path_to_file = os.path.join(self.to_train_dir, filename)
-            logger.debug("... saving timestep #{} to file {}".format(timestep, path_to_file))
+            logger.info("... saving timestep #{} to file {}".format(timestep, path_to_file))
 
             # open file
             with open(path_to_file, 'w') as file:
@@ -777,7 +780,7 @@ class Kabuto:
         logger.info("\n******************************************************\n"
                     "                   ___            _______    ____\n"
                     "   | /     /\\     |   |   |    |     |      /    \\\n"
-                    "   |<     /__\\    |--<    |    |     |     |     |\n"
+                    "   |<     /__\\    |--<    |    |     |     |      |\n"
                     "   | \\   /    \\   |___|    \\__/      |      \\____/\n"
                     "******************************************************\n"
                     "                   Ondrej Bily\n"
