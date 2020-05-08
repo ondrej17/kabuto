@@ -1,6 +1,6 @@
 # Default ignored files
 .idea
-kabuto_machine.iml
+kabuto.iml
 # Custom ignored files
 src/temporary
 src/saved_nn

@@ -45,35 +45,35 @@ The results of the script are stored in `src/result` folder.
 The log of script is both printed to console and written in file `src/kabuto.log`. 
   
  ## Code Structure
- * README.md
- * src
-     * modules
-         * descriptors.py
-         * neural_network.py
-         * phases_to_learn.txt
-     * saved_nn
-         * nn1.h5
-         * ...
-     * dir_to_train
-         * to_train1.txt
-         * ...
-     * dir_to_predict
-         * to_predict1.txt
-         * ...
-     * dir_trained
-         * trained1.txt
-         * ...
-     * dir_predicted
-         * predicted1.txt
-         * ...
-     * temporary
-         * dict_timesteps.json
-     * results
-         * ...
-     * kabuto.py
-     * kabuto.log
+ * `README.md`
+ * `src`
+     * `modules`
+         * `descriptors.py`
+         * `neural_network.py`
+         * `phases_to_learn.txt`
+     * `saved_nn`
+         * `nn1.h5`
+         * `...`
+     * `dir_to_train`
+         * `to_train1.txt`
+         * `...`
+     * `dir_to_predict`
+         * `to_predict1.txt`
+         * `...`
+     * `dir_trained`
+         * `trained1.txt`
+         * `...`
+     * `dir_predicted`
+         * `predicted1.txt`
+         * `...`
+     * `temporary`
+         * `dict_timesteps.json`
+     * `results`
+         * `...`
+     * `kabuto.py`
+     * `kabuto.log`
      
-## Design of the NNs
+ ## Design of the NNs
 * input layer
 	* 14 input nodes
 	* correspond to 14 functions that we use as descriptors

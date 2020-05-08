@@ -12,19 +12,20 @@ class Descriptors:
         > it can be changed to calculate whatever descriptors you choose, but
         > the function 'get_descriptors()' must return an array of floats
         > number of descriptors affects the neural network (# of its input nodes), so be careful
-        > the function 'info_header' returns header for output file that contains descriptors
-        >   ... it must be changed adequately
+        > the function 'info_header' returns a header for the output file that contains descriptors
+        > ... it must be changed adequately
         > class attribute 'number_of_descriptors' holds the number of descriptors
         > r_min and r_max are different for Steinhardt parameters and symmetry functions!
+        > 'atoms_with_pbc' holds all atoms and their copies in all direction due to the PBC
     """
     # important class attribute; update it, when descriptors are changed
     number_of_descriptors = 14
 
-    def __init__(self, id, x, y, z, atoms):
+    def __init__(self, id, x, y, z, atoms_with_pbc):
         self.id = id  # id of actual atom
         self.x, self.y, self.z = x, y, z  # coordination of actual atom
-        self.atoms_for_g = self.create_atoms_in_cutoff_for_g_functions(atoms)
-        self.atoms_for_q = self.create_atoms_in_cutoff_for_q_functions(atoms)
+        self.atoms_for_g = self.create_atoms_in_cutoff_for_g_functions(atoms_with_pbc)
+        self.atoms_for_q = self.create_atoms_in_cutoff_for_q_functions(atoms_with_pbc)
 
         # dictionary of parameters for symmetry functions
         self.symmetry_functions_parameters = {

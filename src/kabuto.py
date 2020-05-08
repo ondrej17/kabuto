@@ -156,9 +156,13 @@ class Kabuto:
             scan_timestep = False
             scan_atoms = False
             scan_number_of_atoms = False
+            scan_pbc = False
 
             # current timestep for accessing main dictionary
             current_timestep = None
+            number_of_pbc = 0
+            pbc = [None, None, None]
+            pbc_dict = dict()
 
             for raw_line in input_file:
                 line = raw_line.strip()
@@ -184,15 +188,31 @@ class Kabuto:
                     # number_of_atoms = int(line)
                     scan_number_of_atoms = False
 
+                elif line == "ITEM: BOX BOUNDS pp pp pp":
+                    # scan for pbc in next three lines
+                    scan_pbc = True
+
+                elif scan_pbc:
+                    logger.debug("PBC: {}".format(repr(line)))
+                    min_value, max_value = tuple(line.split())
+                    if number_of_pbc <= 2:  # load another pbc's
+                        pbc[number_of_pbc] = float(max_value) - float(min_value)
+                        number_of_pbc += 1
+                    if number_of_pbc == 3:  # end loading pbc's
+                        scan_pbc = False
+
                 elif line == "ITEM: ATOMS id type xs ys zs":
                     timesteps[current_timestep] = {}
+                    # store the pbc's in separate dictionary (timestep:list(pbc))
+                    pbc_dict[current_timestep] = list(pbc)
+                    logger.info("PBC (timestep #{}): {}".format(current_timestep, pbc))
                     # scan for atoms in next lines
                     scan_atoms = True
 
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    timesteps[current_timestep][atom_id] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
 
                 else:
                     # skipping useless lines
@@ -203,6 +223,8 @@ class Kabuto:
         # calculating the values of 14 functions for each atoms
         for timestep in timesteps.keys():
             logger.info("... processing timestep #{}".format(timestep))
+            # prepare extended dictionary of atoms that contains also atoms due to PBC
+            atoms_with_pbc = self.create_atoms_with_pbc(timesteps[timestep], pbc_dict[timestep])
             for id in timesteps[timestep].keys():
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
@@ -210,7 +232,7 @@ class Kabuto:
                 z = timesteps[timestep][id][2]
                 logger.debug("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
-                descriptors = Descriptors(id, x, y, z, timesteps[timestep]).get_descriptors()
+                descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
                 logger.debug("Descriptors: {}".format(descriptors))
@@ -221,6 +243,11 @@ class Kabuto:
         with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
             json.dump(timesteps, json_file)
             logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
+
+        # save dictionary to json file
+        with open(self.tmp_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
+            json.dump(pbc_dict, json_file)
+            logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
         # save timesteps to separate files in 'dir_to_train' output_dir
         # create output_dir for saving timesteps (if it does not exist)
@@ -448,7 +475,7 @@ class Kabuto:
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    timesteps[current_timestep][atom_id] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
 
                 else:
                     # skipping useless lines
@@ -770,7 +797,7 @@ class Kabuto:
         for timestep, atoms in timesteps.items():
             logger.debug("... Timestep: {}".format(timestep))
             for atom, coords in atoms.items():
-                logger.debug("... ... Atom #{}:\t{}".format(atom, coords))
+                logger.debug("... ... Atom #{}:\t{}".format(type(atom), coords))
 
     @staticmethod
     def print_intro():
@@ -855,6 +882,64 @@ class Kabuto:
                     file.write(line)
         except FileNotFoundError:
             logger.error("Problem with opening the file: {}".format(path_to_file))
+
+    @staticmethod
+    def create_atoms_with_pbc(atoms, pbc):
+        """
+        returns a dictionary that contains original atoms and their copies to each direction
+            > it is a way to fulfill PBC (periodic boundary condition)
+            > pbc parameter is list of three numbers, period in x, y and z direction
+            > the added atoms should have different id than the original atoms
+            > atoms is dictionary {id:[x, y, z, None]}, where None is reserved place for Descriptors
+        """
+        atoms_with_pbc = dict()
+        r_x, r_y, r_z = pbc[0], pbc[1], pbc[2]
+
+        max_id = max(map(int, list(atoms.keys()))) + 1  # 1 is for a case id = 0
+        logger.info("Maximal ID of atom: {}".format(max_id))
+
+        # go through the dictionary 'atoms' and add 27 atoms to the atoms_with_pbc dictionary
+        # why 27? The original one and 26 new atoms due to the pbc
+        for id, atom in atoms.items():
+            x, y, z = atom[0], atom[1], atom[2]
+
+            # add the original atom
+            atoms_with_pbc[id] = [x, y, z, None]
+
+            # add the other 26 atoms with different id number
+            atoms_with_pbc[id + 1 * max_id] = [x + r_x, y, z, None]
+            atoms_with_pbc[id + 2 * max_id] = [x, y + r_y, z, None]
+            atoms_with_pbc[id + 3 * max_id] = [x, y, z + r_z, None]
+
+            atoms_with_pbc[id + 4 * max_id] = [x - r_x, y, z, None]
+            atoms_with_pbc[id + 5 * max_id] = [x, y - r_y, z, None]
+            atoms_with_pbc[id + 6 * max_id] = [x, y, z - r_z, None]
+
+            atoms_with_pbc[id + 7 * max_id] = [x + r_x, y + r_y, z, None]
+            atoms_with_pbc[id + 8 * max_id] = [x + r_x, y - r_y, z, None]
+            atoms_with_pbc[id + 9 * max_id] = [x - r_x, y + r_y, z, None]
+            atoms_with_pbc[id + 10 * max_id] = [x - r_x, y - r_y, z, None]
+
+            atoms_with_pbc[id + 11 * max_id] = [x + r_x, y, z + r_z, None]
+            atoms_with_pbc[id + 12 * max_id] = [x + r_x, y, z - r_z, None]
+            atoms_with_pbc[id + 13 * max_id] = [x - r_x, y, z + r_z, None]
+            atoms_with_pbc[id + 14 * max_id] = [x - r_x, y, z - r_z, None]
+
+            atoms_with_pbc[id + 15 * max_id] = [x, y + r_y, z + r_z, None]
+            atoms_with_pbc[id + 16 * max_id] = [x, y + r_y, z - r_z, None]
+            atoms_with_pbc[id + 17 * max_id] = [x, y - r_y, z + r_z, None]
+            atoms_with_pbc[id + 18 * max_id] = [x, y - r_y, z - r_z, None]
+
+            atoms_with_pbc[id + 19 * max_id] = [x + r_x, y + r_y, z + r_z, None]
+            atoms_with_pbc[id + 20 * max_id] = [x + r_x, y + r_y, z - r_z, None]
+            atoms_with_pbc[id + 21 * max_id] = [x + r_x, y - r_y, z + r_z, None]
+            atoms_with_pbc[id + 22 * max_id] = [x + r_x, y - r_y, z - r_z, None]
+            atoms_with_pbc[id + 23 * max_id] = [x - r_x, y + r_y, z + r_z, None]
+            atoms_with_pbc[id + 24 * max_id] = [x - r_x, y + r_y, z - r_z, None]
+            atoms_with_pbc[id + 25 * max_id] = [x - r_x, y - r_y, z + r_z, None]
+            atoms_with_pbc[id + 26 * max_id] = [x - r_x, y - r_y, z - r_z, None]
+
+        return atoms_with_pbc
 
 
 # global function
