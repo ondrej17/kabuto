@@ -36,6 +36,8 @@ def get_logger():
 # setting up a logger --> to file and to stdout
 logger = get_logger()
 
+# TODO: move all settings and temporary file into 'config' folder (not the module folder)
+
 
 class Kabuto:
 
@@ -439,9 +441,13 @@ class Kabuto:
             scan_timestep = False
             scan_atoms = False
             scan_number_of_atoms = False
+            scan_pbc = False
 
             # current timestep for accessing main dictionary
             current_timestep = None
+            number_of_pbc = 0
+            pbc = [None, None, None]
+            pbc_dict = dict()
 
             for raw_line in input_file:
                 line = raw_line.strip()
@@ -467,8 +473,24 @@ class Kabuto:
                     # number_of_atoms = int(line)
                     scan_number_of_atoms = False
 
+                elif line == "ITEM: BOX BOUNDS pp pp pp":
+                    # scan for pbc in next three lines
+                    scan_pbc = True
+
+                elif scan_pbc:
+                    logger.debug("PBC: {}".format(repr(line)))
+                    min_value, max_value = tuple(line.split())
+                    if number_of_pbc <= 2:  # load another pbc's
+                        pbc[number_of_pbc] = float(max_value) - float(min_value)
+                        number_of_pbc += 1
+                    if number_of_pbc == 3:  # end loading pbc's
+                        scan_pbc = False
+
                 elif line == "ITEM: ATOMS id type xs ys zs":
                     timesteps[current_timestep] = {}
+                    # store the pbc's in separate dictionary (timestep:list(pbc))
+                    pbc_dict[current_timestep] = list(pbc)
+                    logger.info("PBC (timestep #{}): {}".format(current_timestep, pbc))
                     # scan for atoms in next lines
                     scan_atoms = True
 
@@ -481,10 +503,13 @@ class Kabuto:
                     # skipping useless lines
                     pass
         # all atoms are loaded in dictionary
+        logger.info("Calculating of descriptors begins")
 
         # calculating the descriptors for each atoms
         for timestep in timesteps.keys():
             logger.debug("... processing timestep #{}".format(timestep))
+            # prepare extended dictionary of atoms that contains also atoms due to PBC
+            atoms_with_pbc = self.create_atoms_with_pbc(timesteps[timestep], pbc_dict[timestep])
             for id in timesteps[timestep].keys():
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
@@ -492,10 +517,12 @@ class Kabuto:
                 z = timesteps[timestep][id][2]
                 logger.debug("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
                 # calculate descriptors for current atom
-                descriptors = Descriptors(id, x, y, z, timesteps[timestep]).get_descriptors()
+                descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
                 logger.debug("... ... Descriptors:".format(descriptors))
+
+        logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
         with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -797,7 +824,7 @@ class Kabuto:
         for timestep, atoms in timesteps.items():
             logger.debug("... Timestep: {}".format(timestep))
             for atom, coords in atoms.items():
-                logger.debug("... ... Atom #{}:\t{}".format(type(atom), coords))
+                logger.debug("... ... Atom #{}:\t{}".format(atom, coords))
 
     @staticmethod
     def print_intro():
