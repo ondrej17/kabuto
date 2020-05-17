@@ -121,8 +121,7 @@ class Kabuto:
         """
         logger.info("ACTION: prepare\n"
                     "preparing phase: {}\n"
-                    "preparing from file: {}\n"
-                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(phase, file))
+                    "preparing from file: {}".format(phase, file))
 
         # processing of file ...
         with open(file, "r") as input_file:
@@ -272,8 +271,7 @@ class Kabuto:
                 list_nn()
         """
         logger.info("ACTION: list_nn\n"
-                    "listing all saved neural networks ...\n"
-                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                    "listing all saved neural networks ...")
 
         # list all files in self.saved_nn_dir
         # saved model has extension .h5
@@ -310,8 +308,7 @@ class Kabuto:
                 create_nn(name)
         """
         logger.info("ACTION: create_nn\n"
-                    "creating neural network \'{}\' ...\n"
-                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name))
+                    "creating neural network \'{}\' ...".format(name))
 
         # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
@@ -350,8 +347,7 @@ class Kabuto:
                 train(name)
         """
         logger.info("ACTION: train\n"
-                    "\'{}\' is training from \'{}\' directory\n"
-                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^".format(name, self.to_train_dir))
+                    "\'{}\' is training from \'{}\' directory".format(name, self.to_train_dir))
 
         # check whether the name is in saved_nn directory
         # create saved_nn_dir for saving models of NN (if it does not exist)
@@ -404,8 +400,7 @@ class Kabuto:
             > returns a dictionary {phase:percentage}
         """
         logger.info("ACTION: predict\n"
-                    "predicting ...\n"
-                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                    "predicting ...")
 
         # processing of file ...
         with open(filename, "r") as input_file:
@@ -616,8 +611,7 @@ class Kabuto:
         a method for the testing of the features
         """
         logger.info("ACTION: test\n"
-                    "Entering TEST mode. Object KABUTO created. ...\n"
-                    "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+                    "Entering TEST mode. Object KABUTO created. ...")
 
         # test return values of functions in descriptors module
         test_descriptors = Descriptors(id=1, x=0, y=0, z=0, atoms_with_pbc=dict())

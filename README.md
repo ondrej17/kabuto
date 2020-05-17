@@ -43,6 +43,8 @@ Phases that we want to be learned must be in file `src/config/phases_to_learn.tx
 The results of the script are stored in `src/result` folder.
 
 The log of script is both printed to console and written in file `src/kabuto.log`. 
+
+The example run and simulation are located in `example` folder. *(to be added)*
   
  ## Code Structure
  * `README.md`
@@ -74,6 +76,7 @@ The log of script is both printed to console and written in file `src/kabuto.log
          * `...`
      * `kabuto.py`
      * `kabuto.log`
+ * `example`
      
  ## Design of the NNs
 * input layer
