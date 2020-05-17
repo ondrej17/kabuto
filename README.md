@@ -51,9 +51,10 @@ The log of script is both printed to console and written in file `src/kabuto.log
          * `descriptors.py`
          * `neural_network.py`
      * `config`
-         * `phases_to_learn.txt`
          * `dict_timesteps.json`
          * `dict_pbc.json`
+         * `logger.ini`
+         * `phases_to_learn.txt`
      * `saved_nn`
          * `nn1.h5`
          * `...`

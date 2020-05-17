@@ -3,38 +3,16 @@ import os
 import sys
 import datetime
 import shutil
-import logging
+import logging.config
+
 import numpy as np
 
 from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
 
-
-def get_logger():
-    """
-    returns customized logger that is used in all script
-    """
-    # create logger with 'spam_application'
-    custom_logger = logging.getLogger('kabuto')
-    custom_logger.setLevel(logging.INFO)
-    # create file handler which logs even debug messages
-    fh = logging.FileHandler('kabuto.log')
-    fh.setLevel(logging.INFO)
-    # create console handler with a INFO log level
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    # create formatter and add it to the handlers
-    formatter = logging.Formatter('[%(asctime)s] : %(levelname)s: %(name)s : %(message)s')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-    # add the handlers to the logger
-    custom_logger.addHandler(fh)
-    custom_logger.addHandler(ch)
-    return custom_logger
-
-
-# setting up a logger --> to file and to stdout
-logger = get_logger()
+# set-up the logger
+logging.config.fileConfig(os.path.join('config', 'logger.ini'))
+logger = logging.getLogger('kabuto')
 
 
 class Kabuto:
@@ -632,7 +610,8 @@ class Kabuto:
             # if 'name' is in 'saved_nn' directory, do nothing
             logger.error("Neural network \'{}\' does not exist!".format(name))
 
-    def test(self):
+    @staticmethod
+    def test():
         """
         a method for the testing of the features
         """
@@ -641,18 +620,18 @@ class Kabuto:
                     "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
         # test return values of functions in descriptors module
-        # test_descriptors = Descriptors(id=1, x=0, y=0, z=0, atoms=dict())
-        # logger.info("symmetry function parameters dictionary:\n{}"
-        #             .format(test_descriptors.symmetry_functions_parameters))
-        # logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
-        # logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
-        # logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
-        # logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
-        # logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
+        test_descriptors = Descriptors(id=1, x=0, y=0, z=0, atoms_with_pbc=dict())
+        logger.info("symmetry function parameters dictionary:\n{}"
+                    .format(test_descriptors.symmetry_functions_parameters))
+        logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
+        logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
+        logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
+        logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
+        logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
         # logger.info("scipy version = {}".format(scipy.__version__))
-        # logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
-        # logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
-        # logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
+        logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
+        logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
+        logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
         # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
 
     def prepare_arrays(self, directory=None, filename=None):

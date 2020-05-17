@@ -2,6 +2,7 @@ import os
 import logging
 import tensorflow as tf
 
+# set-up the logger
 logger = logging.getLogger('kabuto.neural_networks')
 
 

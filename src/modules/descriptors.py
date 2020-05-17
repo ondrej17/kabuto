@@ -2,7 +2,7 @@ import math
 import logging
 from scipy.special import sph_harm
 
-# create logger
+# set-up the logger
 logger = logging.getLogger('kabuto.descriptors')
 
 

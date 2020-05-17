@@ -1,12 +1,11 @@
 # Default ignored files
 .idea
 kabuto.iml
-kabuto.log
 # Custom ignored files
-src/config
 src/saved_nn
 src/dir_predicted
 src/dir_to_predict
 src/dir_to_train
 src/dir_trained
 src/results
+kabuto.log
