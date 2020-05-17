@@ -1,9 +1,0 @@
-# this file contains names of phases
-# one line means one phase
-# comments and empty lines are allowed
-
-bcc
-fcc
-hcp
-A15
-dis
