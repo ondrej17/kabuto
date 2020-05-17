@@ -1,8 +1,9 @@
 # Default ignored files
 .idea
 kabuto.iml
+kabuto.log
 # Custom ignored files
-src/temporary
+src/config
 src/saved_nn
 src/dir_predicted
 src/dir_to_predict

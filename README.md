@@ -38,7 +38,7 @@ In `src` folder:
     
     python kabuto.py predict <name_of_nn> <dump.file>
     
-Phases that we want to be learned must be in file `src/modules/phases_to_learn.txt`.
+Phases that we want to be learned must be in file `src/config/phases_to_learn.txt`.
 
 The results of the script are stored in `src/result` folder.
 
@@ -50,7 +50,10 @@ The log of script is both printed to console and written in file `src/kabuto.log
      * `modules`
          * `descriptors.py`
          * `neural_network.py`
+     * `config`
          * `phases_to_learn.txt`
+         * `dict_timesteps.json`
+         * `dict_pbc.json`
      * `saved_nn`
          * `nn1.h5`
          * `...`
@@ -66,8 +69,6 @@ The log of script is both printed to console and written in file `src/kabuto.log
      * `dir_predicted`
          * `predicted1.txt`
          * `...`
-     * `temporary`
-         * `dict_timesteps.json`
      * `results`
          * `...`
      * `kabuto.py`

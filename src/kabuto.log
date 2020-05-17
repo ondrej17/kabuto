@@ -1834,3 +1834,93 @@ RESULT:
 {'0': {'bcc': 20.4996976852417, 'fcc': -173.8880443572998, 'hcp': -174.03645133972168, 'A15': -59.68229389190674, 'dis': 241.94582748413086}, '500': {'bcc': 20.4996976852417, 'fcc': -173.8880443572998, 'hcp': -174.03645133972168, 'A15': -59.68229389190674, 'dis': 241.94582748413086}}
 [2020-05-17 12:16:15,556] : INFO: kabuto : Saving results to file: 'results\results_2020_05_17_12_16_15.txt'
 [2020-05-17 12:16:15,557] : INFO: kabuto : End of predicting.
+[2020-05-17 20:08:00,201] : INFO: kabuto : Command line arguments:
+kabuto.py
+[2020-05-17 20:08:00,201] : INFO: kabuto : 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |     |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+Usage:
+    kabuto.py prepare <name_of_phase> <dump_file>
+    kabuto.py list_nn
+    kabuto.py create_nn <name_of_nn>
+    kabuto.py train <name_of_nn>
+    kabuto.py predict <name_of_nn> <dump.file>
+    kabuto.py test
+******************************************************
+
+[2020-05-17 20:08:11,394] : INFO: kabuto : Command line arguments:
+kabuto.py prepare
+[2020-05-17 20:08:11,394] : INFO: kabuto : 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-05-17 20:08:11,394] : ERROR: kabuto : File 'config\phases_to_learn.txt' not found!
+[2020-05-17 20:08:11,395] : ERROR: kabuto : Available phases were not loaded!
+[2020-05-17 20:08:40,185] : INFO: kabuto : Command line arguments:
+kabuto.py prepare
+[2020-05-17 20:08:40,185] : INFO: kabuto : 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-05-17 20:08:40,186] : INFO: kabuto : Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-05-17 20:08:40,186] : INFO: kabuto : Directory 'results' already exists.
+[2020-05-17 20:08:40,186] : ERROR: kabuto : Either phase or file not given
+[2020-05-17 20:08:56,742] : INFO: kabuto : Command line arguments:
+kabuto.py prepare bcc temporary\\example_dump.file
+[2020-05-17 20:08:56,742] : INFO: kabuto : 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-05-17 20:08:56,743] : INFO: kabuto : Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-05-17 20:08:56,743] : INFO: kabuto : Directory 'results' already exists.
+[2020-05-17 20:08:56,744] : INFO: kabuto : ACTION: prepare
+preparing phase: bcc
+preparing from file: temporary\\example_dump.file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2020-05-17 20:08:56,745] : INFO: kabuto : PBC (timestep #0): [56.63480816157076, 43.17015299775184, 0.5663480816157076]
+[2020-05-17 20:08:56,745] : INFO: kabuto : PBC (timestep #500): [56.63480816157076, 43.17015299775184, 0.5663480816157076]
+[2020-05-17 20:08:56,745] : INFO: kabuto : Calculating of descriptors begins
+[2020-05-17 20:08:56,745] : INFO: kabuto : ... processing timestep #0
+[2020-05-17 20:08:56,745] : INFO: kabuto : Maximal ID of atom: 9
+[2020-05-17 20:08:56,810] : INFO: kabuto : ... processing timestep #500
+[2020-05-17 20:08:56,811] : INFO: kabuto : Maximal ID of atom: 9
+[2020-05-17 20:08:56,876] : INFO: kabuto : Calculating of descriptors ended
+[2020-05-17 20:08:56,877] : INFO: kabuto : Dictionary 'timesteps' was saved to: dict_timesteps.json
+[2020-05-17 20:08:56,879] : INFO: kabuto : Dictionary 'pbc_dict' was saved to: dict_pbc.json
+[2020-05-17 20:08:56,879] : INFO: kabuto : Directory dir_to_train already exists.
+[2020-05-17 20:08:56,879] : INFO: kabuto : Saving timesteps to separate file begins
+[2020-05-17 20:08:56,880] : INFO: kabuto : ... saving timestep #0 to file dir_to_train\2020_05_17_20_08_56_0.txt
+[2020-05-17 20:08:56,881] : INFO: kabuto : ... saving timestep #500 to file dir_to_train\2020_05_17_20_08_56_500.txt
+[2020-05-17 20:08:56,881] : INFO: kabuto : All timesteps were saved in 'dir_to_train' folder

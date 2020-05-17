@@ -36,8 +36,6 @@ def get_logger():
 # setting up a logger --> to file and to stdout
 logger = get_logger()
 
-# TODO: move all settings and temporary file into 'config' folder (not the module folder)
-
 
 class Kabuto:
 
@@ -58,12 +56,12 @@ class Kabuto:
         self.trained_dir = 'dir_trained'
         self.to_predict_dir = "dir_to_predict"
         self.predicted_dir = "dir_predicted"
-        self.tmp_dir = 'temporary'
+        self.config_dir = 'config'
         self.saved_nn_dir = 'saved_nn'
         self.result_dir = "results"
 
         # file with phases that will be identified
-        self.phase_file = os.path.join("modules", "phases_to_learn.txt")
+        self.phase_file = os.path.join("config", "phases_to_learn.txt")
 
         # these parameters are specific for each nn, change it in your case
         # dictionary of phases and positions in vector_q
@@ -242,12 +240,12 @@ class Kabuto:
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
-        with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
+        with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
             json.dump(timesteps, json_file)
             logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
         # save dictionary to json file
-        with open(self.tmp_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
+        with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
             json.dump(pbc_dict, json_file)
             logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
@@ -525,12 +523,14 @@ class Kabuto:
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
-        with open(self.tmp_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
+        with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
             json.dump(timesteps, json_file)
             logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
-        # print timesteps-dictionary
-        # self.print_timesteps(timesteps)
+        # save dictionary to json file
+        with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
+            json.dump(pbc_dict, json_file)
+            logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
         # save timesteps to separate files in 'dir_to_predict' to_predict_dir ---?
         # create to_predict_dir for saving timesteps (if it does not exist)
