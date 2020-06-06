@@ -182,7 +182,7 @@ class Kabuto:
                     timesteps[current_timestep] = {}
                     # store the pbc's in separate dictionary (timestep:list(pbc))
                     pbc_dict[current_timestep] = list(pbc)
-                    logger.info("PBC (timestep #{}): {}".format(current_timestep, pbc))
+                    logger.debug("PBC (timestep #{}): {}".format(current_timestep, pbc))
                     # scan for atoms in next lines
                     scan_atoms = True
 
@@ -212,8 +212,8 @@ class Kabuto:
                 descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                logger.info("Atom: {}".format(id))
-                logger.info("Descriptors: {}".format(descriptors))
+                logger.debug("Atom: {}".format(id))
+                logger.debug("Descriptors: {}".format(descriptors))
 
         logger.info("Calculating of descriptors ended")
 
