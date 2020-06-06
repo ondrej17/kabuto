@@ -212,7 +212,8 @@ class Kabuto:
                 descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                logger.debug("Atom: {}".format(id))
+                # TODO: add a counter for atoms, so it would write to console atom n-th/#_of_all
+                logger.info("Atom: {}".format(id))
                 logger.debug("Descriptors: {}".format(descriptors))
 
         logger.info("Calculating of descriptors ended")
@@ -901,7 +902,7 @@ class Kabuto:
         r_x, r_y, r_z = pbc[0], pbc[1], pbc[2]
 
         max_id = max(map(int, list(atoms.keys()))) + 1  # 1 is for a case id = 0
-        logger.info("Maximal ID of atom: {}".format(max_id))
+        logger.debug("Maximal ID of atom: {}".format(max_id))
 
         # go through the dictionary 'atoms' and add 27 atoms to the atoms_with_pbc dictionary
         # why 27? The original one and 26 new atoms due to the pbc
