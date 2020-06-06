@@ -202,7 +202,9 @@ class Kabuto:
             logger.info("... processing timestep #{}".format(timestep))
             # prepare extended dictionary of atoms that contains also atoms due to PBC
             atoms_with_pbc = self.create_atoms_with_pbc(timesteps[timestep], pbc_dict[timestep])
-            for id in timesteps[timestep].keys():
+            num_of_atoms = len(timesteps[timestep].keys())
+
+            for counter, id in enumerate(timesteps[timestep].keys()):
                 # coordinates of current atom
                 x = timesteps[timestep][id][0]
                 y = timesteps[timestep][id][1]
@@ -212,8 +214,8 @@ class Kabuto:
                 descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                # TODO: add a counter for atoms, so it would write to console atom n-th/#_of_all
-                logger.info("Atom: {}".format(id))
+                logger.info("Atom {}/{}".format(counter+1, num_of_atoms))
+                logger.debug("Atom: {}".format(id))
                 logger.debug("Descriptors: {}".format(descriptors))
 
         logger.info("Calculating of descriptors ended")
@@ -464,7 +466,7 @@ class Kabuto:
                     timesteps[current_timestep] = {}
                     # store the pbc's in separate dictionary (timestep:list(pbc))
                     pbc_dict[current_timestep] = list(pbc)
-                    logger.info("PBC (timestep #{}): {}".format(current_timestep, pbc))
+                    logger.debug("PBC (timestep #{}): {}".format(current_timestep, pbc))
                     # scan for atoms in next lines
                     scan_atoms = True
 
@@ -495,7 +497,7 @@ class Kabuto:
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
                 logger.info("Atom: {}".format(id))
-                logger.info("Descriptors:".format(descriptors))
+                logger.debug("Descriptors:".format(descriptors))
 
         logger.info("Calculating of descriptors ended")
 
