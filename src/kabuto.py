@@ -107,17 +107,17 @@ class Kabuto:
                          "    list_nn\n"
                          "    create_nn <name_of_nn>\n"
                          "    train <name_of_nn>\n"
-                         "    predict <path_to_file_with_structure>\n".format(self.action))
+                         "    predict <path_to_file_with_structure>".format(self.action))
 
     def prepare(self, phase, file):
         """
         Documentation for 'prepare' function:
-            > prepares files for training from dump-file
-            > parses all atomic positions and calculates values of 14 functions for each atom
-            > for each timestamp creates corresponding file in 'dir_to_train' folder
-            > those file are then used to feed the NN (teaching of NN to identify given phase)
-            > usage:
-                prepare(phase, file)
+            * prepares files for training from dump-file
+            * parses all atomic positions and calculates descriptors for each atom
+            * for each timestep creates corresponding file in 'dir_to_train' folder
+            * those file are then used to feed the NN (teaching of NN to identify given phases)
+            * usage:
+                * prepare(phase, file)
         """
         logger.info("ACTION: prepare\n"
                     "preparing phase: {}\n"
@@ -126,10 +126,10 @@ class Kabuto:
         # processing of file ...
         with open(file, "r") as input_file:
 
-            # main dictionary that stores individual timesteps (timestep: atoms)
+            # main dictionary that stores individual timesteps {timestep: atoms}
             timesteps = {}
 
-            # scanning booleans (starts and stops scanning parts of input file)
+            # scanning booleans (starts and stops scanning particular parts of input file)
             scan_timestep = False
             scan_atoms = False
             scan_number_of_atoms = False
@@ -197,7 +197,7 @@ class Kabuto:
         # all atoms are loaded in dictionary
         logger.info("Calculating of descriptors begins")
 
-        # calculating the values of 14 functions for each atoms
+        # calculating of the descriptors for each atoms
         for timestep in timesteps.keys():
             logger.info("... processing timestep #{}".format(timestep))
             # prepare extended dictionary of atoms that contains also atoms due to PBC
@@ -212,7 +212,8 @@ class Kabuto:
                 descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                logger.debug("Descriptors: {}".format(descriptors))
+                logger.info("Atom: {}".format(id))
+                logger.info("Descriptors: {}".format(descriptors))
 
         logger.info("Calculating of descriptors ended")
 
@@ -264,17 +265,15 @@ class Kabuto:
     def list_nn(self):
         """
         Documentation for 'list_nn' function:
-            > lists all nn models saved in 'saved_nn' directory
-            > only nn from this list can be taught
-            > using self.create_nn, new nn can be added to this directory
-            > usage:
-                list_nn()
+            * lists all nn models saved in 'saved_nn' directory
+            * only nn from this list can be taught
+            * using self.create_nn, new nn can be added to this directory
+            * usage:
+                * list_nn()
         """
         logger.info("ACTION: list_nn\n"
                     "listing all saved neural networks ...")
 
-        # list all files in self.saved_nn_dir
-        # saved model has extension .h5
         # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
             logger.info("Directory \'{}\' already exists.".format(self.saved_nn_dir))
@@ -287,28 +286,29 @@ class Kabuto:
                 logger.info("Successfully created directory \'{}\'".format(self.saved_nn_dir))
 
         # list all files in saved_nn_dir and save it to models
+        # saved model has extension .h5
         models = []
         model_extension = ".h5"
-        for item in os.listdir(self.saved_nn_dir):
-            if os.path.isfile(os.path.join(self.saved_nn_dir, item)) and item[-3:] == model_extension:
-                # cut the extension out
-                models.append(item.replace(model_extension, ""))
+        for file in os.listdir(self.saved_nn_dir):
+            if os.path.isfile(os.path.join(self.saved_nn_dir, file)) and file[-3:] == model_extension:
+                # cut the extension out and add the name of NN to the list
+                models.append(file.replace(model_extension, ""))
 
         # print models out
-        logger.info("Listing all saved neural networks")
-        self.print_nn_models(models)
+        string_of_models = self.models_to_string(models)
+        logger.info("Listing all saved neural networks:\n{}".format(string_of_models))
         logger.info("Listing ended")
 
     def create_nn(self, name):
         """
         Documentation for 'create_nn' function:
-            > creates a new model in 'saved_nn' directory
-            > it is a raw neural network, no teaching yet
-            > usage:
-                create_nn(name)
+            * creates a new neural network model in 'saved_nn' directory
+            * it is a raw neural network, no teaching yet
+            * usage:
+                * create_nn(name)
         """
         logger.info("ACTION: create_nn\n"
-                    "creating neural network \'{}\' ...".format(name))
+                    "creating neural network \'{}\'".format(name))
 
         # create saved_nn_dir for saving models of NN (if it does not exist)
         if os.path.isdir(self.saved_nn_dir):
@@ -341,10 +341,11 @@ class Kabuto:
     def train(self, name):
         """
         Documentation for 'train' function:
-            > ...
-            > ...
-            > usage:
-                train(name)
+            * trains given neural network on all files in 'dir_to_train' folder
+            * these files were prepared by 'prepare' function
+            * after training, all trained file are moved to the 'dir_trained' folder
+            * usage:
+                * train(name)
         """
         logger.info("ACTION: train\n"
                     "\'{}\' is training from \'{}\' directory".format(name, self.to_train_dir))
@@ -396,8 +397,9 @@ class Kabuto:
 
     def predict(self, name, filename):
         """
-        predicts the global structure at each timestep that is in given file
-            > returns a dictionary {phase:percentage}
+        Documentation for 'predict' function:
+            * predicts the global structure at each timestep that is in given file
+            * main result is a dictionary {phase:percentage}, which is stored in 'result' folder
         """
         logger.info("ACTION: predict\n"
                     "predicting ...")
@@ -478,7 +480,7 @@ class Kabuto:
 
         # calculating the descriptors for each atoms
         for timestep in timesteps.keys():
-            logger.debug("... processing timestep #{}".format(timestep))
+            logger.info("... processing timestep #{}".format(timestep))
             # prepare extended dictionary of atoms that contains also atoms due to PBC
             atoms_with_pbc = self.create_atoms_with_pbc(timesteps[timestep], pbc_dict[timestep])
             for id in timesteps[timestep].keys():
@@ -491,7 +493,8 @@ class Kabuto:
                 descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
                 # add descriptors to the dictionary
                 timesteps[timestep][id][3] = descriptors
-                logger.debug("... ... Descriptors:".format(descriptors))
+                logger.info("Atom: {}".format(id))
+                logger.info("Descriptors:".format(descriptors))
 
         logger.info("Calculating of descriptors ended")
 
@@ -505,7 +508,7 @@ class Kabuto:
             json.dump(pbc_dict, json_file)
             logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
-        # save timesteps to separate files in 'dir_to_predict' to_predict_dir ---?
+        # save timesteps to separate files in 'dir_to_predict' folder
         # create to_predict_dir for saving timesteps (if it does not exist)
         if os.path.isdir(self.to_predict_dir):
             logger.info("Directory {} already exists.".format(self.to_predict_dir))
@@ -536,7 +539,7 @@ class Kabuto:
                     file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
-        logger.info("All timesteps were saved in \'{}\' folder".format(self.to_predict_dir))
+        logger.info("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
 
         # check whether the name is in saved_nn directory
         if os.path.isdir(self.saved_nn_dir):
@@ -560,7 +563,7 @@ class Kabuto:
         if name in models:
             for root, directories, files in os.walk(self.to_predict_dir):
 
-                # for each file in 'dir_to_predict' directory do this
+                # for each file in 'dir_to_predict' folder do:
                 for filename in sorted(files):
 
                     # prepare two lists, one with descriptors, second one with None
@@ -575,26 +578,26 @@ class Kabuto:
 
                     # let the NN predict something
                     # output is vector q (local structure) for each atom in file at that timestep
-                    #   i.e. a numpy.ndarray [num_atoms, num_phases]
+                    # i.e. a numpy.ndarray [num_atoms, num_phases]
                     prediction = self.nn.predict(input_array)
 
                     # I have a prediction!
-                    logger.debug("... prediction for file \'{}\'\n{}".format(filename, prediction))
+                    logger.info("prediction for file \'{}\'\n{}".format(filename, prediction))
 
-                    # calculate the vector_Q (global structure)
+                    # calculate the vector_Q (global structure) from vector_q (local structures)
                     vector_big_q = self.calculate_vector_big_q(prediction)
 
                     # I have vector Q that has information about global structure at given timestep
-                    logger.debug("... Q = {}".format(vector_big_q))
+                    logger.debug("Q = {}".format(vector_big_q))
 
-                    # create dictionary [phase:percentage]
+                    # add another timestep to results [phase:percentage]
                     global_structure_dict[timestep] = self.create_dict_phase_percentage(vector_big_q)
 
-            # move all files from 'prepare_to_predicting' dir to 'dir_predicted' dir
+            # move all files from 'dir_to_predict' folder to 'dir_predicted' folder
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
 
             # print result (global structure info)
-            logger.info("\nRESULT:\n{}".format(global_structure_dict))
+            logger.info("RESULT:\n{}".format(global_structure_dict))
 
             # save results to 'results' dir
             self.save_results(global_structure_dict)
@@ -608,7 +611,8 @@ class Kabuto:
     @staticmethod
     def test():
         """
-        a method for the testing of the features
+        Documentation for 'test' function:
+            * a method for the testing of the features
         """
         logger.info("ACTION: test\n"
                     "Entering TEST mode. Object KABUTO created. ...")
@@ -630,11 +634,11 @@ class Kabuto:
 
     def prepare_arrays(self, directory=None, filename=None):
         """
-        prepares two arrays, input data, either from all files in 'directory' or from a file 'directory + filename'
+        * prepares two arrays, input data, either from all files in 'directory' or from a file 'directory + filename'
         * first array contains arrays of descriptors
-        * second layer contains arrays of 1 and 0s
+        * second array contains arrays of 1 and 0s
             * position of 1 is determined by phase
-            * call function create_output_vector(phase)
+            * calls function create_output_vector(phase)
         """
 
         if filename is None and directory is not None:
@@ -721,8 +725,8 @@ class Kabuto:
     def create_output_vector(self, phase):
         """
         creates an output vector for neural network
-            > it is a array of 0s and 1
-            > 1 is at the position of given phase
+            * it is a array of 0s and 1
+            * 1 is at the position of given phase
         """
 
         if phase not in self.phases_available.keys():
@@ -739,14 +743,14 @@ class Kabuto:
             logger.error("Problem with available_phases attribute in Kabuto class!")
             return None
 
-        logger.debug("vector_q: {}".format(vector_q))
+        logger.info("vector_q: {}".format(vector_q))
         return vector_q
 
     def load_available_phases(self):
         """
         loads a list of available phases from a file self.phase_file into the dictionary
-            > comments (lines beginning with '#') are allowed
-            > new line, new phase
+            * comments (lines beginning with '#') are allowed
+            * new line, new phase
         """
         phases_dict = dict()
         index = 0
@@ -768,11 +772,12 @@ class Kabuto:
     def calculate_vector_big_q(self, prediction):
         """
         returns the vector Q, that contains information about global structure
-            len(Q) = self.number_of_phases
-            each component is an average percentage of particular phase in all system
+            * len(Q) = self.number_of_phases
+            * each component is an average percentage of particular phase in all system
         """
         vector = [0] * self.number_of_phases
         n = len(prediction.tolist())
+        logger.info("Number of atoms in prediction: {}".format(n))
         for i, q_i in enumerate(prediction.tolist()):  # rows
             for j, q_ij in enumerate(q_i):  # columns
                 vector[j] += q_ij
@@ -816,11 +821,11 @@ class Kabuto:
                     "******************************************************\n")
 
     @staticmethod
-    def print_nn_models(models):
+    def models_to_string(models):
         to_print = ""
         for model in models:
             to_print += "... {}\n".format(model)
-        logger.info("\n{}".format(to_print.strip()))
+        return to_print.strip()
 
     @staticmethod
     def move_files_from_to(from_dir, to_dir):
@@ -843,7 +848,7 @@ class Kabuto:
         for filename in files:
             shutil.move(os.path.join(from_dir, filename), to_dir)
 
-        logger.info("Files from \'{}\' successfully moved to \'{}\'".format(from_dir, to_dir))
+        logger.info("Files successfully moved from \'{}\' to \'{}\'".format(from_dir, to_dir))
 
     @staticmethod
     def dict_to_string(dictionary):
@@ -858,8 +863,8 @@ class Kabuto:
     def save_results(self, global_structure_dict):
         """
         saves results (dictionary [timestep:[phase:percentage]]) to file in format:
-            # timestep phase1 phase2 .... phaseN
-            ...
+            * # timestep phase1 phase2 .... phaseN
+            * ...
         """
         # create specific filename
         filename = datetime.datetime.today().strftime("results_%Y_%m_%d_%H_%M_%S") + ".txt"
@@ -887,10 +892,10 @@ class Kabuto:
     def create_atoms_with_pbc(atoms, pbc):
         """
         returns a dictionary that contains original atoms and their copies to each direction
-            > it is a way to fulfill PBC (periodic boundary condition)
-            > pbc parameter is list of three numbers, period in x, y and z direction
-            > the added atoms should have different id than the original atoms
-            > atoms is dictionary {id:[x, y, z, None]}, where None is reserved place for Descriptors
+            * it is a way to fulfill PBC (periodic boundary condition)
+            * pbc parameter is list of three numbers, period in x, y and z direction
+            * the added atoms should have different id than the original atoms
+            * atoms is dictionary {id:[x, y, z, None]}, where None is reserved place for Descriptors
         """
         atoms_with_pbc = dict()
         r_x, r_y, r_z = pbc[0], pbc[1], pbc[2]

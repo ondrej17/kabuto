@@ -8,4 +8,5 @@ src/dir_to_predict
 src/dir_to_train
 src/dir_trained
 src/results
+example
 kabuto.log
