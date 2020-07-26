@@ -77,6 +77,7 @@ The example run and simulation are located in `example` folder. *(to be added)*
      * `kabuto.py`
      * `kabuto.log`
  * `example`
+ * `scripts`
      
  ## Design of the NNs
 * input layer

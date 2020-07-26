@@ -1,0 +1,10 @@
+[2020-07-26 22:47:01,877]:INFO:kabuto: Saving timesteps to separate file begins
+[2020-07-26 22:47:01,877]:INFO:kabuto: ... saving timestep #0 to file dir_to_train/2020_07_26_22_47_01_0.txt
+Traceback (most recent call last):
+  File "kabuto.py", line 999, in <module>
+    Kabuto(action=sys.argv[1], option1=sys.argv[2], option2=sys.argv[3])
+  File "kabuto.py", line 70, in __init__
+    self.prepare(self.option1, self.option2)
+  File "kabuto.py", line 247, in prepare
+    file.write(str(id) + ' ' + ' '.join(map(str, self.timesteps[timestep][id][3])) + '\n')
+TypeError: 'NoneType' object is not iterable

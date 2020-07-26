@@ -201,7 +201,9 @@ class Kabuto:
         logger.info("Calculating of descriptors begins")
         number_of_cpu = mp.cpu_count() - 2
         with mp.Pool(number_of_cpu) as pool:
-            pool.map(self.parallel_descriptors, self.timesteps.keys())
+            result = pool.map(self.parallel_descriptors, self.timesteps.keys())
+            for timestep, atoms in result:
+                self.timesteps[timestep] = atoms
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
@@ -229,14 +231,13 @@ class Kabuto:
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
 
-        logger.info("Saving timesteps to separate file begins")
+        logger.info("Saving timesteps to separate files begins")
 
         for timestep in self.timesteps.keys():
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
             path_to_file = os.path.join(self.to_train_dir, filename)
             logger.info("... saving timestep #{} to file {}".format(timestep, path_to_file))
-
             # open file
             with open(path_to_file, 'w') as file:
                 # print informative header
@@ -468,7 +469,9 @@ class Kabuto:
         logger.info("Calculating of descriptors begins")
         number_of_cpu = mp.cpu_count() - 2
         with mp.Pool(number_of_cpu) as pool:
-            pool.map(self.parallel_descriptors, self.timesteps.keys())
+            result = pool.map(self.parallel_descriptors, self.timesteps.keys())
+            for timestep, atoms in result:
+                self.timesteps[timestep] = atoms
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
@@ -615,12 +618,14 @@ class Kabuto:
         * calculates descriptors for each atom in given timestep
         * each timestep is assigned to one of the specified number of processes
         * 'timestep' is an integer from self.timesteps.keys() list
+        * returns a dictionary in form: {id, [x, y, z, descriptors]}
         """
         logger.info("... processing timestep #{}".format(timestep))
         # prepare extended dictionary of atoms that contains also atoms due to PBC
         atoms_with_pbc = self.create_atoms_with_pbc(self.timesteps[timestep], self.pbc_dict[timestep])
         num_of_atoms = len(self.timesteps[timestep].keys())
 
+        result = {}
         for counter, id in enumerate(self.timesteps[timestep].keys()):
             # coordinates of current atom
             x = self.timesteps[timestep][id][0]
@@ -630,10 +635,10 @@ class Kabuto:
             # calculate descriptors for current atom
             descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
             # add descriptors to the dictionary
-            self.timesteps[timestep][id][3] = descriptors
-            logger.debug("Atom {}/{}".format(counter + 1, num_of_atoms))
+            result[id] = [x, y, z, descriptors]
+            logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
             logger.debug("Atom: {}".format(id))
-            logger.debug("Descriptors: {}".format(descriptors))
+        return timestep, result
 
     def prepare_arrays(self, directory=None, filename=None):
         """

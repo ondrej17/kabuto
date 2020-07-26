@@ -9,14 +9,14 @@ logger = logging.getLogger('kabuto.descriptors')
 class Descriptors:
     """
     class Descriptors
-        > it can be changed to calculate whatever descriptors you choose, but
-        > the function 'get_descriptors()' must return an array of floats
-        > number of descriptors affects the neural network (# of its input nodes), so be careful
-        > the function 'info_header' returns a header for the output file that contains descriptors
-        > ... it must be changed adequately
-        > class attribute 'number_of_descriptors' holds the number of descriptors
-        > r_min and r_max are different for Steinhardt parameters and symmetry functions!
-        > 'atoms_with_pbc' holds all atoms and their copies in all direction due to the PBC
+        * it can be changed to calculate whatever descriptors you choose, but
+        * the function 'get_descriptors()' must return an array of floats
+        * number of descriptors affects the neural network (# of its input nodes), so be careful
+        * the function 'info_header' returns a header for the output file that contains descriptors
+        * ... it must be changed adequately
+        * class attribute 'number_of_descriptors' holds the number of descriptors
+        * r_min and r_max are different for Steinhardt parameters and symmetry functions!
+        * 'atoms_with_pbc' holds all atoms and their copies in all direction due to the PBC
     """
     # important class attribute; update it, when descriptors are changed
     number_of_descriptors = 14
