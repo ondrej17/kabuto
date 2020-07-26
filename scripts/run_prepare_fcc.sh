@@ -1,4 +1,5 @@
 #!/bin/bash
+source /home/bily/anaconda3/bin/activate tf
 # prepare fcc phase from files in folder: ~/documents/diplomovka/molybden_fcc/
 
 python3 ../src/kabuto.py prepare fcc ~/documents/diplomovka/molybden_fcc/dump_Mo_fcc_1.out

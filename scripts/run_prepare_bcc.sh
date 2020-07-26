@@ -1,4 +1,5 @@
 #!/bin/bash
+source /home/bily/anaconda3/bin/activate tf
 # prepare bcc phase from files in folder: ~/documents/diplomovka/molybden_bcc/
 
 #python3 ../src/kabuto.py prepare bcc ~/documents/diplomovka/molybden_bcc/dump_Mo_bcc_1.out
