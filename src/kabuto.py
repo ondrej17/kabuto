@@ -110,7 +110,7 @@ class Kabuto:
                          "    train <name_of_nn>\n"
                          "    predict <path_to_file_with_structure>".format(self.action))
 
-    def prepare(self, phase, file):
+    def prepare(self, phase, filename):
         """
         Documentation for 'prepare' function:
             * prepares files for training from dump-file
@@ -122,10 +122,10 @@ class Kabuto:
         """
         logger.info("ACTION: prepare\n"
                     "preparing phase: {}\n"
-                    "preparing from file: {}".format(phase, file))
+                    "preparing from file: {}".format(phase, filename))
 
         # processing of file ...
-        with open(file, "r") as input_file:
+        with open(filename, "r") as input_file:
 
             # main dictionary that stores individual timesteps {timestep: atoms}
             self.timesteps = {}
@@ -199,8 +199,8 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        number_of_cpu = mp.cpu_count()
-        with mp.Pool(number_of_cpu - 2) as pool:
+        number_of_cpu = mp.cpu_count() - 2
+        with mp.Pool(number_of_cpu) as pool:
             pool.map(self.parallel_descriptors, self.timesteps.keys())
         logger.info("Calculating of descriptors ended")
 
@@ -389,13 +389,13 @@ class Kabuto:
             * main result is a dictionary {phase:percentage}, which is stored in 'result' folder
         """
         logger.info("ACTION: predict\n"
-                    "predicting ...")
+                    "predicting from file: {}".format(filename))
 
         # processing of file ...
         with open(filename, "r") as input_file:
 
             # main dictionary that stores individual timesteps (timestep: atoms)
-            timesteps = {}
+            self.timesteps = {}
 
             # scanning booleans (starts and stops scanning parts of input file)
             scan_timestep = False
@@ -420,7 +420,7 @@ class Kabuto:
 
                 elif scan_timestep:
                     logger.debug("Timestep: {}".format(repr(line)))
-                    timesteps[line] = {}
+                    self.timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
 
@@ -447,7 +447,7 @@ class Kabuto:
                         scan_pbc = False
 
                 elif line == "ITEM: ATOMS id type xs ys zs":
-                    timesteps[current_timestep] = {}
+                    self.timesteps[current_timestep] = {}
                     # store the pbc's in separate dictionary (timestep:list(pbc))
                     pbc_dict[current_timestep] = list(pbc)
                     logger.debug("PBC (timestep #{}): {}".format(current_timestep, pbc))
@@ -457,40 +457,23 @@ class Kabuto:
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
 
                 else:
                     # skipping useless lines
                     pass
         # all atoms are loaded in dictionary
+
+        # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-
-        # calculating the descriptors for each atoms
-        for timestep in timesteps.keys():
-            logger.info("... processing timestep #{}".format(timestep))
-            # prepare extended dictionary of atoms that contains also atoms due to PBC
-            atoms_with_pbc = self.create_atoms_with_pbc(timesteps[timestep], pbc_dict[timestep])
-            num_of_atoms = len(timesteps[timestep].keys())
-
-            for counter, id in enumerate(timesteps[timestep].keys()):
-                # coordinates of current atom
-                x = timesteps[timestep][id][0]
-                y = timesteps[timestep][id][1]
-                z = timesteps[timestep][id][2]
-                logger.debug("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
-                # calculate descriptors for current atom
-                descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
-                # add descriptors to the dictionary
-                timesteps[timestep][id][3] = descriptors
-                logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
-                logger.debug("Atom: {}".format(id))
-                logger.debug("Descriptors:".format(descriptors))
-
+        number_of_cpu = mp.cpu_count() - 2
+        with mp.Pool(number_of_cpu) as pool:
+            pool.map(self.parallel_descriptors, self.timesteps.keys())
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
-            json.dump(timesteps, json_file)
+            json.dump(self.timesteps, json_file)
             logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
         # save dictionary to json file
@@ -515,7 +498,7 @@ class Kabuto:
 
         logger.info("Saving timesteps to separate file begins")
 
-        for timestep in timesteps.keys():
+        for timestep in self.timesteps.keys():
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
             path_to_file = os.path.join(self.to_predict_dir, filename)
@@ -527,8 +510,8 @@ class Kabuto:
                 file.write(Descriptors.info_header(timestep, phase=None))
 
                 # print descriptors for each atom to file
-                for id in timesteps[timestep].keys():
-                    file.write(str(id) + ' ' + ' '.join(map(str, timesteps[timestep][id][3])) + '\n')
+                for id in self.timesteps[timestep].keys():
+                    file.write(str(id) + ' ' + ' '.join(map(str, self.timesteps[timestep][id][3])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
         logger.info("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
