@@ -636,7 +636,7 @@ class Kabuto:
             descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
             # add descriptors to the dictionary
             result[id] = [x, y, z, descriptors]
-            logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
+            logger.debug("Atom {}/{}".format(counter + 1, num_of_atoms))
             logger.debug("Atom: {}".format(id))
         return timestep, result
 
