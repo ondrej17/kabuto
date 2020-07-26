@@ -610,6 +610,12 @@ class Kabuto:
         # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
 
     def parallel_descriptors(self, timestep):
+        """
+        * this method is called in mp.map function when using mp.Pool object to speed up calculation
+        * calculates descriptors for each atom in given timestep
+        * each timestep is assigned to one of the specified number of processes
+        * 'timestep' is an integer from self.timesteps.keys() list
+        """
         logger.info("... processing timestep #{}".format(timestep))
         # prepare extended dictionary of atoms that contains also atoms due to PBC
         atoms_with_pbc = self.create_atoms_with_pbc(self.timesteps[timestep], self.pbc_dict[timestep])
