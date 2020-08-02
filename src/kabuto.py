@@ -11,8 +11,11 @@ import multiprocessing as mp
 from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
 
+# set-up the path to kabuto script
+path_to_kabuto = os.path.join(*(sys.argv[0].split(os.path.sep)[:-1]))
+
 # set-up the logger
-logging.config.fileConfig(os.path.join('config', 'logger.ini'))
+logging.config.fileConfig(os.path.join(path_to_kabuto, "config", "logger.ini"))
 logger = logging.getLogger('kabuto')
 
 
@@ -31,16 +34,16 @@ class Kabuto:
         self.option2 = option2
 
         # directory names that will be used
-        self.to_train_dir = 'dir_to_train'
-        self.trained_dir = 'dir_trained'
-        self.to_predict_dir = "dir_to_predict"
-        self.predicted_dir = "dir_predicted"
-        self.config_dir = 'config'
-        self.saved_nn_dir = 'saved_nn'
-        self.result_dir = "results"
+        self.to_train_dir = os.path.join(path_to_kabuto, 'dir_to_train')
+        self.trained_dir = os.path.join(path_to_kabuto, 'dir_trained')
+        self.to_predict_dir = os.path.join(path_to_kabuto, "dir_to_predict")
+        self.predicted_dir = os.path.join(path_to_kabuto, "dir_predicted")
+        self.config_dir = os.path.join(path_to_kabuto, 'config')
+        self.saved_nn_dir = os.path.join(path_to_kabuto, 'saved_nn')
+        self.result_dir = os.path.join(path_to_kabuto, "results")
 
         # file with phases that will be identified
-        self.phase_file = os.path.join("config", "phases_to_learn.txt")
+        self.phase_file = os.path.join(self.config_dir, "phases_to_learn.txt")
 
         # these parameters are specific for each nn, change it in your case
         # dictionary of phases and positions in vector_q
@@ -173,15 +176,15 @@ class Kabuto:
                 elif scan_pbc:
                     logger.debug("PBC: {}".format(repr(line)))
                     min_value, max_value = tuple(line.split())
-                    if number_of_pbc <= 2:  # load another pbc's
+                    if number_of_pbc <= 2:  # load another pbc
                         pbc[number_of_pbc] = float(max_value) - float(min_value)
                         number_of_pbc += 1
-                    if number_of_pbc == 3:  # end loading pbc's
+                    if number_of_pbc == 3:  # end loading pbc
                         scan_pbc = False
 
                 elif line == "ITEM: ATOMS id type xs ys zs":
                     self.timesteps[current_timestep] = {}
-                    # store the pbc's in separate dictionary (timestep:list(pbc))
+                    # store the pbc in separate dictionary (timestep:list(pbc))
                     self.pbc_dict[current_timestep] = list(pbc)
                     logger.debug("PBC (timestep #{}): {}".format(current_timestep, pbc))
                     # scan for atoms in next lines
@@ -408,7 +411,7 @@ class Kabuto:
             current_timestep = None
             number_of_pbc = 0
             pbc = [None, None, None]
-            pbc_dict = dict()
+            self.pbc_dict = dict()
 
             for raw_line in input_file:
                 line = raw_line.strip()
@@ -441,16 +444,16 @@ class Kabuto:
                 elif scan_pbc:
                     logger.debug("PBC: {}".format(repr(line)))
                     min_value, max_value = tuple(line.split())
-                    if number_of_pbc <= 2:  # load another pbc's
+                    if number_of_pbc <= 2:  # load another pbc
                         pbc[number_of_pbc] = float(max_value) - float(min_value)
                         number_of_pbc += 1
-                    if number_of_pbc == 3:  # end loading pbc's
+                    if number_of_pbc == 3:  # end loading pbc
                         scan_pbc = False
 
                 elif line == "ITEM: ATOMS id type xs ys zs":
                     self.timesteps[current_timestep] = {}
-                    # store the pbc's in separate dictionary (timestep:list(pbc))
-                    pbc_dict[current_timestep] = list(pbc)
+                    # store the pbc in separate dictionary (timestep:list(pbc))
+                    self.pbc_dict[current_timestep] = list(pbc)
                     logger.debug("PBC (timestep #{}): {}".format(current_timestep, pbc))
                     # scan for atoms in next lines
                     scan_atoms = True
@@ -481,7 +484,7 @@ class Kabuto:
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
-            json.dump(pbc_dict, json_file)
+            json.dump(self.pbc_dict, json_file)
             logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
         # save timesteps to separate files in 'dir_to_predict' folder
