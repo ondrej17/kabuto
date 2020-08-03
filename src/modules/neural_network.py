@@ -25,7 +25,7 @@ class NeuralNetwork:
         logger.debug("Second_array:", second_array)
         # TODO: to what should the number of epochs be equal?
         logger.info("Training begins!")
-        self.model.fit(first_array, second_array, epochs=500, verbose=True)
+        self.model.fit(first_array, second_array, epochs=20, verbose=True)
         logger.info("Training finished!")
 
     def predict(self, input_array):
@@ -69,11 +69,8 @@ class NeuralNetwork:
         self.model = tf.keras.Sequential(layers)
 
         # compile the model
-        # self.model.compile(loss='mean_squared_error',
-        #                   optimizer=tf.keras.optimizers.Adam(0.1))
-        self.model.compile(loss='categorical_crossentropy',
-                           optimizer='SGD',
-                           metrics=['accuracy'])
+        self.model.compile(loss='mean_squared_error',
+                           optimizer=tf.keras.optimizers.Adam(0.1))
         logger.info("Model \'{}\' created.".format(self.name))
 
     def create_layers(self):
