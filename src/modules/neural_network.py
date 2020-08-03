@@ -13,7 +13,6 @@ class NeuralNetwork:
         """
         self.name = name
         self.model = None
-        self.models_dir = "saved_nn"
         self.model_extension = ".h5"
         self.number_of_phases = None
         self.number_of_descriptors = None
@@ -25,8 +24,9 @@ class NeuralNetwork:
         logger.debug("First_array:", first_array)
         logger.debug("Second_array:", second_array)
         # TODO: to what should the number of epochs be equal?
+        logger.info("Training begins!")
         self.model.fit(first_array, second_array, epochs=500, verbose=True)
-        logger.info("Finished training!")
+        logger.info("Training finished!")
 
     def predict(self, input_array):
         """
@@ -36,19 +36,22 @@ class NeuralNetwork:
         """
         return self.model.predict(input_array)
 
-    def save_model(self):
-        path_to_model = os.path.join(self.models_dir, self.name + self.model_extension)
+    def save_model(self, path):
+        """
+        saves model to 'path' folder
+        """
+        path_to_model = os.path.join(path, self.name + self.model_extension)
         if self.model is not None:
             self.model.save(path_to_model)
             logger.info("Model \'{}\' saved to file: {}".format(self.name, path_to_model))
         else:
             logger.error("Model \'{}\' was not saved.".format(self.name))
 
-    def load_model(self):
+    def load_model(self, path):
         """
-        loads model from 'self.models_dir' to self.model and compiles it
+        loads model from 'path' to self.model and compiles it
         """
-        path_to_model = os.path.join(self.models_dir, self.name + self.model_extension)
+        path_to_model = os.path.join(path, self.name + self.model_extension)
         self.model = tf.keras.models.load_model(path_to_model, compile=True)
         logger.info("NN \'{}\' is loaded.".format(self.name))
 
@@ -66,8 +69,11 @@ class NeuralNetwork:
         self.model = tf.keras.Sequential(layers)
 
         # compile the model
-        self.model.compile(loss='mean_squared_error',
-                           optimizer=tf.keras.optimizers.Adam(0.1))
+        # self.model.compile(loss='mean_squared_error',
+        #                   optimizer=tf.keras.optimizers.Adam(0.1))
+        self.model.compile(loss='categorical_crossentropy',
+                           optimizer='SGD',
+                           metrics=['accuracy'])
         logger.info("Model \'{}\' created.".format(self.name))
 
     def create_layers(self):

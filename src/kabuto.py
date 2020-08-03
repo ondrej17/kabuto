@@ -330,7 +330,7 @@ class Kabuto:
             # else, create a new neural network and save its model to <name>.h5 file in 'saved_nn' directory
             nn = NeuralNetwork(name)
             nn.create_model(self.number_of_descriptors, self.number_of_phases)
-            nn.save_model()
+            nn.save_model(self.saved_nn_dir)
 
     def train(self, name):
         """
@@ -373,13 +373,13 @@ class Kabuto:
 
             # prepare NN
             self.nn = NeuralNetwork(name)
-            self.nn.load_model()
+            self.nn.load_model(self.saved_nn_dir)
 
             # let the NN train
             self.nn.train(first_array, second_array)
 
             # at the end, save the model
-            self.nn.save_model()
+            self.nn.save_model(self.saved_nn_dir)
 
             # move all files from 'prepare_to_training' dir to 'dir_trained' dir
             self.move_files_from_to(self.to_train_dir, self.trained_dir)
@@ -559,7 +559,7 @@ class Kabuto:
 
                     # prepare NN, load model
                     self.nn = NeuralNetwork(name)
-                    self.nn.load_model()
+                    self.nn.load_model(self.saved_nn_dir)
 
                     # let the NN predict something
                     # output is vector q (local structure) for each atom in file at that timestep
@@ -666,7 +666,7 @@ class Kabuto:
                 counter = 1
                 for filename in sorted(files):
                     # process each file
-                    logger.info("{}/{} ...  processing file: {}".format(counter, num_of_files, filename))
+                    logger.info("{}/{} ... processing file: {}".format(counter, num_of_files, filename))
                     counter += 1
                     output_vector = None
 
