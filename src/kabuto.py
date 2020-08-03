@@ -365,7 +365,6 @@ class Kabuto:
                 models.append(item.replace(model_extension, ""))
 
         if name in models:
-
             # prepare two lists, one with descriptors, second one with vector q_i
             first_array, second_array, timestep = self.prepare_arrays(self.to_train_dir)
             if first_array is None or second_array is None:
@@ -663,9 +662,12 @@ class Kabuto:
                 if not files:
                     logger.error("No files in \'{}\'".format(directory))
                     return None, None, None
+                num_of_files = len(files)
+                counter = 1
                 for filename in sorted(files):
                     # process each file
-                    logger.debug("... processing file: {}".format(filename))
+                    logger.info("{}/{} ...  processing file: {}".format(counter, num_of_files, filename))
+                    counter += 1
                     output_vector = None
 
                     with open(os.path.join(directory, filename)) as file:
@@ -757,7 +759,7 @@ class Kabuto:
             logger.error("Problem with available_phases attribute in Kabuto class!")
             return None
 
-        logger.info("vector_q: {}".format(vector_q))
+        logger.debug("vector_q: {}".format(vector_q))
         return vector_q
 
     def load_available_phases(self):
