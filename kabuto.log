@@ -1,0 +1,44 @@
+[2020-08-03 16:19:04,503]:INFO:kabuto: Command line arguments:
+src/kabuto.py
+[2020-08-03 16:19:04,503]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |     |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+Usage:
+    kabuto.py prepare <name_of_phase> <dump_file>
+    kabuto.py list_nn
+    kabuto.py create_nn <name_of_nn>
+    kabuto.py train <name_of_nn>
+    kabuto.py predict <name_of_nn> <dump.file>
+    kabuto.py test
+******************************************************
+
+[2020-08-03 16:19:24,712]:INFO:kabuto: Command line arguments:
+src/kabuto.py
+[2020-08-03 16:19:24,713]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |     |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+Usage:
+    kabuto.py prepare <name_of_phase> <dump_file>
+    kabuto.py list_nn
+    kabuto.py create_nn <name_of_nn>
+    kabuto.py train <name_of_nn>
+    kabuto.py predict <name_of_nn> <dump.file>
+    kabuto.py test
+******************************************************
+

@@ -12,9 +12,12 @@ from modules.descriptors import Descriptors
 from modules.neural_network import NeuralNetwork
 
 # set-up the path to kabuto script
-path_to_kabuto = os.path.join(*(sys.argv[0].split(os.path.sep)[:-1]))
+try:
+    path_to_kabuto = os.path.join(*(sys.argv[0].split(os.path.sep)[:-1]))
+except TypeError:
+    path_to_kabuto = ""
 
-# set-up the logger
+# set-up logger
 logging.config.fileConfig(os.path.join(path_to_kabuto, "config", "logger.ini"))
 logger = logging.getLogger('kabuto')
 
@@ -835,7 +838,7 @@ class Kabuto:
     def models_to_string(models):
         to_print = ""
         for model in models:
-            to_print += "... {}\n".format(model)
+            to_print += "-> {}\n".format(model)
         return to_print.strip()
 
     @staticmethod
