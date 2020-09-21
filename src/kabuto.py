@@ -13,6 +13,7 @@ from modules.neural_network import NeuralNetwork
 
 # set-up the path to kabuto script
 try:
+    # TODO: if program is called with absolute path, it misses '/' at the beginning of 'path_to_kabuto'
     path_to_kabuto = os.path.join(*(sys.argv[0].split(os.path.sep)[:-1]))
 except TypeError:
     path_to_kabuto = ""
@@ -47,6 +48,11 @@ class Kabuto:
 
         # file with phases that will be identified
         self.phase_file = os.path.join(self.config_dir, "phases_to_learn.txt")
+
+        # main dictionary that stores individual timesteps {timestep: atoms}
+        self.timesteps = {}
+        # dictionary of pbc values
+        self.pbc_dict = dict()
 
         # these parameters are specific for each nn, change it in your case
         # dictionary of phases and positions in vector_q
@@ -133,9 +139,6 @@ class Kabuto:
         # processing of file ...
         with open(filename, "r") as input_file:
 
-            # main dictionary that stores individual timesteps {timestep: atoms}
-            self.timesteps = {}
-
             # scanning booleans (starts and stops scanning particular parts of input file)
             scan_timestep = False
             scan_atoms = False
@@ -146,7 +149,6 @@ class Kabuto:
             current_timestep = None
             number_of_pbc = 0
             pbc = [None, None, None]
-            self.pbc_dict = dict()
 
             for raw_line in input_file:
                 line = raw_line.strip()
@@ -250,8 +252,8 @@ class Kabuto:
                 file.write(Descriptors.info_header(timestep, phase))
 
                 # print descriptors for each atom to file
-                for id in self.timesteps[timestep].keys():
-                    file.write(str(id) + ' ' + ' '.join(map(str, self.timesteps[timestep][id][3])) + '\n')
+                for atom_id in self.timesteps[timestep].keys():
+                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id][3])) + '\n')
 
         # all files are prepared in 'dir_to_train' folder
         logger.info("All timesteps were saved in \'{}\' folder".format(self.to_train_dir))
@@ -400,9 +402,6 @@ class Kabuto:
         # processing of file ...
         with open(filename, "r") as input_file:
 
-            # main dictionary that stores individual timesteps (timestep: atoms)
-            self.timesteps = {}
-
             # scanning booleans (starts and stops scanning parts of input file)
             scan_timestep = False
             scan_atoms = False
@@ -413,7 +412,6 @@ class Kabuto:
             current_timestep = None
             number_of_pbc = 0
             pbc = [None, None, None]
-            self.pbc_dict = dict()
 
             for raw_line in input_file:
                 line = raw_line.strip()
@@ -518,8 +516,8 @@ class Kabuto:
                 file.write(Descriptors.info_header(timestep, phase=None))
 
                 # print descriptors for each atom to file
-                for id in self.timesteps[timestep].keys():
-                    file.write(str(id) + ' ' + ' '.join(map(str, self.timesteps[timestep][id][3])) + '\n')
+                for atom_id in self.timesteps[timestep].keys():
+                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id][3])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
         logger.info("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
@@ -603,7 +601,7 @@ class Kabuto:
                     "Entering TEST mode. Object KABUTO created. ...")
 
         # test return values of functions in descriptors module
-        test_descriptors = Descriptors(id=1, x=0, y=0, z=0, atoms_with_pbc=dict())
+        test_descriptors = Descriptors(atom_id=1, x=0, y=0, z=0, all_atoms=dict(), pbc=[1, 1, 1])
         logger.info("symmetry function parameters dictionary:\n{}"
                     .format(test_descriptors.symmetry_functions_parameters))
         logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
@@ -626,23 +624,24 @@ class Kabuto:
         * returns a dictionary in form: {id, [x, y, z, descriptors]}
         """
         logger.info("... processing timestep #{}".format(timestep))
-        # prepare extended dictionary of atoms that contains also atoms due to PBC
-        atoms_with_pbc = self.create_atoms_with_pbc(self.timesteps[timestep], self.pbc_dict[timestep])
+
         num_of_atoms = len(self.timesteps[timestep].keys())
 
         result = {}
-        for counter, id in enumerate(self.timesteps[timestep].keys()):
+        for counter, atom_id in enumerate(self.timesteps[timestep].keys()):
             # coordinates of current atom
-            x = self.timesteps[timestep][id][0]
-            y = self.timesteps[timestep][id][1]
-            z = self.timesteps[timestep][id][2]
-            logger.debug("... ... id: {}: [{}, {}, {}]".format(id, x, y, z))
+            x = self.timesteps[timestep][atom_id][0]
+            y = self.timesteps[timestep][atom_id][1]
+            z = self.timesteps[timestep][atom_id][2]
+            logger.debug("... ... id: {}: [{}, {}, {}]".format(atom_id, x, y, z))
             # calculate descriptors for current atom
-            descriptors = Descriptors(id, x, y, z, atoms_with_pbc).get_descriptors()
+            descriptors = Descriptors(atom_id, x, y, z,
+                                      self.timesteps[timestep],
+                                      self.pbc_dict[timestep]).get_descriptors()
             # add descriptors to the dictionary
-            result[id] = [x, y, z, descriptors]
-            logger.debug("Atom {}/{}".format(counter + 1, num_of_atoms))
-            logger.debug("Atom: {}".format(id))
+            result[atom_id] = [x, y, z, descriptors]
+            logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
+            logger.debug("Atom: {}".format(atom_id))
         return timestep, result
 
     def prepare_arrays(self, directory=None, filename=None):
@@ -916,49 +915,49 @@ class Kabuto:
         atoms_with_pbc = dict()
         r_x, r_y, r_z = pbc[0], pbc[1], pbc[2]
 
-        max_id = max(map(int, list(atoms.keys()))) + 1  # 1 is for a case id = 0
-        logger.debug("Maximal ID of atom: {}".format(max_id))
+        max_atom_id = max(map(int, list(atoms.keys()))) + 1  # 1 is for a case id = 0
+        logger.debug("Maximal ID of atom: {}".format(max_atom_id))
 
         # go through the dictionary 'atoms' and add 27 atoms to the atoms_with_pbc dictionary
         # why 27? The original one and 26 new atoms due to the pbc
-        for id, atom in atoms.items():
+        for atom_id, atom in atoms.items():
             x, y, z = atom[0], atom[1], atom[2]
 
             # add the original atom
-            atoms_with_pbc[id] = [x, y, z, None]
+            atoms_with_pbc[atom_id] = [x, y, z, None]
 
             # add the other 26 atoms with different id number
-            atoms_with_pbc[id + 1 * max_id] = [x + r_x, y, z, None]
-            atoms_with_pbc[id + 2 * max_id] = [x, y + r_y, z, None]
-            atoms_with_pbc[id + 3 * max_id] = [x, y, z + r_z, None]
+            atoms_with_pbc[atom_id + 1 * max_atom_id] = [x + r_x, y, z, None]
+            atoms_with_pbc[atom_id + 2 * max_atom_id] = [x, y + r_y, z, None]
+            atoms_with_pbc[atom_id + 3 * max_atom_id] = [x, y, z + r_z, None]
 
-            atoms_with_pbc[id + 4 * max_id] = [x - r_x, y, z, None]
-            atoms_with_pbc[id + 5 * max_id] = [x, y - r_y, z, None]
-            atoms_with_pbc[id + 6 * max_id] = [x, y, z - r_z, None]
+            atoms_with_pbc[atom_id + 4 * max_atom_id] = [x - r_x, y, z, None]
+            atoms_with_pbc[atom_id + 5 * max_atom_id] = [x, y - r_y, z, None]
+            atoms_with_pbc[atom_id + 6 * max_atom_id] = [x, y, z - r_z, None]
 
-            atoms_with_pbc[id + 7 * max_id] = [x + r_x, y + r_y, z, None]
-            atoms_with_pbc[id + 8 * max_id] = [x + r_x, y - r_y, z, None]
-            atoms_with_pbc[id + 9 * max_id] = [x - r_x, y + r_y, z, None]
-            atoms_with_pbc[id + 10 * max_id] = [x - r_x, y - r_y, z, None]
+            atoms_with_pbc[atom_id + 7 * max_atom_id] = [x + r_x, y + r_y, z, None]
+            atoms_with_pbc[atom_id + 8 * max_atom_id] = [x + r_x, y - r_y, z, None]
+            atoms_with_pbc[atom_id + 9 * max_atom_id] = [x - r_x, y + r_y, z, None]
+            atoms_with_pbc[atom_id + 10 * max_atom_id] = [x - r_x, y - r_y, z, None]
 
-            atoms_with_pbc[id + 11 * max_id] = [x + r_x, y, z + r_z, None]
-            atoms_with_pbc[id + 12 * max_id] = [x + r_x, y, z - r_z, None]
-            atoms_with_pbc[id + 13 * max_id] = [x - r_x, y, z + r_z, None]
-            atoms_with_pbc[id + 14 * max_id] = [x - r_x, y, z - r_z, None]
+            atoms_with_pbc[atom_id + 11 * max_atom_id] = [x + r_x, y, z + r_z, None]
+            atoms_with_pbc[atom_id + 12 * max_atom_id] = [x + r_x, y, z - r_z, None]
+            atoms_with_pbc[atom_id + 13 * max_atom_id] = [x - r_x, y, z + r_z, None]
+            atoms_with_pbc[atom_id + 14 * max_atom_id] = [x - r_x, y, z - r_z, None]
 
-            atoms_with_pbc[id + 15 * max_id] = [x, y + r_y, z + r_z, None]
-            atoms_with_pbc[id + 16 * max_id] = [x, y + r_y, z - r_z, None]
-            atoms_with_pbc[id + 17 * max_id] = [x, y - r_y, z + r_z, None]
-            atoms_with_pbc[id + 18 * max_id] = [x, y - r_y, z - r_z, None]
+            atoms_with_pbc[atom_id + 15 * max_atom_id] = [x, y + r_y, z + r_z, None]
+            atoms_with_pbc[atom_id + 16 * max_atom_id] = [x, y + r_y, z - r_z, None]
+            atoms_with_pbc[atom_id + 17 * max_atom_id] = [x, y - r_y, z + r_z, None]
+            atoms_with_pbc[atom_id + 18 * max_atom_id] = [x, y - r_y, z - r_z, None]
 
-            atoms_with_pbc[id + 19 * max_id] = [x + r_x, y + r_y, z + r_z, None]
-            atoms_with_pbc[id + 20 * max_id] = [x + r_x, y + r_y, z - r_z, None]
-            atoms_with_pbc[id + 21 * max_id] = [x + r_x, y - r_y, z + r_z, None]
-            atoms_with_pbc[id + 22 * max_id] = [x + r_x, y - r_y, z - r_z, None]
-            atoms_with_pbc[id + 23 * max_id] = [x - r_x, y + r_y, z + r_z, None]
-            atoms_with_pbc[id + 24 * max_id] = [x - r_x, y + r_y, z - r_z, None]
-            atoms_with_pbc[id + 25 * max_id] = [x - r_x, y - r_y, z + r_z, None]
-            atoms_with_pbc[id + 26 * max_id] = [x - r_x, y - r_y, z - r_z, None]
+            atoms_with_pbc[atom_id + 19 * max_atom_id] = [x + r_x, y + r_y, z + r_z, None]
+            atoms_with_pbc[atom_id + 20 * max_atom_id] = [x + r_x, y + r_y, z - r_z, None]
+            atoms_with_pbc[atom_id + 21 * max_atom_id] = [x + r_x, y - r_y, z + r_z, None]
+            atoms_with_pbc[atom_id + 22 * max_atom_id] = [x + r_x, y - r_y, z - r_z, None]
+            atoms_with_pbc[atom_id + 23 * max_atom_id] = [x - r_x, y + r_y, z + r_z, None]
+            atoms_with_pbc[atom_id + 24 * max_atom_id] = [x - r_x, y + r_y, z - r_z, None]
+            atoms_with_pbc[atom_id + 25 * max_atom_id] = [x - r_x, y - r_y, z + r_z, None]
+            atoms_with_pbc[atom_id + 26 * max_atom_id] = [x - r_x, y - r_y, z - r_z, None]
 
         return atoms_with_pbc
 

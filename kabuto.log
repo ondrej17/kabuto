@@ -42,3 +42,246 @@ Usage:
     kabuto.py test
 ******************************************************
 
+[2020-09-21 16:03:03,545]:INFO:kabuto: Command line arguments:
+src/kabuto.py
+[2020-09-21 16:03:03,545]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |     |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+Usage:
+    kabuto.py prepare <name_of_phase> <dump_file>
+    kabuto.py list_nn
+    kabuto.py create_nn <name_of_nn>
+    kabuto.py train <name_of_nn>
+    kabuto.py predict <name_of_nn> <dump.file>
+    kabuto.py test
+******************************************************
+
+[2020-09-21 16:04:32,029]:INFO:kabuto: Command line arguments:
+src/kabuto.py
+[2020-09-21 16:04:32,029]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |     |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+Usage:
+    kabuto.py prepare <name_of_phase> <dump_file>
+    kabuto.py list_nn
+    kabuto.py create_nn <name_of_nn>
+    kabuto.py train <name_of_nn>
+    kabuto.py predict <name_of_nn> <dump.file>
+    kabuto.py test
+******************************************************
+
+[2020-09-21 21:36:29,537]:INFO:kabuto: Command line arguments:
+src/kabuto.py prepare bcc example/example_dump.file
+[2020-09-21 21:36:29,537]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-09-21 21:36:29,537]:INFO:kabuto: Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-09-21 21:36:29,537]:INFO:kabuto: Directory 'src/results' already exists.
+[2020-09-21 21:36:29,537]:INFO:kabuto: ACTION: prepare
+preparing phase: bcc
+preparing from file: example/example_dump.file
+[2020-09-21 21:36:29,537]:INFO:kabuto: Calculating of descriptors begins
+[2020-09-21 21:36:29,555]:INFO:kabuto: ... processing timestep #0
+[2020-09-21 21:36:29,555]:INFO:kabuto: ... processing timestep #500
+[2020-09-21 21:36:29,558]:INFO:kabuto: Atom 1/8
+[2020-09-21 21:36:29,558]:INFO:kabuto: Atom 1/8
+[2020-09-21 21:36:29,560]:INFO:kabuto: Atom 2/8
+[2020-09-21 21:36:29,560]:INFO:kabuto: Atom 2/8
+[2020-09-21 21:36:29,562]:INFO:kabuto: Atom 3/8
+[2020-09-21 21:36:29,563]:INFO:kabuto: Atom 3/8
+[2020-09-21 21:36:29,565]:INFO:kabuto: Atom 4/8
+[2020-09-21 21:36:29,565]:INFO:kabuto: Atom 4/8
+[2020-09-21 21:36:29,567]:INFO:kabuto: Atom 5/8
+[2020-09-21 21:36:29,569]:INFO:kabuto: Atom 6/8
+[2020-09-21 21:36:29,572]:INFO:kabuto: Atom 7/8
+[2020-09-21 21:36:29,573]:INFO:kabuto: Atom 5/8
+[2020-09-21 21:36:29,575]:INFO:kabuto: Atom 8/8
+[2020-09-21 21:36:29,576]:INFO:kabuto: Atom 6/8
+[2020-09-21 21:36:29,578]:INFO:kabuto: Atom 7/8
+[2020-09-21 21:36:29,581]:INFO:kabuto: Atom 8/8
+[2020-09-21 21:36:29,585]:INFO:kabuto: Calculating of descriptors ended
+[2020-09-21 21:36:29,586]:INFO:kabuto: Dictionary 'timesteps' was saved to: dict_timesteps.json
+[2020-09-21 21:36:29,586]:INFO:kabuto: Dictionary 'pbc_dict' was saved to: dict_pbc.json
+[2020-09-21 21:36:29,586]:INFO:kabuto: Directory src/dir_to_train already exists.
+[2020-09-21 21:36:29,586]:INFO:kabuto: Saving timesteps to separate files begins
+[2020-09-21 21:36:29,586]:INFO:kabuto: ... saving timestep #0 to file src/dir_to_train/2020_09_21_21_36_29_0.txt
+[2020-09-21 21:36:29,587]:INFO:kabuto: ... saving timestep #500 to file src/dir_to_train/2020_09_21_21_36_29_500.txt
+[2020-09-21 21:36:29,587]:INFO:kabuto: All timesteps were saved in 'src/dir_to_train' folder
+[2020-09-21 21:44:58,826]:INFO:kabuto: Command line arguments:
+src/kabuto.py prepare bcc example/example_dump.file
+[2020-09-21 21:44:58,826]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-09-21 21:44:58,826]:INFO:kabuto: Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-09-21 21:44:58,826]:INFO:kabuto: Directory 'src/results' already exists.
+[2020-09-21 21:44:58,826]:INFO:kabuto: ACTION: prepare
+preparing phase: bcc
+preparing from file: example/example_dump.file
+[2020-09-21 21:44:58,826]:INFO:kabuto: Calculating of descriptors begins
+[2020-09-21 21:44:58,842]:INFO:kabuto: ... processing timestep #0
+[2020-09-21 21:44:58,842]:INFO:kabuto: ... processing timestep #500
+[2020-09-21 21:46:55,516]:INFO:kabuto: Command line arguments:
+src/kabuto.py prepare bcc example/example_dump.file
+[2020-09-21 21:46:55,516]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-09-21 21:46:55,516]:INFO:kabuto: Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-09-21 21:46:55,516]:INFO:kabuto: Directory 'src/results' already exists.
+[2020-09-21 21:46:55,516]:INFO:kabuto: ACTION: prepare
+preparing phase: bcc
+preparing from file: example/example_dump.file
+[2020-09-21 21:46:55,516]:INFO:kabuto: Calculating of descriptors begins
+[2020-09-21 21:46:55,532]:INFO:kabuto: ... processing timestep #0
+[2020-09-21 21:46:55,532]:INFO:kabuto: ... processing timestep #500
+[2020-09-21 21:46:55,535]:INFO:kabuto: Atom 1/8
+[2020-09-21 21:46:55,535]:INFO:kabuto: Atom 1/8
+[2020-09-21 21:46:55,537]:INFO:kabuto: Atom 2/8
+[2020-09-21 21:46:55,537]:INFO:kabuto: Atom 2/8
+[2020-09-21 21:46:55,540]:INFO:kabuto: Atom 3/8
+[2020-09-21 21:46:55,540]:INFO:kabuto: Atom 3/8
+[2020-09-21 21:46:55,542]:INFO:kabuto: Atom 4/8
+[2020-09-21 21:46:55,542]:INFO:kabuto: Atom 4/8
+[2020-09-21 21:46:55,544]:INFO:kabuto: Atom 5/8
+[2020-09-21 21:46:55,545]:INFO:kabuto: Atom 5/8
+[2020-09-21 21:46:55,547]:INFO:kabuto: Atom 6/8
+[2020-09-21 21:46:55,547]:INFO:kabuto: Atom 6/8
+[2020-09-21 21:46:55,549]:INFO:kabuto: Atom 7/8
+[2020-09-21 21:46:55,550]:INFO:kabuto: Atom 7/8
+[2020-09-21 21:46:55,552]:INFO:kabuto: Atom 8/8
+[2020-09-21 21:46:55,552]:INFO:kabuto: Atom 8/8
+[2020-09-21 21:46:55,556]:INFO:kabuto: Calculating of descriptors ended
+[2020-09-21 22:02:33,954]:INFO:kabuto: Command line arguments:
+src/kabuto.py prepare bcc example/example_dump.file
+[2020-09-21 22:02:33,954]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-09-21 22:02:33,954]:INFO:kabuto: Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-09-21 22:02:33,954]:INFO:kabuto: Directory 'src/results' already exists.
+[2020-09-21 22:02:33,954]:INFO:kabuto: ACTION: prepare
+preparing phase: bcc
+preparing from file: example/example_dump.file
+[2020-09-21 22:02:33,954]:INFO:kabuto: Calculating of descriptors begins
+[2020-09-21 22:02:33,970]:INFO:kabuto: ... processing timestep #0
+[2020-09-21 22:02:33,970]:INFO:kabuto: ... processing timestep #500
+[2020-09-21 22:02:33,973]:INFO:kabuto: Atom 1/8
+[2020-09-21 22:02:33,973]:INFO:kabuto: Atom 1/8
+[2020-09-21 22:02:33,975]:INFO:kabuto: Atom 2/8
+[2020-09-21 22:02:33,975]:INFO:kabuto: Atom 2/8
+[2020-09-21 22:02:33,977]:INFO:kabuto: Atom 3/8
+[2020-09-21 22:02:33,977]:INFO:kabuto: Atom 3/8
+[2020-09-21 22:02:33,979]:INFO:kabuto: Atom 4/8
+[2020-09-21 22:02:33,980]:INFO:kabuto: Atom 4/8
+[2020-09-21 22:02:33,982]:INFO:kabuto: Atom 5/8
+[2020-09-21 22:02:33,982]:INFO:kabuto: Atom 5/8
+[2020-09-21 22:02:33,984]:INFO:kabuto: Atom 6/8
+[2020-09-21 22:02:33,984]:INFO:kabuto: Atom 6/8
+[2020-09-21 22:02:33,987]:INFO:kabuto: Atom 7/8
+[2020-09-21 22:02:33,987]:INFO:kabuto: Atom 7/8
+[2020-09-21 22:02:33,990]:INFO:kabuto: Atom 8/8
+[2020-09-21 22:02:33,991]:INFO:kabuto: Atom 8/8
+[2020-09-21 22:02:33,997]:INFO:kabuto: Calculating of descriptors ended
+[2020-09-21 22:02:33,998]:INFO:kabuto: Dictionary 'timesteps' was saved to: dict_timesteps.json
+[2020-09-21 22:02:33,998]:INFO:kabuto: Dictionary 'pbc_dict' was saved to: dict_pbc.json
+[2020-09-21 22:02:33,998]:INFO:kabuto: Directory src/dir_to_train already exists.
+[2020-09-21 22:02:33,998]:INFO:kabuto: Saving timesteps to separate files begins
+[2020-09-21 22:02:33,998]:INFO:kabuto: ... saving timestep #0 to file src/dir_to_train/2020_09_21_22_02_33_0.txt
+[2020-09-21 22:02:33,999]:INFO:kabuto: ... saving timestep #500 to file src/dir_to_train/2020_09_21_22_02_33_500.txt
+[2020-09-21 22:02:33,999]:INFO:kabuto: All timesteps were saved in 'src/dir_to_train' folder
+[2020-09-21 22:09:24,301]:INFO:kabuto: Command line arguments:
+src/kabuto.py prepare bcc example/example_dump.file
+[2020-09-21 22:09:24,301]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-09-21 22:09:24,301]:INFO:kabuto: Available phases: {'bcc': 0, 'fcc': 1, 'hcp': 2, 'A15': 3, 'dis': 4}
+[2020-09-21 22:09:24,301]:INFO:kabuto: Directory 'src/results' already exists.
+[2020-09-21 22:09:24,301]:INFO:kabuto: ACTION: prepare
+preparing phase: bcc
+preparing from file: example/example_dump.file
+[2020-09-21 22:09:24,302]:INFO:kabuto: Calculating of descriptors begins
+[2020-09-21 22:09:24,318]:INFO:kabuto: ... processing timestep #0
+[2020-09-21 22:09:24,318]:INFO:kabuto: ... processing timestep #500
+[2020-09-21 22:09:24,321]:INFO:kabuto: Atom 1/8
+[2020-09-21 22:09:24,321]:INFO:kabuto: Atom 1/8
+[2020-09-21 22:09:24,324]:INFO:kabuto: Atom 2/8
+[2020-09-21 22:09:24,324]:INFO:kabuto: Atom 2/8
+[2020-09-21 22:09:24,326]:INFO:kabuto: Atom 3/8
+[2020-09-21 22:09:24,328]:INFO:kabuto: Atom 4/8
+[2020-09-21 22:09:24,329]:INFO:kabuto: Atom 3/8
+[2020-09-21 22:09:24,331]:INFO:kabuto: Atom 5/8
+[2020-09-21 22:09:24,333]:INFO:kabuto: Atom 6/8
+[2020-09-21 22:09:24,334]:INFO:kabuto: Atom 4/8
+[2020-09-21 22:09:24,335]:INFO:kabuto: Atom 7/8
+[2020-09-21 22:09:24,337]:INFO:kabuto: Atom 5/8
+[2020-09-21 22:09:24,338]:INFO:kabuto: Atom 8/8
+[2020-09-21 22:09:24,340]:INFO:kabuto: Atom 6/8
+[2020-09-21 22:09:24,342]:INFO:kabuto: Atom 7/8
+[2020-09-21 22:09:24,347]:INFO:kabuto: Atom 8/8
+[2020-09-21 22:09:24,352]:INFO:kabuto: Calculating of descriptors ended
+[2020-09-21 22:09:24,352]:INFO:kabuto: Dictionary 'timesteps' was saved to: dict_timesteps.json
+[2020-09-21 22:09:24,353]:INFO:kabuto: Dictionary 'pbc_dict' was saved to: dict_pbc.json
+[2020-09-21 22:09:24,353]:INFO:kabuto: Directory src/dir_to_train already exists.
+[2020-09-21 22:09:24,353]:INFO:kabuto: Saving timesteps to separate files begins
+[2020-09-21 22:09:24,353]:INFO:kabuto: ... saving timestep #0 to file src/dir_to_train/2020_09_21_22_09_24_0.txt
+[2020-09-21 22:09:24,353]:INFO:kabuto: ... saving timestep #500 to file src/dir_to_train/2020_09_21_22_09_24_500.txt
+[2020-09-21 22:09:24,353]:INFO:kabuto: All timesteps were saved in 'src/dir_to_train' folder

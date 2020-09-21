@@ -16,16 +16,16 @@ class Descriptors:
         * ... it must be changed adequately
         * class attribute 'number_of_descriptors' holds the number of descriptors
         * r_min and r_max are different for Steinhardt parameters and symmetry functions!
-        * 'atoms_with_pbc' holds all atoms and their copies in all direction due to the PBC
+        * 'all_atoms' holds all atoms in the simulation box
     """
     # important class attribute; update it, when descriptors are changed
     number_of_descriptors = 14
 
-    def __init__(self, id, x, y, z, atoms_with_pbc):
-        self.id = id  # id of actual atom
-        self.x, self.y, self.z = x, y, z  # coordination of actual atom
-        self.atoms_for_g = self.create_atoms_in_cutoff_for_g_functions(atoms_with_pbc)
-        self.atoms_for_q = self.create_atoms_in_cutoff_for_q_functions(atoms_with_pbc)
+    def __init__(self, atom_id, x, y, z, all_atoms, pbc):
+        self.atom_id = atom_id                                      # id of actual atom
+        self.x, self.y, self.z = x, y, z                            # coordination of actual atom
+        self.all_atoms = all_atoms                                  # all atoms in box
+        self.pbc_x, self.pbc_y, self.pbc_z = pbc[0], pbc[1], pbc[2] # PBC
 
         # dictionary of parameters for symmetry functions
         self.symmetry_functions_parameters = {
@@ -104,26 +104,46 @@ class Descriptors:
         """
         r_min, r_max = self.set_r_min_max_g_functions()
         res = 0.
-        for id, items in self.atoms_for_g.items():
-            if id != self.id:  # skip myself
-                r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
-                                 math.pow(items[1] - self.y, 2) +
-                                 math.pow(items[2] - self.z, 2))
+        for atom_id, items in self.all_atoms.items():
+            if atom_id != self.atom_id:  # skip myself
+                # vector r_ij
+                x_ij = items[0] - self.x
+                y_ij = items[1] - self.y
+                z_ij = items[2] - self.z
+
+                # correction of vector r_ij for PBC (and minimum image convention)
+                x_ij -= self.pbc_x * round(x_ij / self.pbc_x)
+                y_ij -= self.pbc_y * round(y_ij / self.pbc_y)
+                z_ij -= self.pbc_z * round(z_ij / self.pbc_z)
+
+                # calculate the correct length of vector r_ij
+                r_ij = math.sqrt(math.pow(x_ij, 2) + math.pow(y_ij, 2) + math.pow(z_ij, 2))
+
                 res += self.f_c(r_ij, r_min, r_max) * math.exp(-eta * math.pow(r_ij - r_s, 2))
         return res
 
     def g_3(self, kappa):
         """
         symmetry function G_3
-        it takes one parameters, kappa
+        it takes one parameter, kappa
         """
         r_min, r_max = self.set_r_min_max_g_functions()
         res = 0.
-        for id, items in self.atoms_for_g.items():
-            if id != self.id:  # exclude myself
-                r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
-                                 math.pow(items[1] - self.y, 2) +
-                                 math.pow(items[2] - self.z, 2))
+        for atom_id, items in self.all_atoms.items():
+            if atom_id != self.atom_id:  # skip myself
+                # vector r_ij
+                x_ij = items[0] - self.x
+                y_ij = items[1] - self.y
+                z_ij = items[2] - self.z
+
+                # correction of vector r_ij for PBC (and minimum image convention)
+                x_ij -= self.pbc_x * round(x_ij / self.pbc_x)
+                y_ij -= self.pbc_y * round(y_ij / self.pbc_y)
+                z_ij -= self.pbc_z * round(z_ij / self.pbc_z)
+
+                # calculate the correct length of vector r_ij
+                r_ij = math.sqrt(math.pow(x_ij, 2) + math.pow(y_ij, 2) + math.pow(z_ij, 2))
+
                 res += self.f_c(r_ij, r_min, r_max) * math.cos(kappa * r_ij)
         return res
 
@@ -162,35 +182,56 @@ class Descriptors:
         returns value of function Q_lm
         """
         r_min, r_max = self.set_r_min_max_q_functions()
+
         # numerator
-        nom = 0
-        for id, items in self.atoms_for_q.items():
-            if id != self.id:  # exclude myself
-                x_other, y_other, z_other = items[0], items[1], items[2]
-                r_ij = math.sqrt(math.pow(x_other - self.x, 2) +
-                                 math.pow(y_other - self.y, 2) +
-                                 math.pow(z_other - self.z, 2))
-                nom += self.f_c(r_ij, r_min, r_max) * self.y_lm(l_param, m, x_other, y_other, z_other)
+        num = 0
+        for atom_id, items in self.all_atoms.items():
+            if atom_id != self.atom_id:  # skip myself
+                # vector r_ij
+                x_ij = items[0] - self.x
+                y_ij = items[1] - self.y
+                z_ij = items[2] - self.z
+
+                # correction of vector r_ij for PBC (and minimum image convention)
+                x_ij -= self.pbc_x * round(x_ij / self.pbc_x)
+                y_ij -= self.pbc_y * round(y_ij / self.pbc_y)
+                z_ij -= self.pbc_z * round(z_ij / self.pbc_z)
+
+                # calculate the correct length of vector r_ij
+                r_ij = math.sqrt(math.pow(x_ij, 2) + math.pow(y_ij, 2) + math.pow(z_ij, 2))
+
+                # addition to a numerator
+                num += self.f_c(r_ij, r_min, r_max) * self.y_lm(l_param, m, x_ij, y_ij, z_ij)
+
         # denominator
         den = 0
-        for id, items in self.atoms_for_q.items():
-            if id != self.id:  # exclude myself
-                x_other, y_other, z_other = items[0], items[1], items[2]
-                r_ij = math.sqrt(math.pow(x_other - self.x, 2) +
-                                 math.pow(y_other - self.y, 2) +
-                                 math.pow(z_other - self.z, 2))
+        for atom_id, items in self.all_atoms.items():
+            if atom_id != self.atom_id:  # skip myself
+                # vector r_ij
+                x_ij = items[0] - self.x
+                y_ij = items[1] - self.y
+                z_ij = items[2] - self.z
+
+                # correction of vector r_ij for PBC (and minimum image convention)
+                x_ij -= self.pbc_x * round(x_ij / self.pbc_x)
+                y_ij -= self.pbc_y * round(y_ij / self.pbc_y)
+                z_ij -= self.pbc_z * round(z_ij / self.pbc_z)
+
+                # calculate the correct length of vector r_ij
+                r_ij = math.sqrt(math.pow(x_ij, 2) + math.pow(y_ij, 2) + math.pow(z_ij, 2))
+
+                # addition to a denominator
                 den += self.f_c(r_ij, r_min, r_max)
 
-        return nom / den
+        return num / den
 
-    def y_lm(self, l_param, m, x2, y2, z2):
+    @staticmethod
+    def y_lm(l_param, m, dx, dy, dz):
         """
         returns value of spherical harmonics for given l and m
-        [x2, y2, z2] are coordinates of other atom
+        [dx, dy, dz] is a vector between two atoms
         [self.x, self.y, self.z] are coordinates of current atom
         """
-        # vector r_ij
-        dx, dy, dz = self.x - x2, self.y - y2, self.z - z2
 
         # spherical coordinates of vector r_ij
         r = math.sqrt(math.pow(dx, 2) + math.pow(dy, 2) + math.pow(dz, 2))
@@ -205,36 +246,6 @@ class Descriptors:
             return sph_harm(0, l_param, phi, theta)
         elif m > 0:
             return (-1)**m * math.sqrt(2) * (sph_harm(m, l_param, phi, theta)).real
-
-    def create_atoms_in_cutoff_for_g_functions(self, atoms):
-        """
-        creates a new dictionary, which contains only atoms that are in cutoff of current atom
-            cutoff is for G functions (symmetry functions)
-        """
-        r_min, r_max = self.set_r_min_max_g_functions()
-        res = dict()
-        for id, items in atoms.items():
-            r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
-                             math.pow(items[1] - self.y, 2) +
-                             math.pow(items[2] - self.z, 2))
-            if r_ij < r_max:
-                res[id] = items
-        return res
-
-    def create_atoms_in_cutoff_for_q_functions(self, atoms):
-        """
-        creates a new dictionary, which contains only atoms that are in cutoff of current atom
-            cutoff is for Steinhardt parameters
-        """
-        r_min, r_max = self.set_r_min_max_q_functions()
-        res = dict()
-        for id, items in atoms.items():
-            r_ij = math.sqrt(math.pow(items[0] - self.x, 2) +
-                             math.pow(items[1] - self.y, 2) +
-                             math.pow(items[2] - self.z, 2))
-            if r_ij < r_max:
-                res[id] = items
-        return res
 
     @staticmethod
     def info_header(timestep, phase):
