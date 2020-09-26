@@ -128,7 +128,7 @@ class Kabuto:
             * prepares files for training from dump-file
             * parses all atomic positions and calculates descriptors for each atom
             * for each timestep creates corresponding file in 'dir_to_train' folder
-            * those file are then used to feed the NN (teaching of NN to identify given phases)
+            * those file are then used to feed the NN (teaching NN to identify given phases)
             * usage:
                 * prepare(phase, file)
         """
@@ -139,7 +139,7 @@ class Kabuto:
         # processing of file ...
         with open(filename, "r") as input_file:
 
-            # scanning booleans (starts and stops scanning particular parts of input file)
+            # the scanning booleans (starts and stops scanning particular parts of input file)
             scan_timestep = False
             scan_atoms = False
             scan_number_of_atoms = False

@@ -22,10 +22,10 @@ class Descriptors:
     number_of_descriptors = 14
 
     def __init__(self, atom_id, x, y, z, all_atoms, pbc):
-        self.atom_id = atom_id                                      # id of actual atom
-        self.x, self.y, self.z = x, y, z                            # coordination of actual atom
-        self.all_atoms = all_atoms                                  # all atoms in box
-        self.pbc_x, self.pbc_y, self.pbc_z = pbc[0], pbc[1], pbc[2] # PBC
+        self.atom_id = atom_id                                       # id of actual atom
+        self.x, self.y, self.z = x, y, z                             # coordination of actual atom
+        self.all_atoms = all_atoms                                   # all atoms in box
+        self.pbc_x, self.pbc_y, self.pbc_z = pbc[0], pbc[1], pbc[2]  # PBC
 
         # dictionary of parameters for symmetry functions
         self.symmetry_functions_parameters = {
