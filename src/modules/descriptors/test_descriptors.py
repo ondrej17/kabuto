@@ -13,6 +13,12 @@ example_dict = {
     9: (5.3, 3.5, 9.8),
     10: (1.3, 3.4, 14.8)
 }
-res = descriptors.compute(example_dict)
 
+# {pbc_x, pbc_y, pbc_z}
+example_pbc = [1.2, 3.4, 5.0]
+
+res = descriptors.compute(*example_pbc, example_dict)
+print("\n\nPython code -->\n")
+for key, value in res.items():
+    print(key, " : ", value)
 
