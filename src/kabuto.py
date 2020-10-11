@@ -209,7 +209,7 @@ class Kabuto:
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
         for timestep in self.timesteps.keys():
-            self.timesteps[timestep] = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
+            self.timesteps[timestep] = self.parallel_descriptors(timestep)
         logger.info("Calculating of descriptors ended")
 
         # number_of_cpu = mp.cpu_count() - 2
@@ -475,7 +475,7 @@ class Kabuto:
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
         for timestep in self.timesteps.keys():
-            self.timesteps[timestep] = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
+            self.timesteps[timestep] = self.parallel_descriptors(timestep)
         logger.info("Calculating of descriptors ended")
 
         # number_of_cpu = mp.cpu_count() - 2
