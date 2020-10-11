@@ -6,9 +6,9 @@ import shutil
 import logging.config
 
 import numpy as np
-import multiprocessing as mp
 
-from modules.descriptors import Descriptors
+# from modules.descriptors import Descriptors
+import descriptors
 from modules.neural_network import NeuralNetwork
 
 # set-up the path to kabuto script
@@ -61,7 +61,8 @@ class Kabuto:
             logger.error("Available phases were not loaded!")
             return
         self.number_of_phases = len(self.phases_available)
-        self.number_of_descriptors = Descriptors.number_of_descriptors
+        # self.number_of_descriptors = Descriptors.number_of_descriptors
+        self.number_of_descriptors = 14
 
         # create 'results' directory if it does not exist
         if os.path.isdir(self.result_dir):
@@ -198,7 +199,7 @@ class Kabuto:
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z)]
 
                 else:
                     # skipping useless lines
@@ -207,12 +208,15 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        number_of_cpu = mp.cpu_count() - 2
-        with mp.Pool(number_of_cpu) as pool:
-            result = pool.map(self.parallel_descriptors, self.timesteps.keys())
-            for timestep, atoms in result:
-                self.timesteps[timestep] = atoms
+        for timestep in self.timesteps.keys():
+            self.timesteps[timestep] = self.parallel_descriptors(timestep)
         logger.info("Calculating of descriptors ended")
+
+        # number_of_cpu = mp.cpu_count() - 2
+        # with mp.Pool(number_of_cpu) as pool:
+        #     result = pool.map(self.parallel_descriptors, self.timesteps.keys())
+        #     for timestep, atoms in result:
+        #         self.timesteps[timestep] = atoms
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -249,11 +253,11 @@ class Kabuto:
             # open file
             with open(path_to_file, 'w') as file:
                 # print informative header
-                file.write(Descriptors.info_header(timestep, phase))
+                file.write(self.descriptors_info_header(timestep, phase))
 
                 # print descriptors for each atom to file
                 for atom_id in self.timesteps[timestep].keys():
-                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id][3])) + '\n')
+                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id])) + '\n')
 
         # all files are prepared in 'dir_to_train' folder
         logger.info("All timesteps were saved in \'{}\' folder".format(self.to_train_dir))
@@ -461,7 +465,7 @@ class Kabuto:
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z)]
 
                 else:
                     # skipping useless lines
@@ -470,12 +474,15 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        number_of_cpu = mp.cpu_count() - 2
-        with mp.Pool(number_of_cpu) as pool:
-            result = pool.map(self.parallel_descriptors, self.timesteps.keys())
-            for timestep, atoms in result:
-                self.timesteps[timestep] = atoms
+        for timestep in self.timesteps.keys():
+            self.timesteps[timestep] = self.parallel_descriptors(timestep)
         logger.info("Calculating of descriptors ended")
+
+        # number_of_cpu = mp.cpu_count() - 2
+        # with mp.Pool(number_of_cpu) as pool:
+        #     result = pool.map(self.parallel_descriptors, self.timesteps.keys())
+        #     for timestep, atoms in result:
+        #         self.timesteps[timestep] = atoms
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -513,11 +520,11 @@ class Kabuto:
             # open file
             with open(path_to_file, 'w') as file:
                 # print informative header
-                file.write(Descriptors.info_header(timestep, phase=None))
+                file.write(self.descriptors_info_header(timestep, phase=None))
 
                 # print descriptors for each atom to file
                 for atom_id in self.timesteps[timestep].keys():
-                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id][3])) + '\n')
+                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
         logger.info("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
@@ -601,19 +608,19 @@ class Kabuto:
                     "Entering TEST mode. Object KABUTO created. ...")
 
         # test return values of functions in descriptors module
-        test_descriptors = Descriptors(atom_id=1, x=0, y=0, z=0, all_atoms=dict(), pbc=[1, 1, 1])
-        logger.info("symmetry function parameters dictionary:\n{}"
-                    .format(test_descriptors.symmetry_functions_parameters))
-        logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
-        logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
-        logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
-        logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
-        logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
-        # logger.info("scipy version = {}".format(scipy.__version__))
-        logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
-        logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
-        logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
-        # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
+        # test_descriptors = Descriptors(atom_id=1, x=0, y=0, z=0, all_atoms=dict(), pbc=[1, 1, 1])
+        # logger.info("symmetry function parameters dictionary:\n{}"
+        #             .format(test_descriptors.symmetry_functions_parameters))
+        # logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
+        # logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
+        # logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
+        # logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
+        # logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
+        # # logger.info("scipy version = {}".format(scipy.__version__))
+        # logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
+        # logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
+        # logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
+        # # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
 
     def parallel_descriptors(self, timestep):
         """
@@ -625,24 +632,27 @@ class Kabuto:
         """
         logger.info("... processing timestep #{}".format(timestep))
 
-        num_of_atoms = len(self.timesteps[timestep].keys())
+        result = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
+        return result
 
-        result = {}
-        for counter, atom_id in enumerate(self.timesteps[timestep].keys()):
-            # coordinates of current atom
-            x = self.timesteps[timestep][atom_id][0]
-            y = self.timesteps[timestep][atom_id][1]
-            z = self.timesteps[timestep][atom_id][2]
-            logger.debug("... ... id: {}: [{}, {}, {}]".format(atom_id, x, y, z))
-            # calculate descriptors for current atom
-            descriptors = Descriptors(atom_id, x, y, z,
-                                      self.timesteps[timestep],
-                                      self.pbc_dict[timestep]).get_descriptors()
-            # add descriptors to the dictionary
-            result[atom_id] = [x, y, z, descriptors]
-            logger.debug("Atom {}/{}".format(counter + 1, num_of_atoms))
-            logger.debug("Atom: {}".format(atom_id))
-        return timestep, result
+        # num_of_atoms = len(self.timesteps[timestep].keys())
+        #
+        # result = {}
+        # for counter, atom_id in enumerate(self.timesteps[timestep].keys()):
+        #     # coordinates of current atom
+        #     x = self.timesteps[timestep][atom_id][0]
+        #     y = self.timesteps[timestep][atom_id][1]
+        #     z = self.timesteps[timestep][atom_id][2]
+        #     logger.debug("... ... id: {}: [{}, {}, {}]".format(atom_id, x, y, z))
+        #     # calculate descriptors for current atom
+        #     descriptors = Descriptors(atom_id, x, y, z,
+        #                               self.timesteps[timestep],
+        #                               self.pbc_dict[timestep]).get_descriptors()
+        #     # add descriptors to the dictionary
+        #     result[atom_id] = [x, y, z, descriptors]
+        #     logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
+        #     logger.debug("Atom: {}".format(atom_id))
+        # return timestep, result
 
     def prepare_arrays(self, directory=None, filename=None):
         """
@@ -683,14 +693,14 @@ class Kabuto:
                             else:
                                 # processing a line with descriptors: [id, **descriptors]
                                 items = line.split()
-                                descriptors = list(map(float, items[1:]))
-                                logger.debug("{} : {}".format(id, descriptors))
+                                descriptors_list = list(map(float, items[1:]))
+                                logger.debug("{} : {}".format(id, descriptors_list))
 
                                 # add output_vector to output array
                                 output_array.append(output_vector)
 
                                 # add descriptors to input array
-                                input_array.append(descriptors)
+                                input_array.append(descriptors_list)
 
             logger.info("Input and output arrays have the same length: {}"
                         .format(len(input_array) == len(output_array)))
@@ -718,11 +728,11 @@ class Kabuto:
                         else:
                             # processing a line with descriptors: [id, **descriptors]
                             items = line.split()
-                            descriptors = list(map(float, items[1:]))
-                            logger.debug("{} : {}".format(id, descriptors))
+                            descriptors_list = list(map(float, items[1:]))
+                            logger.debug("{} : {}".format(id, descriptors_list))
 
                             # add descriptors to input array
-                            input_array.append(descriptors)
+                            input_array.append(descriptors_list)
 
                 logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
 
@@ -807,6 +817,19 @@ class Kabuto:
         for phase, index in self.phases_available.items():
             result_dict[phase] = vector_big_q[index]
         return result_dict
+
+    @staticmethod
+    def descriptors_info_header(timestep, phase):
+        """
+        returns informative header that is to be written at the beginning of file with descriptors
+        """
+        if phase is not None:
+            return "# timestep {}\n" \
+                   "# phase {}\n" \
+                   "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep, phase)
+        else:
+            return "# timestep {}\n" \
+                   "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep)
 
     @staticmethod
     def print_timesteps(timesteps):
