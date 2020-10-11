@@ -14,9 +14,7 @@
   * @returns result Python dictionary {atom_id:(tuple of descriptors)}
   */
 static PyObject *descriptors_compute(PyObject *self, PyObject *args) {
-    std::cout << "C module begins" << std::endl;
-
-    // parse args to atoms
+    // parse args to c-variables
     PyObject *atoms;
     double pbc_x = 0.0;
     double pbc_y = 0.0;
@@ -28,53 +26,30 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args) {
     PyObject *atom_ids = PyDict_Keys(atoms);
     PyObject *coordinates = PyDict_Values(atoms);
     Py_ssize_t pos1 = 0;
-
     std::vector<int> vector_atom_id;
-    std::vector <std::vector<double>> vector_atom_coords;
+    std::vector<std::vector<double>> vector_atom_coords;
 
     // iterate through {atoms_id:coords} and get C vectors
     while (PyDict_Next(atoms, &pos1, &atom_ids, &coordinates)) {
-
         // get current atom_id and push it to the vector
         vector_atom_id.push_back(PyLong_AsLong(atom_ids));
 
         // get atom coords and push it to the vector
         std::vector<double> curr_coordinates = listTupleToVector_Float(PyDict_GetItem(atoms, atom_ids));
         vector_atom_coords.push_back(curr_coordinates);
-
-        // print current atom_id and coordinates
-//        std::cout << PyLong_AsLong(atom_ids) << "\t: ";
-//        for (std::vector<double>::const_iterator i = curr_coordinates.begin(); i != curr_coordinates.end(); ++i) {
-//            std::cout << *i << ' ';
-//        }
-//        std::cout << std::endl;
     }
 
     // create a vector of pbc values
     std::vector<double> pbc{pbc_x, pbc_y, pbc_z};
-//    std::cout << "PBC: ";
-//    for (std::vector<double>::const_iterator i = pbc.begin(); i != pbc.end(); ++i) {
-//        std::cout << *i << ' ';
-//    }
-//    std::cout << std::endl;
 
-    // now, I work with two vectors:
-    //  1. atom ids (1, 2, 3, 6, 90, 900, 96, ...)
-    //  2. corresponding tuples of coordinates ((3, 4, 5), (3, 5, 7), (6, 7, 0), ...)
-
+    // calculate descriptors for each atom:
     std::vector <std::vector<double>> vector_descriptors;
-    // calculate it for each atom:
     for (long unsigned int atom_id = 0; atom_id < vector_atom_id.size(); atom_id++) {
         std::vector<double> descriptors = calculate_descriptors(vector_atom_id[atom_id],
                                                                 vector_atom_coords[atom_id],
                                                                 vector_atom_id,
                                                                 vector_atom_coords,
                                                                 pbc);
-        std::cout << "atom #" << atom_id + 1 << std::endl;
-        for (std::vector<double>::const_iterator j = descriptors.begin(); j != descriptors.end(); ++j) {
-            std::cout << *j << ' ';
-        }
-        std::cout << std::endl;
         vector_descriptors.push_back(descriptors);
     }
 
@@ -94,7 +69,6 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args) {
     }
 
     // return a dictionary {atom_id:descriptors}
-    std::cout << "C module ends" << std::endl;
     return result;
 }
 

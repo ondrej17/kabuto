@@ -6,7 +6,6 @@ import shutil
 import logging.config
 
 import numpy as np
-import multiprocessing as mp
 
 # from modules.descriptors import Descriptors
 import descriptors
@@ -200,7 +199,7 @@ class Kabuto:
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z)]
 
                 else:
                     # skipping useless lines
@@ -209,12 +208,15 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        number_of_cpu = mp.cpu_count() - 2
-        with mp.Pool(number_of_cpu) as pool:
-            result = pool.map(self.parallel_descriptors, self.timesteps.keys())
-            for timestep, atoms in result:
-                self.timesteps[timestep] = atoms
+        for timestep in self.timesteps.keys():
+            self.timesteps[timestep] = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
         logger.info("Calculating of descriptors ended")
+
+        # number_of_cpu = mp.cpu_count() - 2
+        # with mp.Pool(number_of_cpu) as pool:
+        #     result = pool.map(self.parallel_descriptors, self.timesteps.keys())
+        #     for timestep, atoms in result:
+        #         self.timesteps[timestep] = atoms
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -255,7 +257,7 @@ class Kabuto:
 
                 # print descriptors for each atom to file
                 for atom_id in self.timesteps[timestep].keys():
-                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id][3])) + '\n')
+                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id])) + '\n')
 
         # all files are prepared in 'dir_to_train' folder
         logger.info("All timesteps were saved in \'{}\' folder".format(self.to_train_dir))
@@ -463,7 +465,7 @@ class Kabuto:
                 elif scan_atoms:
                     logger.debug("Atom: {}".format(repr(line)))
                     atom_id, atom_type, atom_x, atom_y, atom_z = line.strip().split()
-                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z), None]
+                    self.timesteps[current_timestep][int(atom_id)] = [float(atom_x), float(atom_y), float(atom_z)]
 
                 else:
                     # skipping useless lines
@@ -472,12 +474,15 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        number_of_cpu = mp.cpu_count() - 2
-        with mp.Pool(number_of_cpu) as pool:
-            result = pool.map(self.parallel_descriptors, self.timesteps.keys())
-            for timestep, atoms in result:
-                self.timesteps[timestep] = atoms
+        for timestep in self.timesteps.keys():
+            self.timesteps[timestep] = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
         logger.info("Calculating of descriptors ended")
+
+        # number_of_cpu = mp.cpu_count() - 2
+        # with mp.Pool(number_of_cpu) as pool:
+        #     result = pool.map(self.parallel_descriptors, self.timesteps.keys())
+        #     for timestep, atoms in result:
+        #         self.timesteps[timestep] = atoms
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -519,7 +524,7 @@ class Kabuto:
 
                 # print descriptors for each atom to file
                 for atom_id in self.timesteps[timestep].keys():
-                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id][3])) + '\n')
+                    file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
         logger.info("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
@@ -628,6 +633,7 @@ class Kabuto:
         logger.info("... processing timestep #{}".format(timestep))
 
         result = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
+        return result
 
         # num_of_atoms = len(self.timesteps[timestep].keys())
         #
@@ -646,7 +652,7 @@ class Kabuto:
         #     result[atom_id] = [x, y, z, descriptors]
         #     logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
         #     logger.debug("Atom: {}".format(atom_id))
-        return timestep, result
+        # return timestep, result
 
     def prepare_arrays(self, directory=None, filename=None):
         """
@@ -687,14 +693,14 @@ class Kabuto:
                             else:
                                 # processing a line with descriptors: [id, **descriptors]
                                 items = line.split()
-                                descriptors = list(map(float, items[1:]))
-                                logger.debug("{} : {}".format(id, descriptors))
+                                descriptors_list = list(map(float, items[1:]))
+                                logger.debug("{} : {}".format(id, descriptors_list))
 
                                 # add output_vector to output array
                                 output_array.append(output_vector)
 
                                 # add descriptors to input array
-                                input_array.append(descriptors)
+                                input_array.append(descriptors_list)
 
             logger.info("Input and output arrays have the same length: {}"
                         .format(len(input_array) == len(output_array)))
@@ -722,11 +728,11 @@ class Kabuto:
                         else:
                             # processing a line with descriptors: [id, **descriptors]
                             items = line.split()
-                            descriptors = list(map(float, items[1:]))
-                            logger.debug("{} : {}".format(id, descriptors))
+                            descriptors_list = list(map(float, items[1:]))
+                            logger.debug("{} : {}".format(id, descriptors_list))
 
                             # add descriptors to input array
-                            input_array.append(descriptors)
+                            input_array.append(descriptors_list)
 
                 logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
 
