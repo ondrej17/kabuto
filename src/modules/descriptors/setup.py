@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 
 module1 = Extension(
       "descriptors",
-      sources=['descriptorsmodule.cpp'],
+      sources=['descriptorsmodule.cpp', 'descriptorsfuncmodule.cpp'],
 )
 
 setup(name="descriptors",

@@ -8,7 +8,8 @@ import logging.config
 import numpy as np
 import multiprocessing as mp
 
-from modules.descriptors import Descriptors
+# from modules.descriptors import Descriptors
+import descriptors
 from modules.neural_network import NeuralNetwork
 
 # set-up the path to kabuto script
@@ -61,7 +62,8 @@ class Kabuto:
             logger.error("Available phases were not loaded!")
             return
         self.number_of_phases = len(self.phases_available)
-        self.number_of_descriptors = Descriptors.number_of_descriptors
+        # self.number_of_descriptors = Descriptors.number_of_descriptors
+        self.number_of_descriptors = 14
 
         # create 'results' directory if it does not exist
         if os.path.isdir(self.result_dir):
@@ -249,7 +251,7 @@ class Kabuto:
             # open file
             with open(path_to_file, 'w') as file:
                 # print informative header
-                file.write(Descriptors.info_header(timestep, phase))
+                file.write(self.descriptors_info_header(timestep, phase))
 
                 # print descriptors for each atom to file
                 for atom_id in self.timesteps[timestep].keys():
@@ -513,7 +515,7 @@ class Kabuto:
             # open file
             with open(path_to_file, 'w') as file:
                 # print informative header
-                file.write(Descriptors.info_header(timestep, phase=None))
+                file.write(self.descriptors_info_header(timestep, phase=None))
 
                 # print descriptors for each atom to file
                 for atom_id in self.timesteps[timestep].keys():
@@ -601,19 +603,19 @@ class Kabuto:
                     "Entering TEST mode. Object KABUTO created. ...")
 
         # test return values of functions in descriptors module
-        test_descriptors = Descriptors(atom_id=1, x=0, y=0, z=0, all_atoms=dict(), pbc=[1, 1, 1])
-        logger.info("symmetry function parameters dictionary:\n{}"
-                    .format(test_descriptors.symmetry_functions_parameters))
-        logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
-        logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
-        logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
-        logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
-        logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
-        # logger.info("scipy version = {}".format(scipy.__version__))
-        logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
-        logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
-        logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
-        # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
+        # test_descriptors = Descriptors(atom_id=1, x=0, y=0, z=0, all_atoms=dict(), pbc=[1, 1, 1])
+        # logger.info("symmetry function parameters dictionary:\n{}"
+        #             .format(test_descriptors.symmetry_functions_parameters))
+        # logger.info("f_c(0) = {}".format(test_descriptors.f_c(0, 6.2, 6.4)))
+        # logger.info("f_c(6.2) = {}".format(test_descriptors.f_c(6.2, 6.2, 6.4)))
+        # logger.info("f_c(6.3) = {}".format(test_descriptors.f_c(6.3, 6.2, 6.4)))
+        # logger.info("f_c(6.4) = {}".format(test_descriptors.f_c(6.4, 6.2, 6.4)))
+        # logger.info("f_c(10) = {}".format(test_descriptors.f_c(10, 6.2, 6.4)))
+        # # logger.info("scipy version = {}".format(scipy.__version__))
+        # logger.info("y_00 = {}".format(test_descriptors.y_lm(0, 0, 1, 0, 0)))
+        # logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
+        # logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
+        # # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
 
     def parallel_descriptors(self, timestep):
         """
@@ -625,23 +627,25 @@ class Kabuto:
         """
         logger.info("... processing timestep #{}".format(timestep))
 
-        num_of_atoms = len(self.timesteps[timestep].keys())
+        result = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
 
-        result = {}
-        for counter, atom_id in enumerate(self.timesteps[timestep].keys()):
-            # coordinates of current atom
-            x = self.timesteps[timestep][atom_id][0]
-            y = self.timesteps[timestep][atom_id][1]
-            z = self.timesteps[timestep][atom_id][2]
-            logger.debug("... ... id: {}: [{}, {}, {}]".format(atom_id, x, y, z))
-            # calculate descriptors for current atom
-            descriptors = Descriptors(atom_id, x, y, z,
-                                      self.timesteps[timestep],
-                                      self.pbc_dict[timestep]).get_descriptors()
-            # add descriptors to the dictionary
-            result[atom_id] = [x, y, z, descriptors]
-            logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
-            logger.debug("Atom: {}".format(atom_id))
+        # num_of_atoms = len(self.timesteps[timestep].keys())
+        #
+        # result = {}
+        # for counter, atom_id in enumerate(self.timesteps[timestep].keys()):
+        #     # coordinates of current atom
+        #     x = self.timesteps[timestep][atom_id][0]
+        #     y = self.timesteps[timestep][atom_id][1]
+        #     z = self.timesteps[timestep][atom_id][2]
+        #     logger.debug("... ... id: {}: [{}, {}, {}]".format(atom_id, x, y, z))
+        #     # calculate descriptors for current atom
+        #     descriptors = Descriptors(atom_id, x, y, z,
+        #                               self.timesteps[timestep],
+        #                               self.pbc_dict[timestep]).get_descriptors()
+        #     # add descriptors to the dictionary
+        #     result[atom_id] = [x, y, z, descriptors]
+        #     logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
+        #     logger.debug("Atom: {}".format(atom_id))
         return timestep, result
 
     def prepare_arrays(self, directory=None, filename=None):
@@ -807,6 +811,19 @@ class Kabuto:
         for phase, index in self.phases_available.items():
             result_dict[phase] = vector_big_q[index]
         return result_dict
+
+    @staticmethod
+    def descriptors_info_header(timestep, phase):
+        """
+        returns informative header that is to be written at the beginning of file with descriptors
+        """
+        if phase is not None:
+            return "# timestep {}\n" \
+                   "# phase {}\n" \
+                   "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep, phase)
+        else:
+            return "# timestep {}\n" \
+                   "# id f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14\n".format(timestep)
 
     @staticmethod
     def print_timesteps(timesteps):
