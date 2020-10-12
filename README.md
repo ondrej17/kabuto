@@ -1,4 +1,8 @@
 # KABUTO
+
+## Announcements
+*Predicting method will be extended (or another method will be added). We want Kabuto to be able to identify structure in real time - during simulation - and simultaneously provide the input for PLUMED plugin and LAMMPS simulation.*
+
 ## About
 Developed by **Ondrej Bily**, Faculty of Mathematics, Physics and Informatics, Comenius University in Bratislava, Slovakia. 
 
@@ -23,9 +27,13 @@ Creates a new neural network and stores its model in `saved_nn` directory.
 Trains everything from files in `dir_to_train` directory.
 
 ### Predicting
-Predicts the percentage of each phase that neural network knows. Determines global structure in given dump file for each timestep. 
+Predicts the percentage of each phase that neural network knows. Determines global structure in given dump file for each timestep.
 
 ## Usage
+Compile C++ extension `decsriptors` in `src/modules/descriptors` folder:
+    
+    python3 setup.py install 
+
 In `src` folder:
 
     python kabuto.py prepare <name_of_phase> <dump.file>
@@ -44,12 +52,22 @@ The results of the script are stored in `src/result` folder.
 
 The log of script is both printed to console and written in file `src/kabuto.log`. 
 
-The example run and simulation are located in `example` folder. *(to be added)*
+The example run and simulation are located in `example` folder.
   
  ## Code Structure
  * `README.md`
  * `src`
      * `modules`
+         * `descriptors`
+            * `build`
+                * `...`
+            * `test`
+                * `...`
+            * `descriptorsfuncmodule.cpp`
+            * `descriptorsmodule.cpp`
+            * `descriptorsfuncmodule.h`
+            * `descriptorsmodule.h`
+            * `setup.py`
          * `descriptors.py`
          * `neural_network.py`
      * `config`
@@ -97,3 +115,5 @@ The example run and simulation are located in `example` folder. *(to be added)*
 ## Requirements
 * `Python3.6`
 * `tensorflow`, `scipy` and `numpy` packages
+* `boost` library
+* compiled `descriptros` C++ extension 
