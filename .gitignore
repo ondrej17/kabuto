@@ -7,6 +7,7 @@ src/dir_predicted
 src/dir_to_predict
 src/dir_to_train
 src/dir_trained
+src/modules/descriptors/build
 src/results
 src/kabuto.log
 scripts/kabuto.log
