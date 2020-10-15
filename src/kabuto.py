@@ -6,6 +6,7 @@ import shutil
 import logging.config
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 # from modules.descriptors import Descriptors
 import descriptors
@@ -209,14 +210,8 @@ class Kabuto:
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
         for timestep in self.timesteps.keys():
-            self.timesteps[timestep] = self.parallel_descriptors(timestep)
+            self.timesteps[timestep] = self.calculate_descriptors(timestep)
         logger.info("Calculating of descriptors ended")
-
-        # number_of_cpu = mp.cpu_count() - 2
-        # with mp.Pool(number_of_cpu) as pool:
-        #     result = pool.map(self.parallel_descriptors, self.timesteps.keys())
-        #     for timestep, atoms in result:
-        #         self.timesteps[timestep] = atoms
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -381,8 +376,12 @@ class Kabuto:
             self.nn = NeuralNetwork(name)
             self.nn.load_model(self.saved_nn_dir)
 
-            # let the NN train
-            self.nn.train(first_array, second_array)
+            # let the NN train (catch history)
+            history = self.nn.train(first_array, second_array)
+
+            # save loss and accuracy vs. epochs during training
+            self.plot_loss(history)
+            self.plot_accuracy(history)
 
             # at the end, save the model
             self.nn.save_model(self.saved_nn_dir)
@@ -475,14 +474,8 @@ class Kabuto:
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
         for timestep in self.timesteps.keys():
-            self.timesteps[timestep] = self.parallel_descriptors(timestep)
+            self.timesteps[timestep] = self.calculate_descriptors(timestep)
         logger.info("Calculating of descriptors ended")
-
-        # number_of_cpu = mp.cpu_count() - 2
-        # with mp.Pool(number_of_cpu) as pool:
-        #     result = pool.map(self.parallel_descriptors, self.timesteps.keys())
-        #     for timestep, atoms in result:
-        #         self.timesteps[timestep] = atoms
 
         # save dictionary to json file
         with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -508,7 +501,6 @@ class Kabuto:
 
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
-
         logger.info("Saving timesteps to separate file begins")
 
         for timestep in self.timesteps.keys():
@@ -622,37 +614,16 @@ class Kabuto:
         # logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
         # # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
 
-    def parallel_descriptors(self, timestep):
+    def calculate_descriptors(self, timestep):
         """
-        * this method is called in mp.map function when using mp.Pool object to speed up calculation
         * calculates descriptors for each atom in given timestep
-        * each timestep is assigned to one of the specified number of processes
+        * descriptors id a C++ extension library
         * 'timestep' is an integer from self.timesteps.keys() list
         * returns a dictionary in form: {id, [x, y, z, descriptors]}
         """
         logger.info("... processing timestep #{}".format(timestep))
-
         result = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
         return result
-
-        # num_of_atoms = len(self.timesteps[timestep].keys())
-        #
-        # result = {}
-        # for counter, atom_id in enumerate(self.timesteps[timestep].keys()):
-        #     # coordinates of current atom
-        #     x = self.timesteps[timestep][atom_id][0]
-        #     y = self.timesteps[timestep][atom_id][1]
-        #     z = self.timesteps[timestep][atom_id][2]
-        #     logger.debug("... ... id: {}: [{}, {}, {}]".format(atom_id, x, y, z))
-        #     # calculate descriptors for current atom
-        #     descriptors = Descriptors(atom_id, x, y, z,
-        #                               self.timesteps[timestep],
-        #                               self.pbc_dict[timestep]).get_descriptors()
-        #     # add descriptors to the dictionary
-        #     result[atom_id] = [x, y, z, descriptors]
-        #     logger.info("Atom {}/{}".format(counter + 1, num_of_atoms))
-        #     logger.debug("Atom: {}".format(atom_id))
-        # return timestep, result
 
     def prepare_arrays(self, directory=None, filename=None):
         """
@@ -818,6 +789,30 @@ class Kabuto:
             result_dict[phase] = vector_big_q[index]
         return result_dict
 
+    def plot_loss(self, history):
+        """
+        summarize history for loss
+        """
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.savefig(os.path.join(self.result_dir, "loss-vs-epochs.png"))
+
+    def plot_accuracy(self, history):
+        """
+        summarize history for accuracy
+        """
+        plt.plot(history.history['accuracy'])
+        plt.plot(history.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+        plt.savefig(os.path.join(self.result_dir, "accuracy-vs-epochs.png"))
+
     @staticmethod
     def descriptors_info_header(timestep, phase):
         """
@@ -926,66 +921,8 @@ class Kabuto:
         except FileNotFoundError:
             logger.error("Problem with opening the file: {}".format(path_to_file))
 
-    @staticmethod
-    def create_atoms_with_pbc(atoms, pbc):
-        """
-        returns a dictionary that contains original atoms and their copies to each direction
-            * it is a way to fulfill PBC (periodic boundary condition)
-            * pbc parameter is list of three numbers, period in x, y and z direction
-            * the added atoms should have different id than the original atoms
-            * atoms is dictionary {id:[x, y, z, None]}, where None is reserved place for Descriptors
-        """
-        atoms_with_pbc = dict()
-        r_x, r_y, r_z = pbc[0], pbc[1], pbc[2]
 
-        max_atom_id = max(map(int, list(atoms.keys()))) + 1  # 1 is for a case id = 0
-        logger.debug("Maximal ID of atom: {}".format(max_atom_id))
-
-        # go through the dictionary 'atoms' and add 27 atoms to the atoms_with_pbc dictionary
-        # why 27? The original one and 26 new atoms due to the pbc
-        for atom_id, atom in atoms.items():
-            x, y, z = atom[0], atom[1], atom[2]
-
-            # add the original atom
-            atoms_with_pbc[atom_id] = [x, y, z, None]
-
-            # add the other 26 atoms with different id number
-            atoms_with_pbc[atom_id + 1 * max_atom_id] = [x + r_x, y, z, None]
-            atoms_with_pbc[atom_id + 2 * max_atom_id] = [x, y + r_y, z, None]
-            atoms_with_pbc[atom_id + 3 * max_atom_id] = [x, y, z + r_z, None]
-
-            atoms_with_pbc[atom_id + 4 * max_atom_id] = [x - r_x, y, z, None]
-            atoms_with_pbc[atom_id + 5 * max_atom_id] = [x, y - r_y, z, None]
-            atoms_with_pbc[atom_id + 6 * max_atom_id] = [x, y, z - r_z, None]
-
-            atoms_with_pbc[atom_id + 7 * max_atom_id] = [x + r_x, y + r_y, z, None]
-            atoms_with_pbc[atom_id + 8 * max_atom_id] = [x + r_x, y - r_y, z, None]
-            atoms_with_pbc[atom_id + 9 * max_atom_id] = [x - r_x, y + r_y, z, None]
-            atoms_with_pbc[atom_id + 10 * max_atom_id] = [x - r_x, y - r_y, z, None]
-
-            atoms_with_pbc[atom_id + 11 * max_atom_id] = [x + r_x, y, z + r_z, None]
-            atoms_with_pbc[atom_id + 12 * max_atom_id] = [x + r_x, y, z - r_z, None]
-            atoms_with_pbc[atom_id + 13 * max_atom_id] = [x - r_x, y, z + r_z, None]
-            atoms_with_pbc[atom_id + 14 * max_atom_id] = [x - r_x, y, z - r_z, None]
-
-            atoms_with_pbc[atom_id + 15 * max_atom_id] = [x, y + r_y, z + r_z, None]
-            atoms_with_pbc[atom_id + 16 * max_atom_id] = [x, y + r_y, z - r_z, None]
-            atoms_with_pbc[atom_id + 17 * max_atom_id] = [x, y - r_y, z + r_z, None]
-            atoms_with_pbc[atom_id + 18 * max_atom_id] = [x, y - r_y, z - r_z, None]
-
-            atoms_with_pbc[atom_id + 19 * max_atom_id] = [x + r_x, y + r_y, z + r_z, None]
-            atoms_with_pbc[atom_id + 20 * max_atom_id] = [x + r_x, y + r_y, z - r_z, None]
-            atoms_with_pbc[atom_id + 21 * max_atom_id] = [x + r_x, y - r_y, z + r_z, None]
-            atoms_with_pbc[atom_id + 22 * max_atom_id] = [x + r_x, y - r_y, z - r_z, None]
-            atoms_with_pbc[atom_id + 23 * max_atom_id] = [x - r_x, y + r_y, z + r_z, None]
-            atoms_with_pbc[atom_id + 24 * max_atom_id] = [x - r_x, y + r_y, z - r_z, None]
-            atoms_with_pbc[atom_id + 25 * max_atom_id] = [x - r_x, y - r_y, z + r_z, None]
-            atoms_with_pbc[atom_id + 26 * max_atom_id] = [x - r_x, y - r_y, z - r_z, None]
-
-        return atoms_with_pbc
-
-
-# global function
+# global functions
 def print_kabuto_intro():
     result = "\n******************************************************\n" \
              "                   ___            _______    ____\n" \

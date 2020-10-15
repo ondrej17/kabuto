@@ -26,14 +26,17 @@ class NeuralNetwork:
 
         logger.info("Training begins!")
 
-        self.model.fit(first_array,
-                       second_array,
-                       batch_size=10,
-                       epochs=20,
-                       shuffle=True,
-                       verbose=2)
+        # TODO: How to correctly set the values of parameters?
+        history = self.model.fit(x=first_array,
+                                 y=second_array,
+                                 validation_split=0.3,
+                                 batch_size=50,
+                                 epochs=100,
+                                 shuffle=True,
+                                 verbose=2)
 
         logger.info("Training finished!")
+        return history
 
     def predict(self, input_array):
         """
