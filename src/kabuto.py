@@ -572,7 +572,7 @@ class Kabuto:
                     prediction = self.nn.predict(input_array)
 
                     # I have a prediction!
-                    logger.info("prediction for file \'{}\'\n{}".format(filename, prediction))
+                    logger.debug("prediction for file \'{}\'\n{}".format(filename, prediction))
 
                     # calculate the vector_Q (global structure) from vector_q (local structures)
                     vector_big_q = self.calculate_vector_big_q(prediction)
@@ -587,7 +587,7 @@ class Kabuto:
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
 
             # print result (global structure info)
-            logger.info("RESULT:\n{}".format(global_structure_dict))
+            logger.debug("RESULT:\n{}".format(global_structure_dict))
 
             # save results to 'results' dir
             self.save_results(global_structure_dict)
@@ -702,8 +702,8 @@ class Kabuto:
                                 # add descriptors to input array
                                 input_array.append(descriptors_list)
 
-            logger.info("Input and output arrays have the same length: {}"
-                        .format(len(input_array) == len(output_array)))
+            logger.info("Input and output arrays have the same length: {} ({} vs. {})"
+                        .format(len(input_array) == len(output_array), len(input_array), len(output_array)))
 
             logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
             logger.debug("... Output vector:\n{}".format(np.array(output_array, dtype=float)))

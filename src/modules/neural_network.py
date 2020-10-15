@@ -23,9 +23,16 @@ class NeuralNetwork:
         """
         logger.debug("First_array:", first_array)
         logger.debug("Second_array:", second_array)
-        # TODO: to what should the number of epochs be equal?
+
         logger.info("Training begins!")
-        self.model.fit(first_array, second_array, epochs=20, verbose=True)
+
+        self.model.fit(first_array,
+                       second_array,
+                       batch_size=10,
+                       epochs=20,
+                       shuffle=True,
+                       verbose=2)
+
         logger.info("Training finished!")
 
     def predict(self, input_array):
@@ -70,7 +77,8 @@ class NeuralNetwork:
 
         # compile the model
         self.model.compile(loss='mean_squared_error',
-                           optimizer=tf.keras.optimizers.Adam(0.1))
+                           optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
+                           metrics=['accuracy'])
         logger.info("Model \'{}\' created.".format(self.name))
 
     def create_layers(self):
@@ -81,7 +89,7 @@ class NeuralNetwork:
         input_size = self.number_of_descriptors
         nodes_in_hidden = 25
 
-        layers = [tf.keras.layers.Dense(units=nodes_in_hidden, input_shape=[input_size]),
+        layers = [tf.keras.layers.Dense(units=nodes_in_hidden, input_shape=(input_size,)),
                   tf.keras.layers.Dense(units=nodes_in_hidden),
                   tf.keras.layers.Dense(units=nodes_in_hidden),
                   tf.keras.layers.Dense(units=output_size)]

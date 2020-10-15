@@ -7,7 +7,10 @@ src/dir_predicted
 src/dir_to_predict
 src/dir_to_train
 src/dir_trained
+src/modules/__pycache__
 src/modules/descriptors/build
 src/results
 src/kabuto.log
 scripts/kabuto.log
+src/config/dict_pbc.json
+src/config/dict_timesteps.json
