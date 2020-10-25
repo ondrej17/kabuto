@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 
-#include "descriptorsmodule.h"
-#include "descriptorsfuncmodule.h"
+#include "descriptors_module.hpp"
+#include "descriptors_func_module.hpp"
 
 
 /**

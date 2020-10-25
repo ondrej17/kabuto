@@ -636,7 +636,7 @@ class Kabuto:
 
         if filename is None and directory is not None:
             input_array, output_array = [], []
-            logger.info("Preparing arrays from directory: \'{}\'".format(directory))
+            logger.debug("Preparing arrays from directory: \'{}\'".format(directory))
 
             for root, directories, files in os.walk(directory):
                 if not files:
@@ -683,7 +683,7 @@ class Kabuto:
             return np.array(input_array, dtype=float), np.array(output_array, dtype=float), None
 
         elif filename is not None and directory is not None:
-            logger.info("Preparing only input array from the file: \'{}\'".format(os.path.join(directory, filename)))
+            logger.debug("Preparing only input array from the file: \'{}\'".format(os.path.join(directory, filename)))
 
             input_array, output_array, timestep = [], None, None
 
@@ -773,7 +773,7 @@ class Kabuto:
         """
         vector = [0] * self.number_of_phases
         n = len(prediction.tolist())
-        logger.info("Number of atoms in prediction: {}".format(n))
+        logger.debug("Number of atoms in prediction: {}".format(n))
         for i, q_i in enumerate(prediction.tolist()):  # rows
             for j, q_ij in enumerate(q_i):  # columns
                 vector[j] += q_ij

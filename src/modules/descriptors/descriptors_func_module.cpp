@@ -3,19 +3,8 @@
 #include <cmath>
 #include <boost/math/special_functions/spherical_harmonic.hpp>
 
-#include "descriptorsfuncmodule.h"
+#include "descriptors_func_module.hpp"
 
-/**
- * Calculates descriptors for a given atom_id
- *
- * @param id Id of the atom, for which descriptors will be calculated
- * @param coords Coordinates (x, y, z) of given atom
- * @param vector_id Ids of all atoms
- * @param vector_coords Tuples (x,y,z) of all atoms
- * @param pbc
- *
- * @returns result Tuple of 14 real numbers - descriptors
- */
 std::vector<double> calculate_descriptors(int id,
                                           std::vector<double> &coords,
                                           std::vector<int> &vector_id,
@@ -44,19 +33,6 @@ std::vector<double> calculate_descriptors(int id,
     return result;
 }
 
-/**
- * Symmetry function G_2
- *
- * @param eta
- * @param r_s
- * @param id Id of the atom, for which the function is evaluated
- * @param coords Coordinates (x, y, z) of given atom
- * @param vector_id Ids of all atoms
- * @param vector_coords Tuples (x,y,z) of all atoms
- * @param pbc
- *
- * @returns result
- */
 double symmetry_func_g_2(double eta,
                          double r_s,
                          int id,
@@ -89,18 +65,6 @@ double symmetry_func_g_2(double eta,
     return result;
 }
 
-/**
-* Symmetry function G_3
-*
-* @param kappa
-* @param id Id of the atom, for which the function is evaluated
-* @param coords Coordinates (x, y, z) of given atom
-* @param vector_id Ids of all atoms
-* @param vector_coords Tuples (x,y,z) of all atoms
-* @param pbc
-*
-* @returns result
-*/
 double symmetry_func_g_3(double kappa,
                          int id,
                          std::vector<double> &coords,
@@ -132,17 +96,6 @@ double symmetry_func_g_3(double kappa,
     return result;
 }
 
-/**
- * Returns a value of Steinhardt parameter with l = l
- *
- * @param id
- * @param coords
- * @param vector_id
- * @param vector_coords
- * @param pbc
- *
- * @return double
- */
 double steinhardt_func(int l,
                        int id,
                        std::vector<double> &coords,
@@ -158,19 +111,6 @@ double steinhardt_func(int l,
     return sqrt(result * 4 * M_PI / (2 * l + 1));
 }
 
-/**
- * Returns value of function Q_lm
- *
- * @param m
- * @param l
- * @param id
- * @param coords
- * @param vector_id
- * @param vector_coords
- * @param pbc
- *
- * @return double
- */
 double function_q_lm(int m,
                      int l,
                      int id,
@@ -204,18 +144,6 @@ double function_q_lm(int m,
     return numerator / denominator;
 }
 
-/**
- * Returns value of spherical harmonics for given l and m
- * Uses Boost library
- *
- * @param l
- * @param m
- * @param dx X-component of vector between two atoms
- * @param dy Y-component of vector between two atoms
- * @param dz Z-component of vector between two atoms
- *
- * @return double
- */
 double function_y_lm(int l, int m, double dx, double dy, double dz) {
     // spherical coordinates of vector r_ij
     double r{sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2))};
@@ -235,15 +163,6 @@ double function_y_lm(int l, int m, double dx, double dy, double dz) {
     return result;
 }
 
-/**
-  * Calculates the value of f_c function
-  *
-  * @param r
-  * @param r_min
-  * @param r_max
-  *
-  * @returns double
-  */
 double function_f_c(double r, double r_min, double r_max) {
     if (r <= r_min) {
         return 1.0;
@@ -252,57 +171,4 @@ double function_f_c(double r, double r_min, double r_max) {
     } else {
         return 0.0;
     }
-}
-
-/**
- * Converts PyObject(List/Tuple) to C++ Vector
- *
- * @param incoming It is a PyObject (PyTuple, PyList)
- *
- * @returns data Vector
- *
- * @throws Error when incoming was neither PyTuple, nor PyList
- */
-std::vector<double> listTupleToVector_Float(PyObject *incoming) {
-    std::vector<double> data;
-    if (PyTuple_Check(incoming)) {
-        for (Py_ssize_t i = 0; i < PyTuple_Size(incoming); i++) {
-            PyObject *value = PyTuple_GetItem(incoming, i);
-            data.push_back(PyFloat_AsDouble(value));
-        }
-    } else {
-        if (PyList_Check(incoming)) {
-            for (Py_ssize_t i = 0; i < PyList_Size(incoming); i++) {
-                PyObject *value = PyList_GetItem(incoming, i);
-                data.push_back(PyFloat_AsDouble(value));
-            }
-        } else {
-            throw std::logic_error("Passed PyObject pointer was not a list or tuple!");
-        }
-    }
-    return data;
-}
-
-/**
- * Converts data (C++ vector) to PyObject (PyTuple)
- *
- * @param incoming It is a C++ vector
- *
- * @returns tuple PyTuple
- *
- * @throws Error when there is not enough memory
- */
-PyObject *vectorToTuple_Float(const std::vector<double> &data) {
-    PyObject *tuple = PyTuple_New(data.size());
-    if (!tuple) throw std::logic_error("Unable to allocate memory for Python tuple");
-    for (unsigned int i = 0; i < data.size(); i++) {
-        PyObject *num = PyFloat_FromDouble((double) data[i]);
-        if (!num) {
-            Py_DECREF(tuple);
-            throw std::logic_error("Unable to allocate memory for Python tuple");
-        }
-        PyTuple_SET_ITEM(tuple, i, num);
-    }
-
-    return tuple;
 }
