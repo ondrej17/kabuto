@@ -1,9 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <boost/math/special_functions/spherical_harmonic.hpp>
-
-#include "descriptors_func_module.hpp"
+#include "descriptors_func_module.h"
 
 std::vector<double> calculate_descriptors(int id,
                                           std::vector<double> &coords,

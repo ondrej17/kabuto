@@ -1,18 +1,9 @@
 #include <vector>
 #include <iostream>
 
-#include "descriptors_utility.hpp"
+#include "descriptors_utility.h"
 
 
-/**
- * Converts PyObject(List/Tuple) to C++ Vector
- *
- * @param incoming It is a PyObject (PyTuple, PyList)
- *
- * @returns data Vector
- *
- * @throws Error when incoming was neither PyTuple, nor PyList
- */
 std::vector<double> listTupleToVector_Float(PyObject *incoming) {
     std::vector<double> data;
     if (PyTuple_Check(incoming)) {
@@ -33,15 +24,7 @@ std::vector<double> listTupleToVector_Float(PyObject *incoming) {
     return data;
 }
 
-/**
- * Converts data (C++ vector) to PyObject (PyTuple)
- *
- * @param incoming It is a C++ vector
- *
- * @returns tuple PyTuple
- *
- * @throws Error when there is not enough memory
- */
+
 PyObject *vectorToTuple_Float(const std::vector<double> &data) {
     PyObject *tuple = PyTuple_New(data.size());
     if (!tuple) throw std::logic_error("Unable to allocate memory for Python tuple");

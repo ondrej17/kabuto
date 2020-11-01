@@ -1,100 +1,115 @@
-#include <iostream>
-#include <vector>
-
-#include "descriptors_module.hpp"
-#include "descriptors_func_module.hpp"
+#include "descriptors_module.h"
 
 
-/**
-  * Function that computes and returns descriptors for one timestep
-  *
-  * @param self Module that is calling this function
-  * @param args It is then parsed to a single dictionary {atom_id:(x, y, z)}
-
-  * @returns result Python dictionary {atom_id:(tuple of descriptors)}
-  */
 static PyObject *descriptors_compute(PyObject *self, PyObject *args) {
-    // parse args to c-variables
-    PyObject *atoms;
-    double pbc_x = 0.0;
-    double pbc_y = 0.0;
-    double pbc_z = 0.0;
-    if (!PyArg_ParseTuple(args, "dddO", &pbc_x, &pbc_y, &pbc_z, &atoms)) {
+
+    // parse args
+    PyObject *inputDictionary;
+    double pbcX = 0.0;
+    double pbcY = 0.0;
+    double pbcZ = 0.0;
+    if (!PyArg_ParseTuple(args, "dddO", &pbcX, &pbcY, &pbcZ, &inputDictionary)) {
+        // TODO: check for incorrect parsing
         return Py_BuildValue("d", 1);
     }
 
-    PyObject *atom_ids = PyDict_Keys(atoms);
-    PyObject *coordinates = PyDict_Values(atoms);
+    // create and fill Box object
+    Box box = Box(pbcX, pbcY, pbcZ);
+
+    // parse each timestep in inputDictionary
+    PyObject *timestepId = PyDict_Keys(inputDictionary);
+    PyObject *timestep = PyDict_Values(inputDictionary);
     Py_ssize_t pos1 = 0;
-    std::vector<int> vector_atom_id;
-    std::vector<std::vector<double>> vector_atom_coords;
+    while (PyDict_Next(inputDictionary, &pos1, &timestepId, &timestep)) {
+        // get ID of timestep
+        long int id{PyLong_AsLong(timestepId)};
+        box.addTimestepId(id);
 
-    // iterate through {atoms_id:coords} and get C vectors
-    while (PyDict_Next(atoms, &pos1, &atom_ids, &coordinates)) {
-        // get current atom_id and push it to the vector
-        vector_atom_id.push_back(PyLong_AsLong(atom_ids));
+        // get timestep
+        PyObject *atoms;
+        if (!PyArg_ParseTuple(timestep, "O", &atoms)) {
+            // TODO: check for incorrect parsing
+            return Py_BuildValue("d", 1);
+        }
 
-        // get atom coords and push it to the vector
-        std::vector<double> curr_coordinates = listTupleToVector_Float(PyDict_GetItem(atoms, atom_ids));
-        vector_atom_coords.push_back(curr_coordinates);
+        // parse each atom in timestep
+        PyObject *atomId = PyDict_Keys(atoms);
+        PyObject *atomCoords = PyDict_Values(atoms);
+        Py_ssize_t pos2 = 0;
+        while (PyDict_Next(atoms, &pos2, &atomId, &atomCoords)) {
+            // get current id and coordinates of current atom
+            int id = PyLong_AsLong(atomId);
+            std::vector<double> coordinates = listTupleToVector_Float(PyDict_GetItem(atoms, atomId));
+
+            // add atom to box
+            box.addAtom(id, coordinates[0], coordinates[1], coordinates[2]);
+        }
     }
 
-    // create a vector of pbc values
-    std::vector<double> pbc{pbc_x, pbc_y, pbc_z};
+    // calculate descriptors for each atom
+    box.calculateDescriptors();
 
-    // calculate descriptors for each atom:
-    std::vector <std::vector<double>> vector_descriptors;
-    for (long unsigned int atom_id = 0; atom_id < vector_atom_id.size(); atom_id++) {
-        std::vector<double> descriptors = calculate_descriptors(vector_atom_id[atom_id],
-                                                                vector_atom_coords[atom_id],
-                                                                vector_atom_id,
-                                                                vector_atom_coords,
-                                                                pbc);
-        vector_descriptors.push_back(descriptors);
-    }
-
-    // build a dictionary {atom_id:descriptors} from these two vectors
+    // create Python dictionary that will be passed back to Python script
     PyObject *result = PyDict_New();
-    for (long unsigned int i = 0; i < vector_atom_id.size(); i++) {
-        // prepare id of atom
-        PyObject *id = Py_BuildValue("i", vector_atom_id[i]);
+    int numOfTimesteps{box.getNumberOfTimesteps()};
+    int numOfAtom{box.getNumberOfAtom()};
 
-        // prepare descriptors of atom
-        PyObject *descriptors = vectorToTuple_Float(vector_descriptors[i]);
+    for (int j = 0; j < numOfTimesteps; j++) {
 
+        // next timestep
+        PyObject *timestepDict = PyDict_New();
+
+        for (int i = 0; i < numOfAtom; i++) {
+            // get atom id
+            int atomId{box.getAtomId(i)};
+            std::vector<double> atomDescriptors {box.getAtomDescriptors(i, j)};
+
+            // prepare id and descriptors of atom
+            PyObject *id = Py_BuildValue("i", atomId);
+            PyObject *descriptors = vectorToTuple_Float(atomDescriptors);
+
+            // add new entry to python dictionary
+            if (PyDict_SetItem(timestepDict, id, descriptors) != 0) {
+                // TODO: check for incorrect setting item in PyDict
+                return Py_BuildValue("d", 2);
+            }
+        }
         // add new entry to python dictionary
-        if (PyDict_SetItem(result, id, descriptors) != 0) {
+        int timestepIdInt {box.getTimestepId(j)};
+        PyObject *timestepId = Py_BuildValue("i", timestepIdInt);
+        if (PyDict_SetItem(result, timestepId, timestepDict) != 0) {
+            // TODO: check for incorrect setting item in PyDict
             return Py_BuildValue("d", 2);
         }
     }
 
-    // return a dictionary {atom_id:descriptors}
+    // return a Python dictionary {atom_id:descriptors}
     return result;
 }
 
 /**
- * Defines methods that can be called from Python
+ * PyMethodDef list that defines methods that can be called from Python.
  */
 static PyMethodDef descriptors_methods[] = {
         // "PythonName",    C-function name,        argument presentation,  description
-        {"compute", descriptors_compute, METH_VARARGS, "Compute descriptors for one timestep"},
-        {NULL,      NULL,                0,            NULL}   /* SENTINEL */
+        {"compute", descriptors_compute, METH_VARARGS, "Computes descriptors for one timestep."},
+        {NULL,      NULL,                0,            NULL}
 };
 
 /**
- * Structure that holds information about module
+ * Structure that holds information about module.
  */
-static struct PyModuleDef descriptors =
-        {
-                PyModuleDef_HEAD_INIT,
-                "descriptors",      // name of module
-                NULL,               // module documentation
-                -1,                 // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-                descriptors_methods
-        };
+static struct PyModuleDef descriptors = {
+        PyModuleDef_HEAD_INIT,  // init function of module
+        "descriptors",          // name of module
+        NULL,                   // module documentation
+        -1,                     // size of per-interpreter state of the module,
+        // or -1 if the module keeps state in global variables.
+        descriptors_methods     // list of methods that can be called from Python
+};
 
 /**
- * Initialization class of C++ extension for Python
+ * Initialization function of C++ extension for Python
  */
 PyMODINIT_FUNC PyInit_descriptors(void) {
     return PyModule_Create(&descriptors);

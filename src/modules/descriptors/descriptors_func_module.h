@@ -1,16 +1,20 @@
 #ifndef __DESCRIPTORSFUNC__
 #define __DESCRIPTORSFUNC__
 
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <boost/math/special_functions/spherical_harmonic.hpp>
+
 extern "C" {
 #include <Python.h>
 }
-
-#include "descriptors_utility.hpp"
 
 #define R_MIN_SYM 6.2
 #define R_MAX_SYM 6.4
 #define R_MIN_STEIN 3.8
 #define R_MAX_STEIN 4.0
+
 
 /**
  * Calculates descriptors for a given atom_id

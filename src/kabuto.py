@@ -163,6 +163,7 @@ class Kabuto:
 
                 elif scan_timestep:
                     logger.debug("Timestep: {}".format(repr(line)))
+                    line = int(line)
                     self.timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
@@ -427,6 +428,7 @@ class Kabuto:
 
                 elif scan_timestep:
                     logger.debug("Timestep: {}".format(repr(line)))
+                    line = int(line)
                     self.timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
