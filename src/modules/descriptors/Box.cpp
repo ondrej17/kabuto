@@ -1,7 +1,3 @@
-//
-// Created by ondrej on 1. 11. 2020.
-//
-
 #include "Box.h"
 
 
@@ -37,7 +33,7 @@ int Box::getTimestepId(int ithTimestep) {
 }
 
 std::vector<double> Box::getAtomDescriptors(int ithAtom, int jthTimestep) {
-    return m_atoms[i].getDescriptors(jthTimestep);
+    return m_atoms[ithAtom].getDescriptors(jthTimestep);
 }
 
 int Box::getAtomId(int ithAtom) {

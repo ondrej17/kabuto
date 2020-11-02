@@ -30,7 +30,7 @@ Trains everything from files in `dir_to_train` directory.
 Predicts the percentage of each phase that neural network knows. Determines global structure in given dump file for each timestep.
 
 ## Usage
-Compile C++ extension `decsriptors` in `src/modules/descriptors` folder:
+Compile C++ extension `descriptors` in `src/modules/descriptors` folder:
     
     python3 setup.py install 
 

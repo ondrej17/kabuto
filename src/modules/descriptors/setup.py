@@ -4,7 +4,9 @@ module1 = Extension(
     "descriptors",
     sources=['descriptors_module.cpp',
              'descriptors_func_module.cpp',
-             'descriptors_utility.cpp'],
+             'descriptors_utility.cpp',
+             'Box.cpp',
+             'Atom.cpp'],
 )
 
 setup(name="descriptors",

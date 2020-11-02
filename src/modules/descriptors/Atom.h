@@ -10,7 +10,7 @@ private:
     double m_x;
     double m_y;
     double m_z;
-    std::vector<double> m_descriptors;
+    std::vector<std::vector<double>> m_descriptors;
 
 public:
     /**

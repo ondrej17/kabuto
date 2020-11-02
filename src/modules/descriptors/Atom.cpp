@@ -5,11 +5,11 @@
 #include "Atom.h"
 
 
-std::vector<double> getDescriptors(int jthTimestep) {
+std::vector<double> Atom::getDescriptors(int jthTimestep) {
     return m_descriptors[jthTimestep];
 }
 
 
-void calculateDescriptors(int jthTimestep) {
+void Atom::calculateDescriptors(int jthTimestep) {
     // TODO: correctly write this function. Use the descriptors_func_module.cpp/.h files(s).
 }
