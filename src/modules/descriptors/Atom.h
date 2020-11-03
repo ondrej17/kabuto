@@ -1,8 +1,9 @@
-#ifndef DESCRIPTORS_ATOM_H
-#define DESCRIPTORS_ATOM_H
+#ifndef KABUTO_ATOM_H
+#define KABUTO_ATOM_H
 
 #include <vector>
 
+class Timestep; // forward declaration of Timestep class
 
 class Atom {
 private:
@@ -10,37 +11,32 @@ private:
     double m_x;
     double m_y;
     double m_z;
-    std::vector<std::vector<double>> m_descriptors;
+    std::vector<double> m_descriptors;
+    Timestep &m_masterTimestep; // holds reference to Timestep object that contains this Atom object
 
 public:
-    /**
-     * Constructor of the class (the only one).
-     * @param id ID of this atom.
-     * @param x, y, z Coordinates of this atom
-     */
-    Atom(int id, double x, double y, double z)
-            : m_id{id}, m_x{x}, m_y{y}, m_z{z} {}
+    // constructor
+    Atom(int id, double x, double y, double z, Timestep &masterTimestep)
+            : m_id{id}, m_x{x}, m_y{y}, m_z{z}, m_masterTimestep{masterTimestep} {}
 
-    /**
-     * Returns the ID of this atom.
-     * @return ID of this atom.
-     */
-    inline int getId() {return m_id;};
+    // getters
+    inline int getId() { return m_id; };
 
-    /**
-     * Returns descriptors of the atom from given timestep.
-     * @param jthTimestep The order number of timestep (counted form 0).
-     * @returns (descriptor#1, descriptor#2, ..., descriptor#14)
-     */
-    std::vector<double> getDescriptors(int jthTimestep);
+    inline double getX() { return m_x; };
 
-    /**
-     * Calculates descriptors of the atom for the given timestep.
-     * Checks whether the Verlet list of the atom had been already created.
-     * @param jthTimestep The order number of timestep (counted form 0).
-     */
-    void calculateDescriptors(int jthTimestep);
+    inline double getY() { return m_y; };
+
+    inline double getZ() { return m_z; };
+
+    inline std::vector<double> getDescriptors() { return m_descriptors; };
+
+    inline Timestep &getMasterTimestep() { return m_masterTimestep; };
+
+    // methods
+    void calculateDescriptors();
+
+    void createVerletLists();
 };
 
 
-#endif // DESCRIPTORS_ATOM_H
+#endif //KABUTO_ATOM_H

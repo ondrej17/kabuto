@@ -22,8 +22,8 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args) {
     Py_ssize_t pos1 = 0;
     while (PyDict_Next(inputDictionary, &pos1, &timestepId, &timestep)) {
         // get ID of timestep
-        long int id{PyLong_AsLong(timestepId)};
-        box.addTimestepId(id);
+        long int idOfTimestep{PyLong_AsLong(timestepId)};
+        box.addTimestep(idOfTimestep);
 
         // get timestep
         PyObject *atoms;
@@ -38,13 +38,16 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args) {
         Py_ssize_t pos2 = 0;
         while (PyDict_Next(atoms, &pos2, &atomId, &atomCoords)) {
             // get current id and coordinates of current atom
-            int id = PyLong_AsLong(atomId);
+            long int idOfAtom = PyLong_AsLong(atomId);
             std::vector<double> coordinates = listTupleToVector_Float(PyDict_GetItem(atoms, atomId));
 
             // add atom to box
-            box.addAtom(id, coordinates[0], coordinates[1], coordinates[2]);
+            box.addAtomToTimestep(idOfTimestep, idOfAtom. coordinates[0], coordinates[1], coordinates[2]);
         }
     }
+
+    // create Verlet lists
+    box.createVerletLists();
 
     // calculate descriptors for each atom
     box.calculateDescriptors();

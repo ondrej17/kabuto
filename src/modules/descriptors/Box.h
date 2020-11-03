@@ -1,80 +1,49 @@
-#ifndef DESCRIPTORS_BOX_H
-#define DESCRIPTORS_BOX_H
+#ifndef KABUTO_BOX_H
+#define KABUTO_BOX_H
 
 #include <vector>
-#include "Atom.h"
+#include <pair>
 
+#include "Timestep.h"
+#include "VerletList.h"
 
 class Box {
 private:
     double m_pbcX;
     double m_pbcY;
     double m_pbcZ;
-    std::vector <Atom> m_atoms;
-    std::vector<int> m_timestepsId;
-
+    std::vector <std::pair<int, Timestep>> m_timesteps;
+    std::vector <std::pair<int, VerletList>> m_verletLists;
 public:
-    /**
-     * Constructor of the class (the only one).
-     * @param pbcX, pbcY, pbcZ Periodic boundary conditions in each direction.
-     */
+    // constructor
     Box(double pbcX, double pbcY, double pbcZ)
-            : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ} {
-    }
+            : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ} {}
 
-    /**
-     * Calculates descriptors for all atoms for all timesteps.
-     */
+    // getters
+    inline double getPbcX() { return m_pbcX; };
+
+    inline double getPbcY() { return m_pbcY; };
+
+    inline double getPbcZ() { return m_pbcZ; };
+
+    // methods
     void calculateDescriptors();
 
-    /**
-     * Adds the ID of new timestep (mostly it is a time in ps from beginning of simulation).
-     * @param id ID of timestep.
-     */
-    void addTimestepId(int id);
+    void createVerletLists();
 
-    /**
-     * Adds new atom to the box.
-     * @param id ID of the atom.
-     * @param x, y, z Coordinates of the atom.
-     */
-    void addAtom(int id, double x, double y, double z);
+    void addTimestep(int id);
 
-    /**
-     * Returns the number of timesteps in this box.
-     * @returns number of timesteps in this box.
-     */
+    void addAtomToTimestep(int timestepId, int atomId, double x, double y, double z);
+
     int getNumberOfTimesteps();
 
-    /**
-     * Returns the number of atoms in this box.
-     * @returns number of atoms in this box.
-     */
     int getNumberOfAtom();
 
-    /**
-     * Returns ID of the j-th timestep.
-     * @param ithTimestep The order number of timestep (counted form 0).
-     * @returns ID of the j-th timestep.
-     */
-    int getTimestepId(int ithTimestep);
+    int getTimestepId();
 
-    /**
-     * Returns descriptors of the i-th atom from j-th timestep.
-     * @param ithAtom The order number of atom (counted form 0).
-     * @param jthTimestep The order number of timestep (counted form 0).
-     * @return descriptors of the i-th atom from j-th timestep.
-     */
-    std::vector<double> getAtomDescriptors(int ithAtom, int jthTimestep);
-
-    /**
-     * Returns ID of the i-th atom.
-     * @param ithAtom The order number of atom (counted form 0).
-     * @returns ID of the i-th atom.
-     */
-    int getAtomId(int ithAtom);
+    std::vector<double> getAtomDescriptors(int ithTimestep, int jthAtom);
 
 };
 
 
-#endif // DESCRIPTORS_BOX_H
+#endif //KABUTO_BOX_H
