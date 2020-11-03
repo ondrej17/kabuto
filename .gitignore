@@ -1,5 +1,6 @@
 # Default ignored files
 .idea
+.vscode
 kabuto.iml
 # Custom ignored files
 src/saved_nn
