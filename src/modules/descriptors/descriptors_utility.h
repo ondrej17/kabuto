@@ -1,5 +1,5 @@
-#ifndef KABUTO_DESCRIPTORS_UTILITY_H
-#define KABUTO_DESCRIPTORS_UTILITY_H
+#ifndef DESCRIPTORS_UTILITY_H
+#define DESCRIPTORS_UTILITY_H
 
 extern "C" {
 #include <Python.h>
@@ -27,4 +27,4 @@ std::vector<double> listTupleToVector_Float(PyObject *incoming);
  */
 PyObject *vectorToTuple_Float(const std::vector<double> &data);
 
-#endif //KABUTO_DESCRIPTORS_UTILITY_H
+#endif //DESCRIPTORS_UTILITY_H

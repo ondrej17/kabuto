@@ -1,9 +1,10 @@
-#ifndef KABUTO_VERLETLIST_H
-#define KABUTO_VERLETLIST_H
+#ifndef DESCRIPTORS_VERLETLIST_H
+#define DESCRIPTORS_VERLETLIST_H
 
 #include <vector>
 
-class VerletList {
+class VerletList
+{
 private:
     int m_id;
     std::vector<int> m_ids;
@@ -14,10 +15,10 @@ public:
 
     // getters
     inline int getId() { return m_id; };
-    inline std::vector<int> getIds() {return m_ids;};
+    inline std::vector<int> getIds() { return m_ids; };
 
     // methods
+    void pushBack(int atomId);
 };
 
-
-#endif //KABUTO_VERLETLIST_H
+#endif //DESCRIPTORS_VERLETLIST_H

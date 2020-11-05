@@ -1,5 +1,6 @@
-//
-// Created by ondrej on 3. 11. 2020.
-//
-
 #include "VerletList.h"
+
+void VerletList::pushBack(int atomId)
+{
+    m_ids.push_back(atomId);
+}

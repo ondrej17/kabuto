@@ -1,23 +1,24 @@
-#ifndef KABUTO_ATOM_H
-#define KABUTO_ATOM_H
+#ifndef DESCRIPTORS_ATOM_H
+#define DESCRIPTORS_ATOM_H
 
 #include <vector>
+#include "Box.h"
 
-class Timestep; // forward declaration of Timestep class
+#define DUMMY_DOUBLE 3.14
 
-class Atom {
+class Atom: protected Box {
 private:
     int m_id;
+    int m_idOfMasterTimestep;
     double m_x;
     double m_y;
     double m_z;
     std::vector<double> m_descriptors;
-    Timestep &m_masterTimestep; // holds reference to Timestep object that contains this Atom object
 
 public:
     // constructor
-    Atom(int id, double x, double y, double z, Timestep &masterTimestep)
-            : m_id{id}, m_x{x}, m_y{y}, m_z{z}, m_masterTimestep{masterTimestep} {}
+    Atom(int id, double x, double y, double z, int idOfTimestep)
+        : m_id{id}, m_x{x}, m_y{y}, m_z{z}, m_idOfMasterTimestep{idOfTimestep} {}
 
     // getters
     inline int getId() { return m_id; };
@@ -30,13 +31,10 @@ public:
 
     inline std::vector<double> getDescriptors() { return m_descriptors; };
 
-    inline Timestep &getMasterTimestep() { return m_masterTimestep; };
-
     // methods
     void calculateDescriptors();
 
-    void createVerletLists();
+    void createVerletList();
 };
 
-
-#endif //KABUTO_ATOM_H
+#endif //DESCRIPTORS_ATOM_H

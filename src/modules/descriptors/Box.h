@@ -1,23 +1,29 @@
-#ifndef KABUTO_BOX_H
-#define KABUTO_BOX_H
+#ifndef DESCRIPTORS_BOX_H
+#define DESCRIPTORS_BOX_H
 
-#include <vector>
 #include <utility>
+#include <map>
+#include <iterator>
 
 #include "Timestep.h"
 #include "VerletList.h"
 
-class Box {
+class Box
+{
 private:
     double m_pbcX;
     double m_pbcY;
     double m_pbcZ;
-    std::vector <std::pair<int, Timestep>> m_timesteps;
-    std::vector <std::pair<int, VerletList>> m_verletLists;
+
+protected:
+    std::map<int, VerletList> m_verletLists;
+    std::map<int, Timestep> m_timesteps;
+
 public:
     // constructor
+    Box();
     Box(double pbcX, double pbcY, double pbcZ)
-            : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ} {}
+        : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ} {}
 
     // getters
     inline double getPbcX() { return m_pbcX; };
@@ -39,11 +45,11 @@ public:
 
     int getNumberOfAtom();
 
-    int getTimestepId();
+    std::vector<double> getAtomDescriptors(int timestepId, int atomId);
 
-    std::vector<double> getAtomDescriptors(int ithTimestep, int jthAtom);
+    void addToVerletList(int id, int idOfAtomInVerletList);
 
+    const std::map<int, Timestep> getAllTimesteps() { return m_timesteps; };
 };
 
-
-#endif //KABUTO_BOX_H
+#endif //DESCRIPTORS_BOX_H

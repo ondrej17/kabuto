@@ -4,7 +4,8 @@
 #include <iostream>
 #include <vector>
 
-extern "C" {
+extern "C"
+{
 #include <Python.h>
 }
 

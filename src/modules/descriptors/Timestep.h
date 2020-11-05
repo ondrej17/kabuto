@@ -1,36 +1,40 @@
-#ifndef KABUTO_TIMESTEP_H
-#define KABUTO_TIMESTEP_H
+#ifndef DESCRIPTORS_TIMESTEP_H
+#define DESCRIPTORS_TIMESTEP_H
 
 #include <vector>
 #include <utility>
 
 #include "Atom.h"
 
-class Box;
-
-class Timestep {
+class Timestep
+{
 private:
     int m_id;
-    std::vector <std::pair<int, Atom>> m_atoms;
-    Box &m_masterBox;   // holds reference to Box object that contains this Timestep object
+    std::map<int, Atom> m_atoms;
 
 public:
     // constructor
-    Timestep(int id, Box &masterBox)
-            : m_id{id}, m_masterBox{masterBox} {}
+    Timestep(int id) : m_id{id} {}
 
     // getters
     inline int getId() { return m_id; };
 
-    inline std::vector <std::pair<int, Atom>> getAtoms() { return m_atoms; };
-
-    inline Box &getMasterBox() { return m_masterBox; };
+    inline std::map<int, Atom> getAtoms() { return m_atoms; };
 
     // methods
     void calculateDescriptors();
 
     void createVerletLists();
+
+    void addAtom(int id, double x, double y, double z);
+
+    int getNumberOfAtom();
+
+    int getAtomId(int jthAtom);
+
+    std::vector<double> getAtomDescriptors(int jthAtom);
+
+    std::map<int, Atom> getAllAtoms();
 };
 
-
-#endif //KABUTO_TIMESTEP_H
+#endif //DESCRIPTORS_TIMESTEP_H
