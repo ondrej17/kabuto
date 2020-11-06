@@ -1,3 +1,13 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #ifndef DESCRIPTORS_VERLETLIST_H
 #define DESCRIPTORS_VERLETLIST_H
 

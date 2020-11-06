@@ -1,3 +1,13 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #ifndef DESCRIPTORS_H
 #define DESCRIPTORS_H
 
@@ -10,7 +20,7 @@ extern "C"
 }
 
 #include "descriptors_utility.h"
-#include "Box.h"
+#include "descriptors_box.h"
 
 /**
   * Function that computes and returns descriptors for all timesteps of the simulation.

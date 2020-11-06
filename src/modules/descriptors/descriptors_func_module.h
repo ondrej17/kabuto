@@ -1,3 +1,13 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #ifndef __DESCRIPTORSFUNC__
 #define __DESCRIPTORSFUNC__
 

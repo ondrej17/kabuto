@@ -1,3 +1,13 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #ifndef DESCRIPTORS_BOX_H
 #define DESCRIPTORS_BOX_H
 
@@ -5,8 +15,8 @@
 #include <map>
 #include <iterator>
 
-#include "Timestep.h"
-#include "VerletList.h"
+#include "descriptors_timestep.h"
+#include "descriptors_verlet_list.h"
 
 class Box
 {
@@ -14,14 +24,11 @@ private:
     double m_pbcX;
     double m_pbcY;
     double m_pbcZ;
-
-protected:
     std::map<int, VerletList> m_verletLists;
     std::map<int, Timestep> m_timesteps;
 
 public:
     // constructor
-    Box();
     Box(double pbcX, double pbcY, double pbcZ)
         : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ} {}
 
@@ -32,7 +39,7 @@ public:
 
     inline double getPbcZ() { return m_pbcZ; };
 
-    // methods
+    // methods ?
     void calculateDescriptors();
 
     void createVerletLists();

@@ -1,16 +1,28 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #ifndef DESCRIPTORS_TIMESTEP_H
 #define DESCRIPTORS_TIMESTEP_H
 
 #include <vector>
+#include <map>
 #include <utility>
 
-#include "Atom.h"
+#include "descriptors_atom.h"
 
 class Timestep
 {
 private:
     int m_id;
     std::map<int, Atom> m_atoms;
+    // add other attributes
 
 public:
     // constructor
@@ -21,20 +33,7 @@ public:
 
     inline std::map<int, Atom> getAtoms() { return m_atoms; };
 
-    // methods
-    void calculateDescriptors();
-
-    void createVerletLists();
-
-    void addAtom(int id, double x, double y, double z);
-
-    int getNumberOfAtom();
-
-    int getAtomId(int jthAtom);
-
-    std::vector<double> getAtomDescriptors(int jthAtom);
-
-    std::map<int, Atom> getAllAtoms();
+    // setters
 };
 
 #endif //DESCRIPTORS_TIMESTEP_H

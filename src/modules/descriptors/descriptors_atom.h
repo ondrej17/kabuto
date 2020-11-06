@@ -1,15 +1,24 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #ifndef DESCRIPTORS_ATOM_H
 #define DESCRIPTORS_ATOM_H
 
 #include <vector>
-#include "Box.h"
 
 #define DUMMY_DOUBLE 3.14
 
-class Atom: protected Box {
+class Atom
+{
 private:
     int m_id;
-    int m_idOfMasterTimestep;
     double m_x;
     double m_y;
     double m_z;
@@ -17,8 +26,8 @@ private:
 
 public:
     // constructor
-    Atom(int id, double x, double y, double z, int idOfTimestep)
-        : m_id{id}, m_x{x}, m_y{y}, m_z{z}, m_idOfMasterTimestep{idOfTimestep} {}
+    Atom(int id, double x, double y, double z)
+        : m_id{id}, m_x{x}, m_y{y}, m_z{z} {}
 
     // getters
     inline int getId() { return m_id; };
@@ -30,11 +39,6 @@ public:
     inline double getZ() { return m_z; };
 
     inline std::vector<double> getDescriptors() { return m_descriptors; };
-
-    // methods
-    void calculateDescriptors();
-
-    void createVerletList();
 };
 
 #endif //DESCRIPTORS_ATOM_H
