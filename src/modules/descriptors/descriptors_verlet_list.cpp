@@ -1,6 +1,1 @@
-#include "VerletList.h"
-
-void VerletList::pushBack(int atomId)
-{
-    m_ids.push_back(atomId);
-}
+#include "descriptors_verlet_list.h"

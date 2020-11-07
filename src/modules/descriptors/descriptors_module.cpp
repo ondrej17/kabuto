@@ -15,7 +15,7 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
     }
 
     // create and fill Box object
-    Box box = Box(pbcX, pbcY, pbcZ);
+    Box box(pbcX, pbcY, pbcZ);
 
     // parse each timestep in inputDictionary
     PyObject *timestepId = PyDict_Keys(inputDictionary);
@@ -29,7 +29,7 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
 
         // get timestep
         PyObject *atoms;
-        if (!PyArg_ParseTuple(timestep, "O", &atoms))
+        if (!PyArg_Parse(timestep, "O", &atoms))
         {
             // TODO: check for incorrect parsing
             return Py_BuildValue("d", 1);
@@ -57,33 +57,34 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
     box.calculateDescriptors();
 
     // create Python dictionary that will be passed back to Python script
-    PyObject *result = PyDict_New();
+    PyObject *pyResult = PyDict_New();
+    std::vector<int> timestepsId{box.getTimestepsId()};
 
-    for (std::pair<int, Timestep> idAndTimestep : box.getAllTimesteps())
+    // go through all timesteps
+    for (int timestepId : timestepsId)
     {
-        // next timestep
-        PyObject *timestepDict = PyDict_New();
+        PyObject *pyTimestepDict = PyDict_New();
 
-        for (std::pair<int, Atom> idAndAtom : (idAndTimestep.second).getAllAtoms())
+        std::vector<int> atomsId{box.getTimestepAtomsId(timestepId)};
+
+        for (int atomId : atomsId)
         {
-            // next atom
-            int atomId{idAndAtom.first};
-            std::vector<double> atomDescriptors{(idAndAtom.second).getDescriptors()};
+            std::vector<double> atomDescriptors{box.getAtomDescriptors(timestepId, atomId)};
 
             // prepare id and descriptors of atom
-            PyObject *id = Py_BuildValue("i", atomId);
-            PyObject *descriptors = vectorToTuple_Float(atomDescriptors);
+            PyObject *pyId = Py_BuildValue("i", atomId);
+            PyObject *pyDescriptors = vectorToTuple_Float(atomDescriptors);
 
             // add new entry to python dictionary
-            if (PyDict_SetItem(timestepDict, id, descriptors) != 0)
+            if (PyDict_SetItem(pyTimestepDict, pyId, pyDescriptors) != 0)
             {
                 // TODO: check for incorrect setting item in PyDict
                 return Py_BuildValue("d", 2);
             }
         }
-        int timestepIdInt{idAndTimestep.first};
-        PyObject *timestepId = Py_BuildValue("i", timestepIdInt);
-        if (PyDict_SetItem(result, timestepId, timestepDict) != 0)
+
+        PyObject *pyTimestepId = Py_BuildValue("i", timestepId);
+        if (PyDict_SetItem(pyResult, pyTimestepId, pyTimestepDict) != 0)
         {
             // TODO: check for incorrect setting item in PyDict
             return Py_BuildValue("d", 2);
@@ -91,7 +92,7 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
     }
 
     // return a Python dictionary {atom_id:descriptors}
-    return result;
+    return pyResult;
 }
 
 /**

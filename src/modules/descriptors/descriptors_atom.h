@@ -31,14 +31,13 @@ public:
 
     // getters
     inline int getId() { return m_id; };
-
     inline double getX() { return m_x; };
-
     inline double getY() { return m_y; };
-
     inline double getZ() { return m_z; };
+    inline const std::vector<double> &getDescriptors() { return m_descriptors; };
 
-    inline std::vector<double> getDescriptors() { return m_descriptors; };
+    // setters
+    inline void setDescriptors(std::vector<double> descriptors) { m_descriptors = descriptors; };
 };
 
 #endif //DESCRIPTORS_ATOM_H

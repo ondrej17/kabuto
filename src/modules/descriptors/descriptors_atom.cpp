@@ -1,4 +1,4 @@
-#include "Atom.h"
+#include "descriptors_atom.h"
 
 // void Atom::calculateDescriptors()
 // {
