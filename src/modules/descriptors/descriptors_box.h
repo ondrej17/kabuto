@@ -31,6 +31,7 @@ protected:
     double m_pbcY;
     double m_pbcZ;
     int m_numOfTimesteps;
+    double m_rVerletListLimit;
     std::map<int, VerletList> m_verletLists;
     std::map<int, Timestep> m_timesteps;
     std::vector<int> m_timestepsId;
@@ -41,6 +42,7 @@ public:
         : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ}
     {
         m_numOfTimesteps = 0;
+        m_rVerletListLimit = 7.0; // because rMaxSym = 6.4
     }
 
     // getters
@@ -48,6 +50,7 @@ public:
     inline double getPbcX() { return m_pbcX; };
     inline double getPbcY() { return m_pbcY; };
     inline double getPbcZ() { return m_pbcZ; };
+    inline double getRVerletListLimit() { return m_rVerletListLimit; };
     inline std::map<int, VerletList> &getVerletLists() { return m_verletLists; };
     inline std::map<int, Timestep> &getTimesteps() { return m_timesteps; };
     inline std::vector<int> &getTimestepsId() { return m_timestepsId; };
@@ -57,6 +60,8 @@ public:
     void addAtomToTimestep(int timestepId, int atomId, double x, double y, double z);
     void createVerletLists();
     void calculateDescriptors();
+    int getNumOfAtoms();
+    int getNumOfAtomsInVerletList(int atomId);
     const std::vector<double> &getAtomDescriptors(int timestepId, int atomId);
     const std::vector<int> &getTimestepAtomsId(int timestepId);
 };

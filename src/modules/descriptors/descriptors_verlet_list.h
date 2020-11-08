@@ -26,5 +26,6 @@ public:
     // getters
     inline int getId() { return m_id; };
     inline std::vector<int> getAtomIds() { return m_atomIds; };
+    inline int getNumOfAtoms() {return m_atomIds.size();};
 };
 #endif //DESCRIPTORS_VERLETLIST_H

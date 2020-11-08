@@ -13,7 +13,7 @@ It is an implementation of `tensorflow`'s `keras` neural network in `Python` for
 ### Preparing
 Prepares a file containing descriptors of each atom for each timestep of simulation. Dump file must be an output of the `LAMMPS` simulation. Input file for simulation must contain `dump` command in the format:
 
-    dump myDump all atom 100 dump.atom
+    dump 1 all custom 50 atoms.out id type x y z
     
 Output files (from which neural network will be taught) are stored in `dir_to_train` directory.
 
