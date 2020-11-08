@@ -63,10 +63,20 @@ The example run and simulation are located in `example` folder.
                 * `...`
             * `test`
                 * `...`
-            * `descriptorsfuncmodule.cpp`
-            * `descriptorsmodule.cpp`
-            * `descriptorsfuncmodule.h`
-            * `descriptorsmodule.h`
+            * `descriptors_atom.cpp`
+            * `descriptors_atom.h`
+            * `descriptors_box.cpp`
+            * `descriptors_box.h`
+            * `descriptors_descriptors.cpp`
+            * `descriptors_descriptors.h`
+            * `descriptors_module.cpp`
+            * `descriptors_module.h`
+            * `descriptors_timestep.cpp`
+            * `descriptors_timestep.h`
+            * `descriptors_utility.cpp`
+            * `descriptors_utility.h`
+            * `descriptors_verlet_list.cpp`
+            * `descriptors_verlet_list.h`
             * `setup.py`
          * `descriptors.py`
          * `neural_network.py`
@@ -95,7 +105,13 @@ The example run and simulation are located in `example` folder.
      * `kabuto.py`
      * `kabuto.log`
  * `example`
+    * `molybden_bcc`
+        * `...`
+    * `molybden_fcc`
+        * `...`
+    * `small_example_dump.file`
  * `scripts`
+    * `...`
      
  ## Design of the NNs
 * input layer
@@ -116,4 +132,4 @@ The example run and simulation are located in `example` folder.
 * `Python3.6`
 * `tensorflow`, `scipy` and `numpy` packages
 * `boost` library
-* compiled `descriptros` C++ extension 
+* compiled `descriptors` C++ extension 
