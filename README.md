@@ -78,7 +78,7 @@ The example run and simulation are located in `example` folder.
             * `descriptors_verlet_list.cpp`
             * `descriptors_verlet_list.h`
             * `setup.py`
-         * `descriptors.py`
+         * ~~`descriptors.py`~~
          * `neural_network.py`
      * `config`
          * `dict_timesteps.json`
