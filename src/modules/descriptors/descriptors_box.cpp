@@ -88,7 +88,7 @@ void Box::calculateDescriptors()
     // go through all timesteps
     for (int timestepId : m_timestepsId)
     {
-
+        std::cout << "Calculating timestep #" << timestepId << std::endl;
         std::vector<int> atomsId{m_timesteps.at(timestepId).getAtomsId()};
         std::map<int, Atom> atoms{m_timesteps.at(timestepId).getAtoms()};
 

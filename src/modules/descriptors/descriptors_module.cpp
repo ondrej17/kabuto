@@ -56,7 +56,6 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
     int atomIndex {box.getTimestepAtomsId(box.getTimestepsId().at(0)).at(0)};
     std::cout   << "Number of atoms in Verlet list of atom #1: " 
                 << box.getNumOfAtomsInVerletList(atomIndex) << std::endl;
-    std::cout << "m_rVerletListLimit = " << box.getRVerletListLimit() << std::endl;
 
     // calculate descriptors for each atom
     box.calculateDescriptors();
