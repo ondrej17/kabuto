@@ -55,14 +55,14 @@ public:
         m_rMaxStein = 4.0;
 
         // set the parameters for g2 function
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 2.8));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 3.2));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 4.4));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 4.8));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 5.0));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 5.3));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 5.7));
-        m_g2FunctionParameters.push_back(std::vector<double>(20.0, 6.0));
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 2.8});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 3.2});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 4.4});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 4.8});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 5.0});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 5.3});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 5.7});
+        m_g2FunctionParameters.push_back(std::vector<double>{20.0, 6.0});
 
         // set the parameters for g3 function
         m_g3FunctionParameters.push_back(3.5);

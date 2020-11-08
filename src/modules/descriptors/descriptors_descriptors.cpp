@@ -6,7 +6,7 @@ std::vector<double> Descriptors::getDescriptors()
 
     for (std::vector<double> params : m_g2FunctionParameters)
     {
-        result.push_back(symmetryFunctionG2(params[0], params[1]));
+        result.push_back(symmetryFunctionG2(params.at(0), params.at(1)));
     }
     for (double param : m_g3FunctionParameters)
     {
@@ -27,7 +27,6 @@ double Descriptors::symmetryFunctionG2(double eta, double rs)
     double myY{m_atoms.at(m_id).getY()};
     double myZ{m_atoms.at(m_id).getZ()};
 
-    std::cout << m_id << std::endl;
     for (int id : m_atomsId)
     {
         if (m_id != id)
@@ -52,11 +51,8 @@ double Descriptors::symmetryFunctionG2(double eta, double rs)
             double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
 
             // add correct contribution to result
-            double contribution {fcFunction(r_ij, m_rMinSym, m_rMaxSym) * exp(-eta * pow(r_ij - rs, 2))};
-            std::cout << contribution << " ";
-            result += contribution;
+            result += fcFunction(r_ij, m_rMinSym, m_rMaxSym) * exp(-eta * pow(r_ij - rs, 2));
         }
-        std::cout << std::endl;
     }
     return result;
 }
