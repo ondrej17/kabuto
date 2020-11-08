@@ -1,11 +1,15 @@
 /**
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ * Name: 
+ *      descriptors_box.h
+ * Author: 
+ *      Ondrej Bily
+ * Description: 
+ *      Header file corresponding to class Box. Object Box is created in 
+ *      descriptor_module's "compute" function. In this function, A python 
+ *      arguments are parsed into C++ objects. Namely, all timesteps are 
+ *      contained in the Box object. Object Box is also responsible for 
+ *      creating Verlet lists for each atom and for calculating descriptors
+ *      for each atom.  
  */
 
 #ifndef DESCRIPTORS_BOX_H
@@ -13,14 +17,16 @@
 
 #include <utility>
 #include <map>
+#include <vector>
 
 #include "descriptors_timestep.h"
 #include "descriptors_atom.h"
 #include "descriptors_verlet_list.h"
+#include "descriptors_descriptors.h"
 
 class Box
 {
-private:
+protected:
     double m_pbcX;
     double m_pbcY;
     double m_pbcZ;
@@ -49,10 +55,10 @@ public:
     // methods
     void addTimestep(int timestepId);
     void addAtomToTimestep(int timestepId, int atomId, double x, double y, double z);
-    const std::vector<double> &getAtomDescriptors(int timestepId, int atomId);
-    std::vector<int> &getTimestepAtomsId(int timestepId);
     void createVerletLists();
     void calculateDescriptors();
+    const std::vector<double> &getAtomDescriptors(int timestepId, int atomId);
+    const std::vector<int> &getTimestepAtomsId(int timestepId);
 };
 
 #endif //DESCRIPTORS_BOX_H

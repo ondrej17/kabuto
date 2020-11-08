@@ -12,9 +12,14 @@ void Box::addAtomToTimestep(int timestepId, int atomId, double x, double y, doub
     m_timesteps.at(timestepId).addAtom(atomId, x, y, z);
 }
 
-std::vector<int> &Box::getTimestepAtomsId(int timestepId)
+const std::vector<int> &Box::getTimestepAtomsId(int timestepId)
 {
     return m_timesteps.at(timestepId).getAtomsId();
+}
+
+const std::vector<double> &Box::getAtomDescriptors(int timestepId, int atomId)
+{
+    return m_timesteps.at(timestepId).getAtomDescriptors(atomId);
 }
 
 void Box::createVerletLists()
@@ -47,15 +52,8 @@ void Box::createVerletLists()
     }
 }
 
-const std::vector<double> &Box::getAtomDescriptors(int timestepId, int atomId)
-{
-    return m_timesteps.at(timestepId).getAtomDescriptors(atomId);
-}
-
 void Box::calculateDescriptors()
 {
-    // TODO: implement the calculation of descriptors using functions in descriptors_func_module.h
-
     // go through all timesteps
     for (int timestepId : m_timestepsId)
     {
@@ -66,10 +64,12 @@ void Box::calculateDescriptors()
         // go through all atoms in given timestep
         for (int atomId : atomsId)
         {
-
-            // DUMMY calculation of descriptors ->
-            std::vector<double> descriptors(14, DUMMY_DOUBLE);
-            //  <-
+            std::vector<int> atomsInVerletListId{m_verletLists.at(atomId).getAtomIds()};
+            // create descriptors vector
+            std::vector<double> descriptors {Descriptors(atomId, 
+                                                        m_pbcX, m_pbcY, m_pbcZ, 
+                                                        atomsInVerletListId, 
+                                                        atoms).getDescriptors()};
 
             // set descriptors for given atom!
             m_timesteps.at(timestepId).setAtomDescriptors(atomId, descriptors);
