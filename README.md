@@ -13,7 +13,7 @@ It is an implementation of `tensorflow`'s `keras` neural network in `Python` for
 ### Preparing
 Prepares a file containing descriptors of each atom for each timestep of simulation. Dump file must be an output of the `LAMMPS` simulation. Input file for simulation must contain `dump` command in the format:
 
-    dump myDump all atom 100 dump.atom
+    dump 1 all custom 50 atoms.out id type x y z
     
 Output files (from which neural network will be taught) are stored in `dir_to_train` directory.
 
@@ -30,7 +30,7 @@ Trains everything from files in `dir_to_train` directory.
 Predicts the percentage of each phase that neural network knows. Determines global structure in given dump file for each timestep.
 
 ## Usage
-Compile C++ extension `decsriptors` in `src/modules/descriptors` folder:
+Compile C++ extension `descriptors` in `src/modules/descriptors` folder:
     
     python3 setup.py install 
 
@@ -63,12 +63,22 @@ The example run and simulation are located in `example` folder.
                 * `...`
             * `test`
                 * `...`
-            * `descriptorsfuncmodule.cpp`
-            * `descriptorsmodule.cpp`
-            * `descriptorsfuncmodule.h`
-            * `descriptorsmodule.h`
+            * `descriptors_atom.cpp`
+            * `descriptors_atom.h`
+            * `descriptors_box.cpp`
+            * `descriptors_box.h`
+            * `descriptors_descriptors.cpp`
+            * `descriptors_descriptors.h`
+            * `descriptors_module.cpp`
+            * `descriptors_module.h`
+            * `descriptors_timestep.cpp`
+            * `descriptors_timestep.h`
+            * `descriptors_utility.cpp`
+            * `descriptors_utility.h`
+            * `descriptors_verlet_list.cpp`
+            * `descriptors_verlet_list.h`
             * `setup.py`
-         * `descriptors.py`
+         * ~~`descriptors.py`~~
          * `neural_network.py`
      * `config`
          * `dict_timesteps.json`
@@ -95,7 +105,13 @@ The example run and simulation are located in `example` folder.
      * `kabuto.py`
      * `kabuto.log`
  * `example`
+    * `molybden_bcc`
+        * `...`
+    * `molybden_fcc`
+        * `...`
+    * `small_example_dump.file`
  * `scripts`
+    * `...`
      
  ## Design of the NNs
 * input layer
@@ -116,4 +132,4 @@ The example run and simulation are located in `example` folder.
 * `Python3.6`
 * `tensorflow`, `scipy` and `numpy` packages
 * `boost` library
-* compiled `descriptros` C++ extension 
+* compiled `descriptors` C++ extension 

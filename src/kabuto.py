@@ -163,6 +163,7 @@ class Kabuto:
 
                 elif scan_timestep:
                     logger.debug("Timestep: {}".format(repr(line)))
+                    line = int(line)
                     self.timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
@@ -189,7 +190,7 @@ class Kabuto:
                     if number_of_pbc == 3:  # end loading pbc
                         scan_pbc = False
 
-                elif line == "ITEM: ATOMS id type xs ys zs":
+                elif line == "ITEM: ATOMS id type x y z":
                     self.timesteps[current_timestep] = {}
                     # store the pbc in separate dictionary (timestep:list(pbc))
                     self.pbc_dict[current_timestep] = list(pbc)
@@ -209,8 +210,7 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        for timestep in self.timesteps.keys():
-            self.timesteps[timestep] = self.calculate_descriptors(timestep)
+        self.timesteps = descriptors.compute(*(self.pbc_dict[0]), self.timesteps)
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file
@@ -427,6 +427,7 @@ class Kabuto:
 
                 elif scan_timestep:
                     logger.debug("Timestep: {}".format(repr(line)))
+                    line = int(line)
                     self.timesteps[line] = {}
                     current_timestep = line
                     scan_timestep = False
@@ -473,8 +474,7 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using multiprocessing
         logger.info("Calculating of descriptors begins")
-        for timestep in self.timesteps.keys():
-            self.timesteps[timestep] = self.calculate_descriptors(timestep)
+        self.timesteps = descriptors.compute(*(self.pbc_dict[0]), self.timesteps)
         logger.info("Calculating of descriptors ended")
 
         # save dictionary to json file

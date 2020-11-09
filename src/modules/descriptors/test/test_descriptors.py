@@ -1,6 +1,6 @@
 import math
 import descriptors
-from scipy.special import sph_harm
+# from scipy.special import sph_harm
 
 
 # def function_y_lm(l_param, m, dx, dy, dz):
@@ -31,15 +31,26 @@ from scipy.special import sph_harm
 
 # {atom_is:coordinates}
 example_dict = {
-    1: (0.5, 0.5, 10),
-    2: (1.5, 6.3, 4.7),
-    3: (6.1, 0.3, 4.1)
+    1: {1: (0.5, 0.5, 10),
+        2: (1.5, 6.3, 4.7),
+        3: (6.1, 0.3, 4.1)},
+    # 2: {1: (0.5, 0.5, 10),
+    #     2: (1.5, 6.3, 4.7),
+    #     3: (6.1, 0.3, 4.1)},
+    # 3: {1: (0.5, 0.5, 10),
+    #     2: (1.5, 6.3, 4.7),
+    #     3: (6.1, 0.3, 4.1)},
+    # 4: {1: (0.5, 0.5, 10),
+    #     2: (1.5, 6.3, 4.7),
+    #     3: (6.1, 0.3, 4.1)}
 }
 
 # {pbc_x, pbc_y, pbc_z}
-example_pbc = [1.2, 3.4, 5.0]
+example_pbc = (1.2, 3.4, 5.0)
 
 res = descriptors.compute(*example_pbc, example_dict)
 print("\n\nPython code -->\n")
 for key, value in res.items():
-    print(key, " : ", value)
+    print("timestep #", key, " : ")
+    for key2, value2 in value.items():
+        print("\tAtom #", key2, " : ", value2)
