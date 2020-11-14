@@ -17,21 +17,37 @@ class NeuralNetwork:
         self.number_of_phases = None
         self.number_of_descriptors = None
 
+        self.max_epochs = 100
+        self.batch_size = 100
+        self.steps_per_epoch = 10000 // self.batch_size
+
+    def create_layers(self):
+        """
+        returns an array of keras layers
+        """
+        output_size = self.number_of_phases
+        input_size = self.number_of_descriptors
+        nodes = 16  # 25
+
+        layers = [
+            tf.keras.Input(shape=(input_size,), dtype='float32'),
+            tf.keras.layers.Dense(units=nodes, activation='elu'),
+            tf.keras.layers.Dense(units=nodes, activation='elu'),
+            tf.keras.layers.Dense(units=output_size)
+        ]
+        return layers
+
     def train(self, first_array, second_array):
         """
         trains the current nn from input arrays
         """
-        logger.debug("First_array:", first_array)
-        logger.debug("Second_array:", second_array)
-
         logger.info("Training begins!")
 
-        # TODO: How to correctly set the values of parameters?
         history = self.model.fit(x=first_array,
                                  y=second_array,
+                                 steps_per_epoch=self.steps_per_epoch,
                                  validation_split=0.3,
-                                 batch_size=50,
-                                 epochs=100,
+                                 epochs=self.max_epochs,
                                  shuffle=True,
                                  verbose=2)
 
@@ -53,7 +69,8 @@ class NeuralNetwork:
         path_to_model = os.path.join(path, self.name + self.model_extension)
         if self.model is not None:
             self.model.save(path_to_model)
-            logger.info("Model \'{}\' saved to file: {}".format(self.name, path_to_model))
+            logger.info("Model \'{}\' saved to file: {}".format(
+                self.name, path_to_model))
         else:
             logger.error("Model \'{}\' was not saved.".format(self.name))
 
@@ -62,7 +79,8 @@ class NeuralNetwork:
         loads model from 'path' to self.model and compiles it
         """
         path_to_model = os.path.join(path, self.name + self.model_extension)
-        self.model = tf.keras.models.load_model(path_to_model, compile=True)
+        self.model = tf.keras.models.load_model(path_to_model)
+        self.model.summary()
         logger.info("NN \'{}\' is loaded.".format(self.name))
 
     def create_model(self, number_of_descriptors, number_of_phases):
@@ -72,6 +90,13 @@ class NeuralNetwork:
         self.number_of_descriptors = number_of_descriptors
         self.number_of_phases = number_of_phases
 
+        # prepare scheduler
+        lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
+            0.00001,
+            decay_steps=self.steps_per_epoch*50,
+            decay_rate=1,
+            staircase=False)
+
         # define the layers
         layers = self.create_layers()
 
@@ -79,21 +104,8 @@ class NeuralNetwork:
         self.model = tf.keras.Sequential(layers)
 
         # compile the model
-        self.model.compile(loss='mean_squared_error',
-                           optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
+        self.model.compile(optimizer=tf.keras.optimizers.Adam(0.00001),
+                           loss='mean_squared_error',
                            metrics=['accuracy'])
+        self.model.summary()
         logger.info("Model \'{}\' created.".format(self.name))
-
-    def create_layers(self):
-        """
-        returns an array of keras layers
-        """
-        output_size = self.number_of_phases
-        input_size = self.number_of_descriptors
-        nodes_in_hidden = 25
-
-        layers = [tf.keras.layers.Dense(units=nodes_in_hidden, input_shape=(input_size,)),
-                  tf.keras.layers.Dense(units=nodes_in_hidden),
-                  tf.keras.layers.Dense(units=nodes_in_hidden),
-                  tf.keras.layers.Dense(units=output_size)]
-        return layers

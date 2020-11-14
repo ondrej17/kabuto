@@ -24,6 +24,13 @@ logging.config.fileConfig(os.path.join(path_to_kabuto, "config", "logger.ini"))
 logger = logging.getLogger('kabuto')
 
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
+
 class Kabuto:
 
     def __init__(self, action, option1, option2):
@@ -679,8 +686,23 @@ class Kabuto:
             logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
             logger.debug("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
 
+            
+            input_result = np.array(input_array, dtype=float)
+            output_result = np.array(output_array, dtype=float)
+            
+            # save arrays in json
+            with open(self.config_dir + os.path.sep + "input_array.json", "w") as json_file:
+                print("input_result.shape =", input_result.shape)
+                json.dump(input_result, json_file, cls=NumpyEncoder)
+                logger.info("Input numpy array was saved to: input_array.json")
+
+            with open(self.config_dir + os.path.sep + "output_array.json", "w") as json_file:
+                print("output_result.shape =", output_result.shape)
+                json.dump(output_result, json_file, cls=NumpyEncoder)
+                logger.info("Input numpy array was saved to: output_array.json")
+
             # return numpy array, tensorflow likes it
-            return np.array(input_array, dtype=float), np.array(output_array, dtype=float), None
+            return input_result, output_result, None
 
         elif filename is not None and directory is not None:
             logger.debug("Preparing only input array from the file: \'{}\'".format(os.path.join(directory, filename)))
@@ -755,7 +777,9 @@ class Kabuto:
                 for line in file:
                     # skip the commented lines
                     # phase must be one word
-                    if line.strip() != '' and line.split()[0] != '#' and len(line.split()) == 1:
+                    if line.strip() != '' and \
+                        line.strip()[0] != '#' and \
+                        len(line.split()) == 1:
                         phases_dict[line.strip()] = index
                         index += 1
         except FileNotFoundError:
