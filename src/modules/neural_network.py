@@ -17,9 +17,12 @@ class NeuralNetwork:
         self.number_of_phases = None
         self.number_of_descriptors = None
 
-        self.max_epochs = 100
-        self.batch_size = 100
+        # learning parameters that must be set correctly ->
+        self.learning_rate = 0.00005
+        self.epochs = 80
+        self.batch_size = 1000
         self.steps_per_epoch = 10000 // self.batch_size
+        # <-
 
     def create_layers(self):
         """
@@ -30,9 +33,12 @@ class NeuralNetwork:
         nodes = 16  # 25
 
         layers = [
+            # input tensor
             tf.keras.Input(shape=(input_size,), dtype='float32'),
+            # hidden layers
             tf.keras.layers.Dense(units=nodes, activation='elu'),
             tf.keras.layers.Dense(units=nodes, activation='elu'),
+            # output layer
             tf.keras.layers.Dense(units=output_size)
         ]
         return layers
@@ -43,13 +49,14 @@ class NeuralNetwork:
         """
         logger.info("Training begins!")
 
-        history = self.model.fit(x=first_array,
-                                 y=second_array,
-                                 steps_per_epoch=self.steps_per_epoch,
-                                 validation_split=0.3,
-                                 epochs=self.max_epochs,
-                                 shuffle=True,
-                                 verbose=2)
+        history = self.model.fit(
+            x                   = first_array,
+            y                   = second_array,
+            steps_per_epoch     = self.steps_per_epoch,
+            validation_split    = 0.3,
+            epochs              = self.epochs,
+            verbose             = 2
+        )
 
         logger.info("Training finished!")
         return history
@@ -91,11 +98,11 @@ class NeuralNetwork:
         self.number_of_phases = number_of_phases
 
         # prepare scheduler
-        lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
-            0.00001,
-            decay_steps=self.steps_per_epoch*50,
-            decay_rate=1,
-            staircase=False)
+        # lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
+        #     0.00001,
+        #     decay_steps=self.steps_per_epoch*50,
+        #     decay_rate=1,
+        #     staircase=False)
 
         # define the layers
         layers = self.create_layers()
@@ -104,7 +111,7 @@ class NeuralNetwork:
         self.model = tf.keras.Sequential(layers)
 
         # compile the model
-        self.model.compile(optimizer=tf.keras.optimizers.Adam(0.00001),
+        self.model.compile(optimizer=tf.keras.optimizers.Adam(self.learning_rate),
                            loss='mean_squared_error',
                            metrics=['accuracy'])
         self.model.summary()

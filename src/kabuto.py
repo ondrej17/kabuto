@@ -691,15 +691,15 @@ class Kabuto:
             output_result = np.array(output_array, dtype=float)
             
             # save arrays in json
-            with open(self.config_dir + os.path.sep + "input_array.json", "w") as json_file:
-                print("input_result.shape =", input_result.shape)
-                json.dump(input_result, json_file, cls=NumpyEncoder)
-                logger.info("Input numpy array was saved to: input_array.json")
+            # with open(self.config_dir + os.path.sep + "input_array.json", "w") as json_file:
+            #     print("input_result.shape =", input_result.shape)
+            #     json.dump(input_result, json_file, cls=NumpyEncoder)
+            #     logger.info("Input numpy array was saved to: input_array.json")
 
-            with open(self.config_dir + os.path.sep + "output_array.json", "w") as json_file:
-                print("output_result.shape =", output_result.shape)
-                json.dump(output_result, json_file, cls=NumpyEncoder)
-                logger.info("Input numpy array was saved to: output_array.json")
+            # with open(self.config_dir + os.path.sep + "output_array.json", "w") as json_file:
+            #     print("output_result.shape =", output_result.shape)
+            #     json.dump(output_result, json_file, cls=NumpyEncoder)
+            #     logger.info("Input numpy array was saved to: output_array.json")
 
             # return numpy array, tensorflow likes it
             return input_result, output_result, None
@@ -824,6 +824,7 @@ class Kabuto:
         plt.xlabel('epoch')
         plt.legend(['train', 'test'], loc='upper left')
         plt.savefig(os.path.join(self.result_dir, "loss-vs-epochs.png"))
+        plt.clf()
 
     def plot_accuracy(self, history):
         """
@@ -836,6 +837,7 @@ class Kabuto:
         plt.xlabel('epoch')
         plt.legend(['train', 'test'], loc='upper left')
         plt.savefig(os.path.join(self.result_dir, "accuracy-vs-epochs.png"))
+        plt.clf()
 
     @staticmethod
     def descriptors_info_header(timestep, phase):
