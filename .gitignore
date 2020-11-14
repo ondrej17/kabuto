@@ -15,3 +15,7 @@ src/kabuto.log
 scripts/kabuto.log
 src/config/dict_pbc.json
 src/config/dict_timesteps.json
+src/config/input_array.json
+src/config/output_array.json
+example/molybden_bcc
+example/molybden_fcc

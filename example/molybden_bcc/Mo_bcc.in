@@ -41,6 +41,6 @@ thermo_modify   format 2 %22.18f
 velocity        all create 300 12345 mom yes rot no
 dump            1 all custom 50 dumpMoBcc5.out id type x y z
 fix             2 all npt temp 300 300 1 iso 0 0 1 drag 1
-run             9999
+run             99999
 
 #-------------------------------------------------

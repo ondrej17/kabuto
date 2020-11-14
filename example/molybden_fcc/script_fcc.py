@@ -8,7 +8,7 @@ num = 1
 temperature = 600
 
 # I want 36000 timesteps (as in article)
-while timesteps_together < 1000:
+while timesteps_together < 10000:
     
 	input_script = """
 # Mo, fcc
@@ -51,9 +51,9 @@ thermo          10
 thermo_style    custom step lx ly lz press pxx pyy pzz pe temp
 thermo_modify   format 2 %22.18f
 velocity        all create {} 12345 mom yes rot no
-dump            1 all custom 50 dumpMoBcc{}.out id type x y z
+dump            1 all custom 50 dumpMoFcc{}.out id type x y z
 fix             2 all npt temp {} {} 1 iso 0 0 1 drag 1
-run             9999
+run             99999
 
 #-------------------------------------------------
 """.format(temperature, num, temperature, temperature)
@@ -77,7 +77,7 @@ run             9999
 	os.system("mpirun -np 4 lmp -in {}".format(script_name))
 	
 	# raise counters	
-	timesteps_together += 200
+	timesteps_together += 2000
 	num += 1
 	
 	
