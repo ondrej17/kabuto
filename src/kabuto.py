@@ -826,17 +826,18 @@ class Kabuto:
         plt.savefig(os.path.join(self.result_dir, "loss-vs-epochs.png"))
         plt.clf()
 
+    # TODO: change accuracy to mae
     def plot_accuracy(self, history):
         """
-        summarize history for accuracy
+        summarize history for mean absolute error
         """
-        plt.plot(history.history['accuracy'])
-        plt.plot(history.history['val_accuracy'])
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
+        plt.plot(history.history['mean_absolute_error'])
+        plt.plot(history.history['val_mean_absolute_error'])
+        plt.title('model mae')
+        plt.ylabel('mae')
         plt.xlabel('epoch')
         plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig(os.path.join(self.result_dir, "accuracy-vs-epochs.png"))
+        plt.savefig(os.path.join(self.result_dir, "mae-vs-epochs.png"))
         plt.clf()
 
     @staticmethod
