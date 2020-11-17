@@ -32,7 +32,8 @@ Predicts the percentage of each phase that neural network knows. Determines glob
 ## Usage
 Compile C++ extension `descriptors` in `src/modules/descriptors` folder:
     
-    python3 setup.py install 
+    cmake CMakeLists.txt
+    make 
 
 In `src` folder:
 
@@ -59,24 +60,24 @@ The example run and simulation are located in `example` folder.
  * `src`
      * `modules`
          * `descriptors`
-            * `build`
+            * `tests`
                 * `...`
-            * `test`
-                * `...`
-            * `descriptors_atom.cpp`
-            * `descriptors_atom.h`
-            * `descriptors_box.cpp`
-            * `descriptors_box.h`
-            * `descriptors_descriptors.cpp`
-            * `descriptors_descriptors.h`
-            * `descriptors_module.cpp`
-            * `descriptors_module.h`
-            * `descriptors_timestep.cpp`
-            * `descriptors_timestep.h`
-            * `descriptors_utility.cpp`
-            * `descriptors_utility.h`
-            * `descriptors_verlet_list.cpp`
-            * `descriptors_verlet_list.h`
+            * `src`
+                * `descriptors_atom.cpp`
+                * `descriptors_atom.h`
+                * `descriptors_box.cpp`
+                * `descriptors_box.h`
+                * `descriptors_descriptors.cpp`
+                * `descriptors_descriptors.h`
+                * `descriptors_module.cpp`
+                * `descriptors_module.h`
+                * `descriptors_timestep.cpp`
+                * `descriptors_timestep.h`
+                * `descriptors_utility.cpp`
+                * `descriptors_utility.h`
+                * `descriptors_verlet_list.cpp`
+                * `descriptors_verlet_list.h`
+            * `CMakeLists.txt`
             * `setup.py`
          * ~~`descriptors.py`~~
          * `neural_network.py`
@@ -129,7 +130,8 @@ The example run and simulation are located in `example` folder.
 		* N is number of phases we want to identify
   
 ## Requirements
-* `Python3.6`
+* `Python`
 * `tensorflow`, `scipy` and `numpy` packages
 * `boost` library
+* `cmake`
 * compiled `descriptors` C++ extension 
