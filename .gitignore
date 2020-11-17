@@ -15,6 +15,7 @@ src/modules/descriptors/CMakeFiles
 src/modules/descriptors/install_manifest.txt
 src/modules/descriptors/cmake_install.cmake
 src/modules/descriptors/CMakeCache.txt
+src/modules/descriptors/Makefile
 src/modules/descriptors/test_*
 src/results
 src/kabuto.log
