@@ -53,6 +53,9 @@ CMAKE_BINARY_DIR = /home/ondrej/Documents/University/predmety/Diplomova_praca/ka
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/test_boost.dir/all
+all: CMakeFiles/test_box.dir/all
+all: CMakeFiles/test_atom.dir/all
 all: CMakeFiles/target.dir/all
 
 .PHONY : all
@@ -63,9 +66,93 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles/test_boost.dir/clean
+clean: CMakeFiles/test_box.dir/clean
+clean: CMakeFiles/test_atom.dir/clean
 clean: CMakeFiles/target.dir/clean
 
 .PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/test_boost.dir
+
+# All Build rule for target.
+CMakeFiles/test_boost.dir/all:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/depend
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles --progress-num=9,10,11,12,13,14,15 "Built target test_boost"
+.PHONY : CMakeFiles/test_boost.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/test_boost.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles 7
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/test_boost.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles 0
+.PHONY : CMakeFiles/test_boost.dir/rule
+
+# Convenience name for target.
+test_boost: CMakeFiles/test_boost.dir/rule
+
+.PHONY : test_boost
+
+# clean rule for target.
+CMakeFiles/test_boost.dir/clean:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/clean
+.PHONY : CMakeFiles/test_boost.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/test_box.dir
+
+# All Build rule for target.
+CMakeFiles/test_box.dir/all:
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/depend
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles --progress-num=16,17,18,19,20,21,22 "Built target test_box"
+.PHONY : CMakeFiles/test_box.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/test_box.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles 7
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/test_box.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles 0
+.PHONY : CMakeFiles/test_box.dir/rule
+
+# Convenience name for target.
+test_box: CMakeFiles/test_box.dir/rule
+
+.PHONY : test_box
+
+# clean rule for target.
+CMakeFiles/test_box.dir/clean:
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/clean
+.PHONY : CMakeFiles/test_box.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/test_atom.dir
+
+# All Build rule for target.
+CMakeFiles/test_atom.dir/all:
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/depend
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles --progress-num=2,3,4,5,6,7,8 "Built target test_atom"
+.PHONY : CMakeFiles/test_atom.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/test_atom.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles 7
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/test_atom.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles 0
+.PHONY : CMakeFiles/test_atom.dir/rule
+
+# Convenience name for target.
+test_atom: CMakeFiles/test_atom.dir/rule
+
+.PHONY : test_atom
+
+# clean rule for target.
+CMakeFiles/test_atom.dir/clean:
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/clean
+.PHONY : CMakeFiles/test_atom.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/target.dir

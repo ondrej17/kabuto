@@ -56,18 +56,6 @@ CMAKE_BINARY_DIR = /home/ondrej/Documents/University/predmety/Diplomova_praca/ka
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip/fast
-
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
@@ -124,6 +112,18 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles /home/ondrej/Documents/University/predmety/Diplomova_praca/kabuto/kabuto/src/modules/descriptors/CMakeFiles/progress.marks
@@ -157,6 +157,45 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named test_boost
+
+# Build rule for target.
+test_boost: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_boost
+.PHONY : test_boost
+
+# fast build rule for target.
+test_boost/fast:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/build
+.PHONY : test_boost/fast
+
+#=============================================================================
+# Target rules for targets named test_box
+
+# Build rule for target.
+test_box: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_box
+.PHONY : test_box
+
+# fast build rule for target.
+test_box/fast:
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/build
+.PHONY : test_box/fast
+
+#=============================================================================
+# Target rules for targets named test_atom
+
+# Build rule for target.
+test_atom: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_atom
+.PHONY : test_atom
+
+# fast build rule for target.
+test_atom/fast:
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/build
+.PHONY : test_atom/fast
+
+#=============================================================================
 # Target rules for targets named target
 
 # Build rule for target.
@@ -169,19 +208,292 @@ target/fast:
 	$(MAKE) -f CMakeFiles/target.dir/build.make CMakeFiles/target.dir/build
 .PHONY : target/fast
 
+src/descriptors_atom.o: src/descriptors_atom.cpp.o
+
+.PHONY : src/descriptors_atom.o
+
+# target to build an object file
+src/descriptors_atom.cpp.o:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_atom.cpp.o
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_atom.cpp.o
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_atom.cpp.o
+.PHONY : src/descriptors_atom.cpp.o
+
+src/descriptors_atom.i: src/descriptors_atom.cpp.i
+
+.PHONY : src/descriptors_atom.i
+
+# target to preprocess a source file
+src/descriptors_atom.cpp.i:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_atom.cpp.i
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_atom.cpp.i
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_atom.cpp.i
+.PHONY : src/descriptors_atom.cpp.i
+
+src/descriptors_atom.s: src/descriptors_atom.cpp.s
+
+.PHONY : src/descriptors_atom.s
+
+# target to generate assembly for a file
+src/descriptors_atom.cpp.s:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_atom.cpp.s
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_atom.cpp.s
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_atom.cpp.s
+.PHONY : src/descriptors_atom.cpp.s
+
+src/descriptors_box.o: src/descriptors_box.cpp.o
+
+.PHONY : src/descriptors_box.o
+
+# target to build an object file
+src/descriptors_box.cpp.o:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_box.cpp.o
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_box.cpp.o
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_box.cpp.o
+.PHONY : src/descriptors_box.cpp.o
+
+src/descriptors_box.i: src/descriptors_box.cpp.i
+
+.PHONY : src/descriptors_box.i
+
+# target to preprocess a source file
+src/descriptors_box.cpp.i:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_box.cpp.i
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_box.cpp.i
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_box.cpp.i
+.PHONY : src/descriptors_box.cpp.i
+
+src/descriptors_box.s: src/descriptors_box.cpp.s
+
+.PHONY : src/descriptors_box.s
+
+# target to generate assembly for a file
+src/descriptors_box.cpp.s:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_box.cpp.s
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_box.cpp.s
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_box.cpp.s
+.PHONY : src/descriptors_box.cpp.s
+
+src/descriptors_descriptors.o: src/descriptors_descriptors.cpp.o
+
+.PHONY : src/descriptors_descriptors.o
+
+# target to build an object file
+src/descriptors_descriptors.cpp.o:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_descriptors.cpp.o
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_descriptors.cpp.o
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_descriptors.cpp.o
+.PHONY : src/descriptors_descriptors.cpp.o
+
+src/descriptors_descriptors.i: src/descriptors_descriptors.cpp.i
+
+.PHONY : src/descriptors_descriptors.i
+
+# target to preprocess a source file
+src/descriptors_descriptors.cpp.i:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_descriptors.cpp.i
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_descriptors.cpp.i
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_descriptors.cpp.i
+.PHONY : src/descriptors_descriptors.cpp.i
+
+src/descriptors_descriptors.s: src/descriptors_descriptors.cpp.s
+
+.PHONY : src/descriptors_descriptors.s
+
+# target to generate assembly for a file
+src/descriptors_descriptors.cpp.s:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_descriptors.cpp.s
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_descriptors.cpp.s
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_descriptors.cpp.s
+.PHONY : src/descriptors_descriptors.cpp.s
+
+src/descriptors_timestep.o: src/descriptors_timestep.cpp.o
+
+.PHONY : src/descriptors_timestep.o
+
+# target to build an object file
+src/descriptors_timestep.cpp.o:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_timestep.cpp.o
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_timestep.cpp.o
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_timestep.cpp.o
+.PHONY : src/descriptors_timestep.cpp.o
+
+src/descriptors_timestep.i: src/descriptors_timestep.cpp.i
+
+.PHONY : src/descriptors_timestep.i
+
+# target to preprocess a source file
+src/descriptors_timestep.cpp.i:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_timestep.cpp.i
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_timestep.cpp.i
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_timestep.cpp.i
+.PHONY : src/descriptors_timestep.cpp.i
+
+src/descriptors_timestep.s: src/descriptors_timestep.cpp.s
+
+.PHONY : src/descriptors_timestep.s
+
+# target to generate assembly for a file
+src/descriptors_timestep.cpp.s:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_timestep.cpp.s
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_timestep.cpp.s
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_timestep.cpp.s
+.PHONY : src/descriptors_timestep.cpp.s
+
+src/descriptors_verlet_list.o: src/descriptors_verlet_list.cpp.o
+
+.PHONY : src/descriptors_verlet_list.o
+
+# target to build an object file
+src/descriptors_verlet_list.cpp.o:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_verlet_list.cpp.o
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_verlet_list.cpp.o
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_verlet_list.cpp.o
+.PHONY : src/descriptors_verlet_list.cpp.o
+
+src/descriptors_verlet_list.i: src/descriptors_verlet_list.cpp.i
+
+.PHONY : src/descriptors_verlet_list.i
+
+# target to preprocess a source file
+src/descriptors_verlet_list.cpp.i:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_verlet_list.cpp.i
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_verlet_list.cpp.i
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_verlet_list.cpp.i
+.PHONY : src/descriptors_verlet_list.cpp.i
+
+src/descriptors_verlet_list.s: src/descriptors_verlet_list.cpp.s
+
+.PHONY : src/descriptors_verlet_list.s
+
+# target to generate assembly for a file
+src/descriptors_verlet_list.cpp.s:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/src/descriptors_verlet_list.cpp.s
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/src/descriptors_verlet_list.cpp.s
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/src/descriptors_verlet_list.cpp.s
+.PHONY : src/descriptors_verlet_list.cpp.s
+
+tests/test_atom.o: tests/test_atom.cpp.o
+
+.PHONY : tests/test_atom.o
+
+# target to build an object file
+tests/test_atom.cpp.o:
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/tests/test_atom.cpp.o
+.PHONY : tests/test_atom.cpp.o
+
+tests/test_atom.i: tests/test_atom.cpp.i
+
+.PHONY : tests/test_atom.i
+
+# target to preprocess a source file
+tests/test_atom.cpp.i:
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/tests/test_atom.cpp.i
+.PHONY : tests/test_atom.cpp.i
+
+tests/test_atom.s: tests/test_atom.cpp.s
+
+.PHONY : tests/test_atom.s
+
+# target to generate assembly for a file
+tests/test_atom.cpp.s:
+	$(MAKE) -f CMakeFiles/test_atom.dir/build.make CMakeFiles/test_atom.dir/tests/test_atom.cpp.s
+.PHONY : tests/test_atom.cpp.s
+
+tests/test_boost.o: tests/test_boost.cpp.o
+
+.PHONY : tests/test_boost.o
+
+# target to build an object file
+tests/test_boost.cpp.o:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/tests/test_boost.cpp.o
+.PHONY : tests/test_boost.cpp.o
+
+tests/test_boost.i: tests/test_boost.cpp.i
+
+.PHONY : tests/test_boost.i
+
+# target to preprocess a source file
+tests/test_boost.cpp.i:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/tests/test_boost.cpp.i
+.PHONY : tests/test_boost.cpp.i
+
+tests/test_boost.s: tests/test_boost.cpp.s
+
+.PHONY : tests/test_boost.s
+
+# target to generate assembly for a file
+tests/test_boost.cpp.s:
+	$(MAKE) -f CMakeFiles/test_boost.dir/build.make CMakeFiles/test_boost.dir/tests/test_boost.cpp.s
+.PHONY : tests/test_boost.cpp.s
+
+tests/test_box.o: tests/test_box.cpp.o
+
+.PHONY : tests/test_box.o
+
+# target to build an object file
+tests/test_box.cpp.o:
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/tests/test_box.cpp.o
+.PHONY : tests/test_box.cpp.o
+
+tests/test_box.i: tests/test_box.cpp.i
+
+.PHONY : tests/test_box.i
+
+# target to preprocess a source file
+tests/test_box.cpp.i:
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/tests/test_box.cpp.i
+.PHONY : tests/test_box.cpp.i
+
+tests/test_box.s: tests/test_box.cpp.s
+
+.PHONY : tests/test_box.s
+
+# target to generate assembly for a file
+tests/test_box.cpp.s:
+	$(MAKE) -f CMakeFiles/test_box.dir/build.make CMakeFiles/test_box.dir/tests/test_box.cpp.s
+.PHONY : tests/test_box.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install/strip"
 	@echo "... install/local"
 	@echo "... install"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... install/strip"
+	@echo "... test_boost"
+	@echo "... test_box"
+	@echo "... test_atom"
 	@echo "... target"
+	@echo "... src/descriptors_atom.o"
+	@echo "... src/descriptors_atom.i"
+	@echo "... src/descriptors_atom.s"
+	@echo "... src/descriptors_box.o"
+	@echo "... src/descriptors_box.i"
+	@echo "... src/descriptors_box.s"
+	@echo "... src/descriptors_descriptors.o"
+	@echo "... src/descriptors_descriptors.i"
+	@echo "... src/descriptors_descriptors.s"
+	@echo "... src/descriptors_timestep.o"
+	@echo "... src/descriptors_timestep.i"
+	@echo "... src/descriptors_timestep.s"
+	@echo "... src/descriptors_verlet_list.o"
+	@echo "... src/descriptors_verlet_list.i"
+	@echo "... src/descriptors_verlet_list.s"
+	@echo "... tests/test_atom.o"
+	@echo "... tests/test_atom.i"
+	@echo "... tests/test_atom.s"
+	@echo "... tests/test_boost.o"
+	@echo "... tests/test_boost.i"
+	@echo "... tests/test_boost.s"
+	@echo "... tests/test_box.o"
+	@echo "... tests/test_box.i"
+	@echo "... tests/test_box.s"
 .PHONY : help
 
 

@@ -1,5 +1,7 @@
 project(descriptors)
 cmake_minimum_required(VERSION 3.16)
+set(CMAKE_CXX_STANDARD 14)
+find_package(Threads)
 
 find_program(PYTHON "python")
 
@@ -15,3 +17,20 @@ if (PYTHON)
 
     install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
 endif()
+
+set(SOURCE_FILES
+        src/descriptors_atom.cpp
+        src/descriptors_box.cpp
+        src/descriptors_descriptors.cpp
+        #src/descriptors_module.cpp
+        src/descriptors_timestep.cpp
+        #src/descriptors_utility.cpp
+        src/descriptors_verlet_list.cpp
+)
+
+include_directories("/usr/include/python3.8")
+
+add_executable(test_atom tests/test_atom.cpp ${SOURCE_FILES})
+add_executable(test_box tests/test_box.cpp ${SOURCE_FILES})
+add_executable(test_boost tests/test_boost.cpp ${SOURCE_FILES})
+# TODO: add more tests

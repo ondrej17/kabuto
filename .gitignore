@@ -2,6 +2,7 @@
 .idea
 .vscode
 kabuto.iml
+
 # Custom ignored files
 src/saved_nn
 src/dir_predicted
@@ -10,12 +11,17 @@ src/dir_to_train
 src/dir_trained
 src/modules/__pycache__
 src/modules/descriptors/build
+src/modules/descriptors/CMakeFiles
+src/modules/descriptors/install_manifest.txt
+src/modules/descriptors/cmake_install.cmake
+src/modules/descriptors/CMakeCache.txt
+src/modules/descriptors/test_*
 src/results
 src/kabuto.log
-scripts/kabuto.log
 src/config/dict_pbc.json
 src/config/dict_timesteps.json
 src/config/input_array.json
 src/config/output_array.json
+
 example/molybden_bcc
 example/molybden_fcc
