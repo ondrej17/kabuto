@@ -42,7 +42,7 @@ public:
         : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ}
     {
         m_numOfTimesteps = 0;
-        m_rVerletListLimit = 7.0; // because rMaxSym = 6.4
+        m_rVerletListLimit = 7.4; // because rMaxSym = 6.4
     }
 
     // getters

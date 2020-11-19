@@ -3,7 +3,6 @@ project(descriptors)
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(Threads)
 find_program(PYTHON "python")
 
 # compile C++ library for Python
@@ -12,8 +11,10 @@ if (PYTHON)
     set(OUTPUT      "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
 
     add_custom_command(OUTPUT ${OUTPUT}
-                       COMMAND ${PYTHON} ${SETUP_PY} build
+                       COMMAND ${PYTHON} ${SETUP_PY} install
                        COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT})
+    # if installing does not work on Maxwell, see: https://docs.python.org/3.8/install/
+    # instalation copies the library to system place, e.g. /usr/lib/...
 
     add_custom_target(target ALL DEPENDS ${OUTPUT})
 

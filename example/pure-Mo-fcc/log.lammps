@@ -1,0 +1,136 @@
+LAMMPS (3 Mar 2020)
+
+# Mo, fcc
+# # ---------- Initialize Simulation ---------------------
+clear
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+atom_modify     map array
+
+# # ---------- Create Atoms ---------------------
+lattice         fcc 4.00
+Lattice spacing in x,y,z = 4 4 4
+region          box block 0 5 0 5 0 5 units lattice
+create_box      1 box
+Created orthogonal box = (0 0 0) to (20 20 20)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box
+Created 500 atoms
+  create_atoms CPU = 0.000206976 secs
+
+# # ---------- Define Interatomic Potential ---------------------
+pair_style      eam/alloy
+pair_coeff      * * Mo_Zhou04.eam.alloy Mo
+Reading potential file Mo_Zhou04.eam.alloy with DATE: 2018-03-30
+neighbor        2.0 bin
+neigh_modify    delay 10 check yes
+
+#  # ---------- Define Settings ---------------------
+compute         eng all pe/atom
+compute         eatoms all reduce sum c_eng
+
+#  # ---------- Run Minimization ---------------------
+reset_timestep  0
+fix             1 all box/relax iso 0.0 vmax 0.001
+thermo          10
+thermo_style    custom step pe lx ly lz press pxx pyy pzz c_eatoms
+min_style       cg
+minimize        1e-25 1e-25 5000 10000
+WARNING: Using 'neigh_modify every 1 delay 0 check yes' setting during minimization (src/min.cpp:190)
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 8.10022
+  ghost atom cutoff = 8.10022
+  binsize = 4.05011, bins = 5 5 5
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/alloy, perpetual
+      attributes: half, newton on
+      pair build: half/bin/atomonly/newton
+      stencil: half/bin/3d/newton
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 4.713 | 4.713 | 4.713 Mbytes
+Step PotEng Lx Ly Lz Press Pxx Pyy Pzz c_eatoms 
+       0   -3303.2277           20           20           20    111293.35    111293.35    111293.35    111293.35   -3303.2277 
+      10   -3316.9931         20.2         20.2         20.2    71589.907    71589.907    71589.907    71589.907   -3316.9931 
+      20   -3325.2265         20.4         20.4         20.4    35724.278    35724.278    35724.278    35724.278   -3325.2265 
+      30   -3328.0429    20.596247    20.596247    20.596247    5.3292776    5.3292776    5.3292776    5.3292776   -3328.0429 
+      35   -3328.0429    20.596275    20.596275    20.596275 -6.4883881e-10 -6.4710542e-10 -6.4961231e-10 -6.4979869e-10   -3328.0429 
+Loop time of 0.0406127 on 1 procs for 35 steps with 500 atoms
+
+99.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -3303.22769512     -3328.04286796     -3328.04286796
+  Force two-norm initial, final = 1667.13 1.04311e-11
+  Force max component initial, final = 1667.13 1.03075e-11
+  Final line search alpha, max atom move = 1 1.03075e-11
+  Iterations, force evaluations = 35 41
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.037155   | 0.037155   | 0.037155   |   0.0 | 91.49
+Neigh   | 0.00047532 | 0.00047532 | 0.00047532 |   0.0 |  1.17
+Comm    | 0.00043757 | 0.00043757 | 0.00043757 |   0.0 |  1.08
+Output  | 0.00012069 | 0.00012069 | 0.00012069 |   0.0 |  0.30
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.002424   |            |       |  5.97
+
+Nlocal:    500 ave 500 max 500 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1956 ave 1956 max 1956 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    33500 ave 33500 max 33500 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 33500
+Ave neighs/atom = 67
+Neighbor list builds = 1
+Dangerous builds = 0
+unfix           1
+
+#  # ----------- Run simulation of fcc phase of Mo --------------------
+reset_timestep  0
+thermo          10
+thermo_style    custom step lx ly lz press pxx pyy pzz pe temp
+thermo_modify   format 2 %22.18f
+velocity        all create 600 12345 mom yes rot no
+dump            1 all custom 50 dumpPureMoFcc.out id type x y z
+fix             2 all npt temp 600 600 1 iso 0 0 1 drag 1
+run             0
+Per MPI rank memory allocation (min/avg/max) = 4.984 | 4.984 | 4.984 Mbytes
+Step Lx Ly Lz Press Pxx Pyy Pzz PotEng Temp 
+       0  20.596274644052041225    20.596275    20.596275    4731.1804     4656.758    4827.5031    4709.2802   -3328.0429          600 
+Loop time of 7.31e-07 on 1 procs for 0 steps with 500 atoms
+
+410.4% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 7.31e-07   |            |       |100.00
+
+Nlocal:    500 ave 500 max 500 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1956 ave 1956 max 1956 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    33500 ave 33500 max 33500 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 33500
+Ave neighs/atom = 67
+Neighbor list builds = 0
+Dangerous builds = 0
+
+#-------------------------------------------------
+Total wall time: 0:00:00

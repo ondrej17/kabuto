@@ -13,8 +13,6 @@
 
 #include <vector>
 
-#define DUMMY_DOUBLE 3.14
-
 class Atom
 {
 private:
