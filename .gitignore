@@ -4,6 +4,7 @@
 kabuto.iml
 
 # Custom ignored files
+kabuto.log
 src/saved_nn
 src/dir_predicted
 src/dir_to_predict

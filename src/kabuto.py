@@ -8,16 +8,21 @@ import logging.config
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from modules.descriptors import Descriptors
 import descriptors
 from modules.neural_network import NeuralNetwork
 
 # set-up the path to kabuto script
-try:
-    # TODO: if program is called with absolute path, it misses '/' at the beginning of 'path_to_kabuto'
-    path_to_kabuto = os.path.join(*(sys.argv[0].split(os.path.sep)[:-1]))
-except TypeError:
-    path_to_kabuto = ""
+if os.path.isabs(sys.argv[0]): 
+    # absolute path to kabuto.py (remove /kabuto.py)
+    position_of_last_sep = sys.argv[0].rfind(os.path.sep)
+    path_to_kabuto = sys.argv[0][:position_of_last_sep]
+else:
+    # relative path to kabuto.py
+    try:
+        path_to_kabuto = os.path.join(*(sys.argv[0].split(os.path.sep)[:-1]))
+    except TypeError:
+        path_to_kabuto = ""
+
 
 # set-up logger
 logging.config.fileConfig(os.path.join(path_to_kabuto, "config", "logger.ini"))
