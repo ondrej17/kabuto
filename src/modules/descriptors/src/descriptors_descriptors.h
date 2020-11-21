@@ -85,6 +85,9 @@ public:
     double fcFunction(double r, double rMin, double rMax);
     double qlmFunction(int m, int l);
     double ylmFunction(int m, int l, double dx, double dy, double dz);
+    double getSphericalR(double x, double y, double z);
+    double getSphericalPhi(double x, double y, double z);
+    double getSphericalTheta(double x, double y, double z);
 };
 
 #endif // DESCRIPTORS_DESCRIPTORS_H

@@ -162,10 +162,9 @@ double Descriptors::qlmFunction(int m, int l)
 
 double Descriptors::ylmFunction(int m, int l, double dx, double dy, double dz)
 {
-    // spherical coordinates of vector (dx, dy, dz)
-    double r{sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2))};
-    double phi{atan2(dy, dx)};
-    double theta{acos(dz / r)};
+    // spherical angles of vector (dx, dy, dz)
+    double phi{getSphericalPhi(dx, dy, dz)};
+    double theta{getSphericalTheta(dx, dy, dz)};
 
     // return real form spherical harmonics in form Y_lm
     //      sph_harm() returns Y_l^m --> wikipedia
@@ -179,4 +178,19 @@ double Descriptors::ylmFunction(int m, int l, double dx, double dy, double dz)
     }
     // m == 0
     return boost::math::spherical_harmonic_r(l, m, theta, phi);
+}
+
+double Descriptors::getSphericalR(double x, double y, double z)
+{
+    return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+}
+
+double Descriptors::getSphericalPhi(double x, double y, double z)
+{
+    return atan2(y, x);
+}
+
+double Descriptors::getSphericalTheta(double x, double y, double z)
+{
+    return acos(z / getSphericalR(x, y, z));
 }
