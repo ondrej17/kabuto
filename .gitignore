@@ -11,13 +11,8 @@ src/dir_to_predict
 src/dir_to_train
 src/dir_trained
 src/modules/__pycache__
+src/modules/descriptors/tests/bin/test*
 src/modules/descriptors/build
-src/modules/descriptors/CMakeFiles
-src/modules/descriptors/install_manifest.txt
-src/modules/descriptors/cmake_install.cmake
-src/modules/descriptors/CMakeCache.txt
-src/modules/descriptors/Makefile
-src/modules/descriptors/test_*
 src/results
 src/kabuto.log
 src/config/dict_pbc.json

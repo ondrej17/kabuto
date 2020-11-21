@@ -32,8 +32,7 @@ Predicts the percentage of each phase that neural network knows. Determines glob
 ## Usage
 Compile C++ extension `descriptors` in `src/modules/descriptors` folder:
     
-    cmake CMakeLists.txt
-    make 
+    (sudo) ./install.sh
 
 In `src` folder:
 
