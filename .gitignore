@@ -21,5 +21,4 @@ src/config/dict_timesteps.json
 src/config/input_array.json
 src/config/output_array.json
 
-example/molybden_bcc
-example/molybden_fcc
+example

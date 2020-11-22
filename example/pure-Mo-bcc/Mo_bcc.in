@@ -10,7 +10,7 @@ atom_modify     map array
 
 # # ---------- Create Atoms --------------------- 
 lattice         bcc 4.00
-region          box block 0 2 0 2 0 2 units lattice
+region          box block 0 5 0 5 0 5 units lattice
 create_box      1 box
 create_atoms    1 box
 
@@ -41,6 +41,6 @@ thermo_modify   format 2 %22.18f
 velocity        all create 300 12345 mom yes rot no
 dump            1 all custom 50 dumpPureMoBcc.out id type x y z
 fix             2 all npt temp 300 300 1 iso 0 0 1 drag 1
-run             0
+run             9999
 
 #-------------------------------------------------
