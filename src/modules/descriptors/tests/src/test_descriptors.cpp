@@ -11,24 +11,25 @@
 
 int id{1};
 double pbcX{6.3}, pbcY{6.3}, pbcZ{6.3};
-std::vector<int> atomsInVerletList{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 14, 15, 16};
+std::vector<int> atomsInVerletList{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 std::map<int, Atom> atoms = {
-    // atoms in BCC structure (2x2x2 = 16 atoms)
-    {1, Atom(1, 0.849862, 0.849862, 0.849862)},
+    // atoms in pure BCC structure (2x2x2 = 16 atoms)
+    //      id      x[A]        y[A]        z[AM]
+    {1, Atom(1, 0.84986, 0.84986, 0.84986)},
     {2, Atom(2, 2.42493, 2.42493, 2.42493)},
-    {3, Atom(3, 4, 0.849862, 0.849862)},
+    {3, Atom(3, 4.00000, 0.84986, 0.84986)},
     {4, Atom(4, 5.57507, 2.42493, 2.42493)},
-    {5, Atom(5, 0.849862, 4, 0.849862)},
+    {5, Atom(5, 0.84986, 4.00000, 0.84986)},
     {6, Atom(6, 2.42493, 5.57507, 2.42493)},
-    {7, Atom(7, 4, 4, 0.849862)},
+    {7, Atom(7, 4.00000, 4.00000, 0.84986)},
     {8, Atom(8, 5.57507, 5.57507, 2.42493)},
-    {9, Atom(9, 0.849862, 0.849862, 4)},
+    {9, Atom(9, 0.84986, 0.84986, 4.00000)},
     {10, Atom(10, 2.42493, 2.42493, 5.57507)},
-    {11, Atom(11, 4, 0.849862, 4)},
+    {11, Atom(11, 4.00000, 0.84986, 4.00000)},
     {12, Atom(12, 5.57507, 2.42493, 5.57507)},
-    {13, Atom(13, 0.849862, 4, 4)},
+    {13, Atom(13, 0.84986, 4.00000, 4.00000)},
     {14, Atom(14, 2.42493, 5.57507, 5.57507)},
-    {15, Atom(15, 4, 4, 4)},
+    {15, Atom(15, 4.00000, 4.00000, 4.00000)},
     {16, Atom(16, 5.57507, 5.57507, 5.57507)},
 };
 
@@ -102,9 +103,33 @@ BOOST_AUTO_TEST_CASE(testQlmFunction)
     double epsilon{0.00001};
     double result;
 
-    // TODO: calculate result for the given atoms with calculation only!
-    // result = ...;
-    // BOOST_TEST(fabs(descriptors.qlmFunction(0, 0) - result) < epsilon);
+    result = 0.28209;
+    BOOST_TEST(fabs(descriptors.qlmFunction(0, 0) - result) < epsilon);
+
+    // more tests can be added
+}
+
+BOOST_AUTO_TEST_CASE(testG2Function)
+{
+    double epsilon{0.001};
+    double result;
+    double eta{20.0};
+    double rs{2.8};
+
+    result = 7.46794;
+    BOOST_TEST(fabs(descriptors.symmetryFunctionG2(eta, rs) - result) < epsilon);
+
+    // more tests can be added
+}
+
+BOOST_AUTO_TEST_CASE(testG3Function)
+{
+    double epsilon{0.001};
+    double result;
+    double kappa{3.5};
+
+    result = -9.86289;
+    BOOST_TEST(fabs(descriptors.symmetryFunctionG3(kappa) - result) < epsilon);
 
     // more tests can be added
 }
