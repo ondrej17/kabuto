@@ -22,3 +22,8 @@ src/config/input_array.json
 src/config/output_array.json
 
 example
+
+# When .gitignore stops working, run this:
+#   git rm -r --cached .
+#   git add .
+#   git commit -m "Untracked files issue resolved to fix .gitignore"
