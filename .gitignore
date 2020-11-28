@@ -21,8 +21,6 @@ src/config/dict_timesteps.json
 src/config/input_array.json
 src/config/output_array.json
 
-example
-
 # When .gitignore stops working, run this:
 #   git rm -r --cached .
 #   git add .
