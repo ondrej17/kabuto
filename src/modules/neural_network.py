@@ -18,17 +18,9 @@ class NeuralNetwork:
         self.number_of_descriptors = None
 
         # learning parameters that must be set correctly ->
-        self.learning_rate = 0.000005
+        self.learning_rate = 0.0001
         self.epochs = 100
-        self.batch_size = 10000
-            # prepare scheduler
-        #self.lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
-        #    initial_learning_rate   = self.learning_rate,
-        #    decay_steps             = 1.0,
-        #    decay_rate              = 0.5,
-        #    staircase               = False
-        #)
-        self.lr_schedule = self.learning_rate
+        self.batch_size = 100
         # <-
 
     def create_layers(self):
@@ -59,9 +51,10 @@ class NeuralNetwork:
         history = self.model.fit(
             x                   = first_array,
             y                   = second_array,
-            batch_size          = self.batch_size,
-            validation_split    = 0.3,
-            epochs              = self.epochs,
+            #batch_size          = self.batch_size,
+            validation_split    = 0.2,
+            #epochs              = self.epochs,
+            shuffle             = True,
             verbose             = 2
         )
 
@@ -74,6 +67,7 @@ class NeuralNetwork:
             input_array is a matrix [num_of_atoms, num_of_descriptors]
             returns a matrix [num_of_atoms, num_of_phases]
         """
+        logger.info("Predicting from array:\n{}".format(input_array))
         return self.model.predict(input_array)
 
     def save_model(self, path):
@@ -94,7 +88,7 @@ class NeuralNetwork:
         """
         path_to_model = os.path.join(path, self.name + self.model_extension)
         self.model = tf.keras.models.load_model(path_to_model)
-        self.model.summary()
+        #self.model.summary()
         logger.info("NN \'{}\' is loaded.".format(self.name))
 
     def create_model(self, number_of_descriptors, number_of_phases):
@@ -112,10 +106,10 @@ class NeuralNetwork:
 
         # compile the model
         self.model.compile(
-            #optimizer   = tf.keras.optimizers.SGD(learning_rate = self.learning_rate),
-            optimizer   = tf.keras.optimizers.Adam(self.lr_schedule),
-            loss        = 'mse',
-            metrics     = [tf.keras.metrics.MeanAbsoluteError()]
+            optimizer   = tf.keras.optimizers.Adam(self.learning_rate),
+            loss        = 'categorical_crossentropy',
+            metrics     = ['accuracy']
         )
+
         self.model.summary()
         logger.info("Model \'{}\' created.".format(self.name))

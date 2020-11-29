@@ -25,7 +25,7 @@ else:
 
 def plotDescriptorsFirstAtom(nbins, phase):
     """
-    Plot histograms of descriptors for atom #1
+    Plots histograms of descriptors for atom #1
     """
     for index, name in descriptorsNames.items():
         print("INFO: Plotting {} of atom #1".format(name))

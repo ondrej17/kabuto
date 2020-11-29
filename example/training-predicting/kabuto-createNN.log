@@ -1,0 +1,35 @@
+[2020-11-29 19:07:59,492]:INFO:kabuto: Command line arguments:
+../../src/kabuto.py create_nn nn1
+[2020-11-29 19:07:59,492]:INFO:kabuto: 
+******************************************************
+                   ___            _______    ____
+   | /     /\     |   |   |    |     |      /    \
+   |<     /__\    |--<    |    |     |     |      |
+   | \   /    \   |___|    \__/      |      \____/
+******************************************************
+                   Ondrej Bily
+                  Diploma Thesis
+                       2020
+******************************************************
+
+[2020-11-29 19:07:59,492]:INFO:kabuto: Available phases: {'bcc': 0, 'fcc': 1}
+[2020-11-29 19:07:59,492]:INFO:kabuto: Directory '../../src/results' already exists.
+[2020-11-29 19:07:59,492]:INFO:kabuto: ACTION: create_nn
+creating neural network 'nn1'
+[2020-11-29 19:07:59,492]:INFO:kabuto: Directory '../../src/saved_nn' already exists.
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+dense (Dense)                (None, 25)                375       
+_________________________________________________________________
+dense_1 (Dense)              (None, 25)                650       
+_________________________________________________________________
+dense_2 (Dense)              (None, 2)                 52        
+=================================================================
+Total params: 1,077
+Trainable params: 1,077
+Non-trainable params: 0
+_________________________________________________________________
+[2020-11-29 19:07:59,546]:INFO:kabuto.neural_networks: Model 'nn1' created.
+[2020-11-29 19:07:59,554]:INFO:kabuto.neural_networks: Model 'nn1' saved to file: ../../src/saved_nn/nn1.h5

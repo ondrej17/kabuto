@@ -1,15 +1,5 @@
-import json
 import os
 import sys
-import datetime
-import shutil
-import logging.config
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-import descriptors
-from modules.neural_network import NeuralNetwork
 
 # set-up the path to kabuto script
 if os.path.isabs(sys.argv[0]): 
@@ -23,10 +13,22 @@ else:
     except TypeError:
         path_to_kabuto = ""
 
+import logging.config
 
 # set-up logger
 logging.config.fileConfig(os.path.join(path_to_kabuto, "config", "logger.ini"))
 logger = logging.getLogger('kabuto')
+
+
+import json
+import datetime
+import shutil
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+import descriptors
+from modules.neural_network import NeuralNetwork
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -466,7 +468,7 @@ class Kabuto:
                     if number_of_pbc == 3:  # end loading pbc
                         scan_pbc = False
 
-                elif line == "ITEM: ATOMS id type xs ys zs":
+                elif line == "ITEM: ATOMS id type x y z":
                     self.timesteps[current_timestep] = {}
                     # store the pbc in separate dictionary (timestep:list(pbc))
                     self.pbc_dict[current_timestep] = list(pbc)
@@ -558,7 +560,7 @@ class Kabuto:
             for root, directories, files in os.walk(self.to_predict_dir):
 
                 # for each file in 'dir_to_predict' folder do:
-                for filename in sorted(files):
+                for filename in files:
 
                     # prepare two lists, one with descriptors, second one with None
                     input_array, second_array, timestep = self.prepare_arrays(self.to_predict_dir, filename)
@@ -576,13 +578,13 @@ class Kabuto:
                     prediction = self.nn.predict(input_array)
 
                     # I have a prediction!
-                    logger.debug("prediction for file \'{}\'\n{}".format(filename, prediction))
+                    logger.info("prediction for file \'{}\'\n{}".format(filename, prediction))
 
                     # calculate the vector_Q (global structure) from vector_q (local structures)
                     vector_big_q = self.calculate_vector_big_q(prediction)
 
                     # I have vector Q that has information about global structure at given timestep
-                    logger.debug("Q = {}".format(vector_big_q))
+                    logger.info("Q = {}".format(vector_big_q))
 
                     # add another timestep to results [phase:percentage]
                     global_structure_dict[timestep] = self.create_dict_phase_percentage(vector_big_q)
@@ -591,7 +593,7 @@ class Kabuto:
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
 
             # print result (global structure info)
-            logger.debug("RESULT:\n{}".format(global_structure_dict))
+            logger.info("RESULT:\n{}".format(global_structure_dict))
 
             # save results to 'results' dir
             self.save_results(global_structure_dict)
@@ -688,8 +690,8 @@ class Kabuto:
             logger.info("Input and output arrays have the same length: {} ({} vs. {})"
                         .format(len(input_array) == len(output_array), len(input_array), len(output_array)))
 
-            logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
-            logger.debug("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
+            logger.info("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
+            logger.info("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
 
             
             input_result = np.array(input_array, dtype=float)
@@ -834,15 +836,15 @@ class Kabuto:
     # TODO: change accuracy to mae
     def plot_accuracy(self, history):
         """
-        summarize history for mean absolute error
+        summarize history for accuracy
         """
-        plt.plot(history.history['mean_absolute_error'])
-        plt.plot(history.history['val_mean_absolute_error'])
-        plt.title('model mae')
-        plt.ylabel('mae')
+        plt.plot(history.history['accuracy'])
+        plt.plot(history.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
         plt.xlabel('epoch')
         plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig(os.path.join(self.result_dir, "mae-vs-epochs.png"))
+        plt.savefig(os.path.join(self.result_dir, "accuracy-vs-epochs.png"))
         plt.clf()
 
     @staticmethod
