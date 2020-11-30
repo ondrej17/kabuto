@@ -1,11 +1,12 @@
 /**
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ * Name: 
+ *      descriptors_timestep.h
+ * Author: 
+ *      Ondrej Bily
+ * Description: 
+ *      Header file corresponding to class Timestep. Object Timestep 
+ *      is created in Box class for each loaded timestep. Timestep holds
+ *      all atoms and theirs IDs. 
  */
 
 #ifndef DESCRIPTORS_TIMESTEP_H
@@ -40,9 +41,10 @@ public:
 
     // methods
     void addAtom(int atomId, double x, double y, double z);
+    void setAtomDescriptors(int atom_id, std::vector<double> descriptors);
     Atom &getAtom(int id);
     const std::vector<double> &getAtomDescriptors(int atom_id);
-    void setAtomDescriptors(int atom_id, std::vector<double> descriptors);
+    
 };
 
 #endif //DESCRIPTORS_TIMESTEP_H

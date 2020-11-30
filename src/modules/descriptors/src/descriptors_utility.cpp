@@ -1,6 +1,3 @@
-#include <vector>
-#include <iostream>
-
 #include "descriptors_utility.h"
 
 std::vector<double> listTupleToVector_Float(PyObject *incoming)

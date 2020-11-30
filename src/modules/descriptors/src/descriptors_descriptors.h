@@ -1,11 +1,24 @@
 /**
+ * Name: 
+ *      descriptors_descriptors.h
+ * Author: 
+ *      Ondrej Bily
+ * Description: 
+ *      Header file corresponding to class Descriptors. This class is used
+ *      in Box class for calculating the descriptors of given atom. After
+ *      that each atom holds its descriptors as a tuple of doubles. 
  * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *      Since descriptors describe atom's surrounding, they must be chosen 
+ *      carefully. Also, not all atoms are accounted in calculation of 
+ *      descriptors for given atom, only those that are in "cut-off" sphere.
+ *      Different values for cut-off are used for each type of descriptor.
+ *       
+ *      Descriptors consists of 14 values:
+ *      * 8 symmetry function of type G2 (Behler-Parinello)
+ *      * 3 symmetry function of type G3 (Behler-Parinello)
+ *      * 3 Steinhardt parameters with l = 6, 7, 8   
+ *      
+ *      Note: periodic boundary conditions (PBC) are implemented as well.
  */
 
 #ifndef DESCRIPTORS_DESCRIPTORS_H
@@ -20,15 +33,15 @@
 class Descriptors
 {
 private:
+    // Attributes of atom, to whom the descriptors corresponds.
     int m_id;
     double m_pbcX;
     double m_pbcY;
     double m_pbcZ;
-
     std::vector<int> m_atomsId;
     std::map<int, Atom> m_atoms;
 
-    // descriptors-specific values
+    // Descriptors-specific values: cutoff values and parameters
     double m_rMinSym;
     double m_rMaxSym;
     double m_rMinStein;
@@ -55,6 +68,7 @@ public:
         m_rMaxStein = 4.0;
 
         // set the parameters for g2 function
+        m_g2FunctionParameters.reserve(8);
         m_g2FunctionParameters.push_back(std::vector<double>{20.0, 2.8});
         m_g2FunctionParameters.push_back(std::vector<double>{20.0, 3.2});
         m_g2FunctionParameters.push_back(std::vector<double>{20.0, 4.4});
@@ -65,11 +79,13 @@ public:
         m_g2FunctionParameters.push_back(std::vector<double>{20.0, 6.0});
 
         // set the parameters for g3 function
+        m_g3FunctionParameters.reserve(3);
         m_g3FunctionParameters.push_back(3.5);
         m_g3FunctionParameters.push_back(4.5);
         m_g3FunctionParameters.push_back(7.0);
 
         // set the parameters for steinhardt function
+        m_steinhardtFunctionParameters.reserve(3);
         m_steinhardtFunctionParameters.push_back(6);
         m_steinhardtFunctionParameters.push_back(7);
         m_steinhardtFunctionParameters.push_back(8);

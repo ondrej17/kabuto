@@ -1,11 +1,12 @@
 /**
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ * Name: 
+ *      descriptors_verlet_list.h
+ * Author: 
+ *      Ondrej Bily
+ * Description: 
+ *      Header file corresponding to class VerletList. Box object 
+ *      creates VerletList for each atom. VerletList contains IDs 
+ *      of atoms that are in cutoff sphere of given atom.
  */
 
 #ifndef DESCRIPTORS_VERLETLIST_H

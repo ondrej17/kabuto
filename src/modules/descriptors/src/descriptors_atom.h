@@ -1,11 +1,12 @@
 /**
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ * Name: 
+ *      descriptors_atom.h
+ * Author: 
+ *      Ondrej Bily
+ * Description: 
+ *      Header file corresponding to class Atom. Object Atom is created for 
+ *      each atom in system. Each atom has its id, coordinates and calculated 
+ *      descriptors. Descriptors are calculated in Box object.
  */
 
 #ifndef DESCRIPTORS_ATOM_H

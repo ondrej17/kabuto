@@ -4,8 +4,7 @@ void Timestep::addAtom(int atomId, double x, double y, double z)
 {
     m_numOfAtoms++;
     m_atomsId.push_back(atomId);
-    Atom atom = Atom(atomId, x, y, z);
-    m_atoms.insert(std::make_pair(atomId, atom));
+    m_atoms.insert(std::pair<int, Atom>(atomId, Atom(atomId, x, y, z)));
 }
 
 Atom &Timestep::getAtom(int id)

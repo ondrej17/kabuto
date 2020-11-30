@@ -2,19 +2,19 @@
 
 static PyObject *descriptors_compute(PyObject *self, PyObject *args)
 {
-
     // parse args
     PyObject *inputDictionary;
-    double pbcX = 0.0;
-    double pbcY = 0.0;
-    double pbcZ = 0.0;
+    double pbcX{0.0};
+    double pbcY{0.0};
+    double pbcZ{0.0};
     if (!PyArg_ParseTuple(args, "dddO", &pbcX, &pbcY, &pbcZ, &inputDictionary))
     {
         // TODO: check for incorrect parsing
+        // TODO: throwing exception from C++ to Python?
         return Py_BuildValue("d", 1);
     }
 
-    // create and fill Box object
+    // create Box object
     Box box(pbcX, pbcY, pbcZ);
 
     // parse each timestep in inputDictionary
@@ -27,7 +27,7 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
         long int idOfTimestep{PyLong_AsLong(timestepId)};
         box.addTimestep(idOfTimestep);
 
-        // get timestep
+        // get atoms in timestep
         PyObject *atoms;
         if (!PyArg_Parse(timestep, "O", &atoms))
         {
@@ -35,7 +35,7 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
             return Py_BuildValue("d", 1);
         }
 
-        // parse each atom in timestep
+        // parse each atom in atoms
         PyObject *atomId = PyDict_Keys(atoms);
         PyObject *atomCoords = PyDict_Values(atoms);
         Py_ssize_t pos2 = 0;
@@ -45,17 +45,17 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
             long int idOfAtom = PyLong_AsLong(atomId);
             std::vector<double> coordinates = listTupleToVector_Float(PyDict_GetItem(atoms, atomId));
 
-            // add atom to box
-            box.addAtomToTimestep(idOfTimestep, idOfAtom, coordinates[0], coordinates[1], coordinates[2]);
+            // add atom to box (and to correct timestep)
+            box.addAtomToTimestep(idOfTimestep, idOfAtom, coordinates.at(0), coordinates.at(1), coordinates.at(2));
         }
     }
 
     // create Verlet lists
     box.createVerletLists();
     std::cout << "Number of atoms:" << box.getNumOfAtoms() << std::endl;
-    int atomIndex {box.getTimestepAtomsId(box.getTimestepsId().at(0)).at(0)};
-    std::cout   << "Number of atoms in Verlet list of atom #1: " 
-                << box.getNumOfAtomsInVerletList(atomIndex) << std::endl;
+    int atomIndex{box.getTimestepAtomsId(box.getTimestepsId().at(0)).at(0)};
+    std::cout << "Number of atoms in Verlet list of atom #" << atomIndex << ": "
+              << box.getNumOfAtomsInVerletList(atomIndex) << std::endl;
 
     // calculate descriptors for each atom
     box.calculateDescriptors();
@@ -95,34 +95,6 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
         }
     }
 
-    // return a Python dictionary {atom_id:descriptors}
+    // return a Python dictionary {timestepId: {atom_id:descriptors}}
     return pyResult;
-}
-
-/**
- * PyMethodDef list that defines methods that can be called from Python.
- */
-static PyMethodDef descriptors_methods[] = {
-    // "PythonName",    C-function name,        argument presentation,  description
-    {"compute", descriptors_compute, METH_VARARGS, "Computes descriptors for one timestep."},
-    {NULL, NULL, 0, NULL}};
-
-/**
- * Structure that holds information about module.
- */
-static struct PyModuleDef descriptors = {
-    PyModuleDef_HEAD_INIT, // init function of module
-    "descriptors",         // name of module
-    NULL,                  // module documentation
-    -1,                    // size of per-interpreter state of the module,
-    // or -1 if the module keeps state in global variables.
-    descriptors_methods // list of methods that can be called from Python
-};
-
-/**
- * Initialization function of C++ extension for Python
- */
-PyMODINIT_FUNC PyInit_descriptors(void)
-{
-    return PyModule_Create(&descriptors);
 }
