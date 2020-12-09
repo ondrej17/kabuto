@@ -27,22 +27,22 @@
 class Box
 {
 protected:
-    double m_pbcX;
-    double m_pbcY;
-    double m_pbcZ;
-    int m_numOfTimesteps;
-    double m_rVerletListLimit;
-    std::map<int, VerletList> m_verletLists;
-    std::map<int, Timestep> m_timesteps;
-    std::vector<int> m_timestepsId;
+    double m_pbcX;                              // PBC in x direction
+    double m_pbcY;                              // PBC in y direction
+    double m_pbcZ;                              // PBC in z direction
+    int m_numOfTimesteps;                       // number of timesteps of system
+    double m_rVerletListLimit;                  // cutoff for atoms in the Verlet List 
+    std::map<int, VerletList> m_verletLists;    // map of Verlet List for each atom
+    std::map<int, Timestep> m_timesteps;        // map of all timesteps of systems
+    std::vector<int> m_timestepsId;             // IDs of all timesteps
 
 public:
     // constructor
     Box(double pbcX, double pbcY, double pbcZ)
         : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ}
     {
-        m_numOfTimesteps = 0;
-        m_rVerletListLimit = 7.4; // because rMaxSym = 6.4
+        m_numOfTimesteps = 0;       // no timesteps at the beginning
+        m_rVerletListLimit = 7.4;   // because rMaxSym = 6.4 (magical number for now)
     }
 
     // getters

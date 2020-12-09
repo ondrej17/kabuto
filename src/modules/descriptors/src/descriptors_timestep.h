@@ -21,16 +21,16 @@
 class Timestep
 {
 private:
-    int m_id;
-    int m_numOfAtoms;
-    std::map<int, Atom> m_atoms;
-    std::vector<int> m_atomsId;
+    int m_id;                       // ID of timestep
+    int m_numOfAtoms;               // number of atoms in this timestep
+    std::map<int, Atom> m_atoms;    // map of atoms objects in this timestep
+    std::vector<int> m_atomsId;     // IDs of atoms in this timestep
 
 public:
     // constructor
     Timestep(int id) : m_id{id}
     {
-        m_numOfAtoms = 0;
+        m_numOfAtoms = 0;           // no atoms in the beginning
     }
 
     // getters

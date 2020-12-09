@@ -10,8 +10,9 @@
  * 
  *      Since descriptors describe atom's surrounding, they must be chosen 
  *      carefully. Also, not all atoms are accounted in calculation of 
- *      descriptors for given atom, only those that are in "cut-off" sphere.
- *      Different values for cut-off are used for each type of descriptor.
+ *      descriptors for given atom, only those that are in "cut-off" sphere
+ *      (in Verlet List). Different values for cut-off are used for each 
+ *      type of descriptor.
  *       
  *      Descriptors consists of 14 values:
  *      * 8 symmetry function of type G2 (Behler-Parinello)
@@ -26,29 +27,29 @@
 
 #include <map>
 #include <cmath>
-#include <boost/math/special_functions/spherical_harmonic.hpp>
 
+#include "boost/math/special_functions/spherical_harmonic.hpp"
 #include "descriptors_atom.h"
 
 class Descriptors
 {
 private:
     // Attributes of atom, to whom the descriptors corresponds.
-    int m_id;
-    double m_pbcX;
-    double m_pbcY;
-    double m_pbcZ;
-    std::vector<int> m_atomsId;
-    std::map<int, Atom> m_atoms;
+    int m_id;                       // ID of atom
+    double m_pbcX;                  // PBC in x direction
+    double m_pbcY;                  // PBC in y direction
+    double m_pbcZ;                  // PBC in z direction
+    std::vector<int> m_atomsId;     // holds IDs of atoms that are in its Verlet List
+    std::map<int, Atom> m_atoms;    // holds atoms that are in its Verlet List
 
     // Descriptors-specific values: cutoff values and parameters
-    double m_rMinSym;
-    double m_rMaxSym;
-    double m_rMinStein;
-    double m_rMaxStein;
-    std::vector<std::vector<double>> m_g2FunctionParameters;
-    std::vector<double> m_g3FunctionParameters;
-    std::vector<int> m_steinhardtFunctionParameters;
+    double m_rMinSym;                                           // parameter for fcFunction method
+    double m_rMaxSym;                                           // parameter for fcFunction method
+    double m_rMinStein;                                         // parameter for fcFunction method
+    double m_rMaxStein;                                         // parameter for fcFunction method
+    std::vector<std::vector<double>> m_g2FunctionParameters;    // parameters for G2 symmetry functions
+    std::vector<double> m_g3FunctionParameters;                 // parameters for G3 symmetry functions
+    std::vector<int> m_steinhardtFunctionParameters;            // parameters for Steinhardt parameters
 
 public:
     // constructor
@@ -57,11 +58,12 @@ public:
                 double pbcY,
                 double pbcZ,
                 const std::vector<int> &atomsInVerletListIds,
-                const std::map<int, Atom> &atoms)
-        : m_id{atomId}, m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ},
-          m_atomsId{atomsInVerletListIds}, m_atoms{atoms}
+                const std::map<int, Atom> &atomsInVerletList)
+        :   m_id{atomId}, 
+            m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ},
+            m_atomsId{atomsInVerletListIds}, m_atoms{atomsInVerletList}
     {
-        // set the cutoff parameters
+        // set the cutoff parameters (magical number for now)
         m_rMinSym = 6.2;
         m_rMaxSym = 6.4;
         m_rMinStein = 3.8;

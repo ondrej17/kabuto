@@ -17,12 +17,13 @@
 class VerletList
 {
 private:
-    int m_id;
-    std::vector<int> m_atomIds;
+    int m_id;                   // ID of atom
+    std::vector<int> m_atomIds; // IDs of atoms in Verlet List
 
 public:
     // constructor
-    VerletList(int id, std::vector<int> atomIds) : m_id{id}, m_atomIds{atomIds} {}
+    VerletList( int id, std::vector<int> atomIds) 
+        : m_id{id}, m_atomIds{atomIds} {}
 
     // getters
     inline int getId() { return m_id; };

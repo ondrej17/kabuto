@@ -17,11 +17,11 @@
 class Atom
 {
 private:
-    int m_id;
-    double m_x;
-    double m_y;
-    double m_z;
-    std::vector<double> m_descriptors;
+    int m_id;                           // ID of atom
+    double m_x;                         // coordinate x
+    double m_y;                         // coordinate y
+    double m_z;                         // coordinate z
+    std::vector<double> m_descriptors;  // descriptors of atom
 
 public:
     // constructor
