@@ -12,6 +12,7 @@ src/dir_to_train
 src/dir_trained
 src/modules/__pycache__
 
+src/modules/descriptors/build
 src/modules/descriptors/tests/build
 
 src/results

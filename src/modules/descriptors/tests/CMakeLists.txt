@@ -14,16 +14,17 @@ set(SOURCE_FILES
         #../src/descriptors_module.cpp
         #../src/descriptors_timestep.cpp
         #../src/descriptors_utility.cpp
-        #../src/descriptors_verlet_list.cpp
-        
+        ../src/descriptors_verlet_list.cpp
+) 
+set(TEST_FILES
         test.cpp
         test_atom.cpp
         #test_box.cpp
         test_descriptors.cpp
         #test_timestep.cpp
-        #test_verlet_list.cpp
+        test_verlet_list.cpp
 )
 
-add_executable(descriptors ${SOURCE_FILES})
+add_executable(descriptors ${SOURCE_FILES} ${TEST_FILES})
 target_link_libraries(descriptors PRIVATE gtest) # link google test to this executable
 

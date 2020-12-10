@@ -5,8 +5,6 @@
  * All rights reserved.
  */
 
-
-#include <iostream>
 #include <gtest/gtest.h>
 
 #include "../src/descriptors_descriptors.h"
@@ -18,7 +16,7 @@ double pbcX{6.3}, pbcY{6.3}, pbcZ{6.3};
 std::vector<int> atomsInVerletList{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 std::map<int, Atom> atoms = {
     // atoms in pure BCC structure (2x2x2 = 16 atoms)
-    //      id      x[A]        y[A]        z[AM]
+    //      id      x[A]        y[A]        z[A]
     {1, Atom(1, 0.84986, 0.84986, 0.84986)},
     {2, Atom(2, 2.42493, 2.42493, 2.42493)},
     {3, Atom(3, 4.00000, 0.84986, 0.84986)},
@@ -40,50 +38,124 @@ std::map<int, Atom> atoms = {
 // global descriptors object
 Descriptors descriptors(id, pbcX, pbcY, pbcZ, atomsInVerletList, atoms);
 
-TEST(test_descriptors, testCutoffFunction)
+TEST(testDescriptors, testCutoffFunction1)
 {
     double epsilon{0.0001};
-    ASSERT_TRUE(fabs(descriptors.fcFunction(14.0, 10.0, 12.0) - 0.0) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.fcFunction(11.0, 10.0, 12.0) - 0.5) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.fcFunction(11.5, 10.0, 12.0) - 0.1464) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.fcFunction(2.0, 10.0, 12.0) - 1.0) < epsilon);
+    double result;
+
+    result = 0.0;
+    ASSERT_TRUE(fabs(descriptors.fcFunction(14.0, 10.0, 12.0) - result) < epsilon);
     // what if one or more of the parameter(s) is/are negative?
     // what if rMin > rMax ?
 }
 
-TEST(test_descriptors, testSphericalCoordinates)
+TEST(testDescriptors, testCutoffFunction2)
 {
-    double epsilon{0.00001};
+    double epsilon{0.0001};
+    double result;
 
-    ASSERT_TRUE(fabs(descriptors.getSphericalR(0.0, 0.0, 0.0) - 0.0) < epsilon);
-    // ASSERT_TRUE(fabs(descriptors.getSphericalPhi(0.0, 0.0, 0.0) - ???) < epsilon);
-    // ASSERT_TRUE(fabs(descriptors.getSphericalTheta(0.0, 0.0, 0.0) - ???) < epsilon);
-
-    ASSERT_TRUE(fabs(descriptors.getSphericalR(1.0, 1.0, 1.0) - sqrt(3.0)) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(1.0, 1.0, 1.0) - M_PI_4) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(1.0, 1.0, 1.0) - 0.955317) < epsilon);
-
-    ASSERT_TRUE(fabs(descriptors.getSphericalR(-1.0, 1.0, 1.0) - sqrt(3.0)) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(-1.0, 1.0, 1.0) - (M_PI - M_PI_4)) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(-1.0, 1.0, 1.0) - 0.955317) < epsilon);
-
-    ASSERT_TRUE(fabs(descriptors.getSphericalR(1.0, -1.0, 1.0) - sqrt(3.0)) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(1.0, -1.0, 1.0) - (-M_PI_4)) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(1.0, -1.0, 1.0) - 0.955317) < epsilon);
-
-    ASSERT_TRUE(fabs(descriptors.getSphericalR(1.0, 1.0, -1.0) - sqrt(3.0)) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(1.0, 1.0, -1.0) - M_PI_4) < epsilon);
-    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(1.0, 1.0, -1.0) - 2.186276) < epsilon);
-
-    // more tests can be added
+    result = 0.5;
+    ASSERT_TRUE(fabs(descriptors.fcFunction(11.0, 10.0, 12.0) - result) < epsilon);
+    // what if one or more of the parameter(s) is/are negative?
+    // what if rMin > rMax ?
 }
 
-TEST(test_descriptors, testYlmFunction)
+TEST(testDescriptors, testCutoffFunction3)
+{
+    double epsilon{0.0001};
+    double result;
+
+    result = 0.1464;
+    ASSERT_TRUE(fabs(descriptors.fcFunction(11.5, 10.0, 12.0) - result) < epsilon);
+    // what if one or more of the parameter(s) is/are negative?
+    // what if rMin > rMax ?
+}
+
+TEST(testDescriptors, testCutoffFunction4)
+{
+    double epsilon{0.0001};
+    double result;
+
+    result = 1.0;
+    ASSERT_TRUE(fabs(descriptors.fcFunction(2.0, 10.0, 12.0) - result) < epsilon);
+    // what if one or more of the parameter(s) is/are negative?
+    // what if rMin > rMax ?
+}
+
+TEST(testDescriptors, testSphericalCoordinatesR)
 {
     double epsilon{0.00001};
     double result;
 
-    // int m, int l, double dx, double dy, double dz
+    result = 0.0;
+    ASSERT_TRUE(fabs(descriptors.getSphericalR(0.0, 0.0, 0.0) - result) < epsilon);
+
+    result = sqrt(3.0);
+    ASSERT_TRUE(fabs(descriptors.getSphericalR(1.0, 1.0, 1.0) - result) < epsilon);
+
+    result = sqrt(3.0);
+    ASSERT_TRUE(fabs(descriptors.getSphericalR(-1.0, 1.0, 1.0) - result) < epsilon);
+
+    result = sqrt(3.0);
+    ASSERT_TRUE(fabs(descriptors.getSphericalR(1.0, -1.0, 1.0) - result) < epsilon);
+
+    result = sqrt(3.0);
+    ASSERT_TRUE(fabs(descriptors.getSphericalR(1.0, 1.0, -1.0) - result) < epsilon);
+
+    // more tests can be added
+}
+
+TEST(testDescriptors, testSphericalCoordinatesPhi)
+{
+    double epsilon{0.00001};
+    double result;
+
+    // result = ???;
+    // ASSERT_TRUE(fabs(descriptors.getSphericalPhi(0.0, 0.0, 0.0) - ???) < epsilon);
+
+    result = M_PI_4;
+    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(1.0, 1.0, 1.0) - result) < epsilon);
+
+    result = M_PI - M_PI_4;
+    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(-1.0, 1.0, 1.0) - result) < epsilon);
+
+    result = -M_PI_4;
+    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(1.0, -1.0, 1.0) - result) < epsilon);
+
+    result = M_PI_4;
+    ASSERT_TRUE(fabs(descriptors.getSphericalPhi(1.0, 1.0, -1.0) - result) < epsilon);
+
+    // more tests can be added
+}
+
+TEST(testDescriptors, testSphericalCoordinatesTheta)
+{
+    double epsilon{0.00001};
+    double result;
+
+    // result = ???;
+    // ASSERT_TRUE(fabs(descriptors.getSphericalTheta(0.0, 0.0, 0.0) - ???) < epsilon);
+
+    result = 0.955317;
+    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(1.0, 1.0, 1.0) - result) < epsilon);
+
+    result = 0.955317;
+    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(-1.0, 1.0, 1.0) - result) < epsilon);
+
+    result = 0.955317;
+    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(1.0, -1.0, 1.0) - result) < epsilon);
+
+    result = 2.186276;
+    ASSERT_TRUE(fabs(descriptors.getSphericalTheta(1.0, 1.0, -1.0) - result) < epsilon);
+
+    // more tests can be added
+}
+
+TEST(testDescriptors, testYlmFunction1)
+{
+    double epsilon{0.00001};
+    double result;
+
     result = 0.5 * sqrt(1 / M_PI);
     ASSERT_TRUE(fabs(descriptors.ylmFunction(0, 0, 1.0, 2.0, 3.0) - result) < epsilon);
 
@@ -102,7 +174,7 @@ TEST(test_descriptors, testYlmFunction)
     // more tests can be added
 }
 
-TEST(test_descriptors, testQlmFunction)
+TEST(testDescriptors, testQlmFunction1)
 {
     double epsilon{0.00001};
     double result;
@@ -113,7 +185,7 @@ TEST(test_descriptors, testQlmFunction)
     // more tests can be added
 }
 
-TEST(test_descriptors, testG2Function)
+TEST(testDescriptors, testG2Function1)
 {
     double epsilon{0.001};
     double result;
@@ -126,7 +198,7 @@ TEST(test_descriptors, testG2Function)
     // more tests can be added
 }
 
-TEST(test_descriptors, testG3Function)
+TEST(testDescriptors, testG3Function1)
 {
     double epsilon{0.001};
     double result;
