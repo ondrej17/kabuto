@@ -59,7 +59,7 @@ No building is needed, all header files are already included (`src/boost`).
 
 ### Building `googletest` framework
 
-No building is needed, all header files are already included (`tests/gtest`).
+No building is needed, all header files are already included (`tests/gtest` and `tests/GoogleTest`).
 
 ### Building tests
 
