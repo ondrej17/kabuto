@@ -16,39 +16,40 @@ The whole library is also my project for the subject "Programovanie (3)" at the 
 
 ## Project structure
 
- * `src`
-   * `boost`
-     * `...`
-   * `common`
-     * `images`
-       * `object-relationship.png`
-   * `descriptors_atom.cpp`
-   * `descriptors_atom.h`
-   * `descriptors_box.cpp`
-   * `descriptors_box.h`
-   * `descriptors_descriptors.cpp`
-   * `descriptors_descriptors.h`
-   * `descriptors_module.cpp`
-   * `descriptors_module.h`
-   * `descriptors_timestep.cpp`
-   * `descriptors_timestep.h`
-   * `descriptors_utility.cpp`
-   * `descriptors_utility.h`
-   * `descriptors_verlet_list.cpp`
-   * `descriptors_verlet_list.h`
- * `tests`
-   * `googletest`
-     * `...`
-   * `CMakeLists.txt`
-   * `test_atom.cpp`
-   * `test_box.cpp`
-   * `test_descriptors.cpp`
-   * `test_timestep.cpp`
-   * `test_verlet_list.cpp`
-   * `test.cpp`
- * `install.sh`
- * `setup.py`
- * `README.md`
+* `src`
+  * `boost`
+    * `...`
+  * `common`
+    * `images`
+      * `object-relationship.png`
+  * `descriptors_atom.cpp`
+  * `descriptors_atom.h`
+  * `descriptors_box.cpp`
+  * `descriptors_box.h`
+  * `descriptors_descriptors.cpp`
+  * `descriptors_descriptors.h`
+  * `descriptors_module.cpp`
+  * `descriptors_module.h`
+  * `descriptors_timestep.cpp`
+  * `descriptors_timestep.h`
+  * `descriptors_utility.cpp`
+  * `descriptors_utility.h`
+  * `descriptors_verlet_list.cpp`
+  * `descriptors_verlet_list.h`
+* `tests`
+  * `GoogleTest`
+    * `...`
+  * `gtest`
+    * `...`
+  * `CMakeLists.txt`
+  * `test_atom.cpp`
+  * `test_box.cpp`
+  * `test_descriptors.cpp`
+  * `test_timestep.cpp`
+  * `test_verlet_list.cpp`
+* `install.sh`
+* `setup.py`
+* `README.md`
 
 ## Building and installing
 
@@ -56,19 +57,9 @@ The whole library is also my project for the subject "Programovanie (3)" at the 
 
 No building is needed, all header files are already included (`src/boost`).
 
-### Building `googletest`
+### Building `googletest` framework
 
-No building is needed, all header files are already included (`tests/googletest`).
-
-In case you wanted to build it by yourself, use this:
-
-    cd tests
-    git clone https://github.com/google/googletest.git
-    cd googletests
-    mkdir build 
-    cd build
-    cmake -Dgtest_build_samples=ON -DCMAKE_BUILD_TYPE=Debug ..
-    make -j4
+No building is needed, all header files are already included (`tests/gtest`).
 
 ### Building tests
 

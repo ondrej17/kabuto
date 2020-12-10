@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "../src/descriptors_atom.h"
 
