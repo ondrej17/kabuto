@@ -4,6 +4,7 @@
 
 bcc
 fcc
+amorf
 #hcp
 #A15
 #dis

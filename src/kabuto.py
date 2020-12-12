@@ -222,8 +222,10 @@ class Kabuto:
                     pass
         # all atoms are loaded in dictionary
 
-        # calculating of the descriptors for each timestep using multiprocessing
+        # calculating of the descriptors for each timestep using C++ extension
         logger.info("Calculating of descriptors begins")
+        # TODO: self.pbc_dict[0] ... 0 is id of timestep. It is not always 0
+        # TODO: pass all pbc_dict to compute function
         self.timesteps = descriptors.compute(*(self.pbc_dict[0]), self.timesteps)
         logger.info("Calculating of descriptors ended")
 
@@ -593,7 +595,7 @@ class Kabuto:
             self.move_files_from_to(self.to_predict_dir, self.predicted_dir)
 
             # print result (global structure info)
-            logger.info("RESULT:\n{}".format(global_structure_dict))
+            logger.debug("RESULT:\n{}".format(global_structure_dict))
 
             # save results to 'results' dir
             self.save_results(global_structure_dict)
@@ -627,17 +629,6 @@ class Kabuto:
         # logger.info("y_42 = {}".format(test_descriptors.y_lm(4, 2, 1, 0, 0)))
         # logger.info("y_20 = {}".format(test_descriptors.y_lm(2, 0, 1, 0, 0)))
         # # logger.info("srt(2) * y_4^2 = {}".format(scipy.special.sph_harm(2, 4, 0, math.pi / 2) * math.sqrt(2)))
-
-    def calculate_descriptors(self, timestep):
-        """
-        * calculates descriptors for each atom in given timestep
-        * descriptors id a C++ extension library
-        * 'timestep' is an integer from self.timesteps.keys() list
-        * returns a dictionary in form: {id, [x, y, z, descriptors]}
-        """
-        logger.info("... processing timestep #{}".format(timestep))
-        result = descriptors.compute(*self.pbc_dict[timestep], self.timesteps[timestep])
-        return result
 
     def prepare_arrays(self, directory=None, filename=None):
         """

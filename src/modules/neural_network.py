@@ -67,7 +67,7 @@ class NeuralNetwork:
             input_array is a matrix [num_of_atoms, num_of_descriptors]
             returns a matrix [num_of_atoms, num_of_phases]
         """
-        logger.info("Predicting from array:\n{}".format(input_array))
+        #logger.info("Predicting from array:\n{}".format(input_array))
         return self.model.predict(input_array)
 
     def save_model(self, path):
@@ -89,7 +89,7 @@ class NeuralNetwork:
         path_to_model = os.path.join(path, self.name + self.model_extension)
         self.model = tf.keras.models.load_model(path_to_model)
         #self.model.summary()
-        logger.info("NN \'{}\' is loaded.".format(self.name))
+        #logger.info("NN \'{}\' is loaded.".format(self.name))
 
     def create_model(self, number_of_descriptors, number_of_phases):
         """

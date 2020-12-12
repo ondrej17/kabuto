@@ -1,0 +1,73 @@
+# amorphous phase of Mo
+
+# Initialize Simulation --------------------- 
+clear
+units           metal 
+dimension       3 
+boundary        p p p 
+atom_style      atomic 
+atom_modify     map array
+
+# Create Atoms --------------------- 
+lattice         bcc 4.00
+region          box block 0 5 0 5 0 5 units lattice
+create_box      1 box
+create_atoms    1 box
+
+# Define Interatomic Potential --------------------- 
+pair_style      eam/alloy 
+pair_coeff      * * Mo_Zhou04.eam.alloy Mo
+neighbor        2.0 bin 
+neigh_modify    delay 10 check yes 
+
+# Setting THERMO
+reset_timestep  0 
+thermo          10 
+thermo_style    custom step lx ly lz press pe temp
+
+# Run Minimization 
+variable        targetPressure equal 0.0
+
+fix             1 all                                       &
+                box/relax iso ${targetPressure} vmax 0.001 
+min_style       cg 
+minimize        1e-25 1e-25 5000 10000 
+unfix           1
+
+# Setting DUMP
+reset_timestep  0 
+variable        dumpInterval equal 25
+dump            1 all custom ${dumpInterval} dump.out id type x y z
+
+# Run simulation 
+## melt Mo-bcc
+variable        initTemp        equal 300
+variable        finalTemp       equal 6000
+variable        doubleInitTemp  equal 2*${initTemp}
+
+velocity        all create ${doubleInitTemp} 12345 mom yes rot yes
+
+fix             2 all                                   &
+                nvt                                     &
+                temp ${initTemp} ${finalTemp} $(100.0*dt)
+
+run             40000
+unfix           2
+
+## quickly cool down melted Mo
+variable        finalAmorfTemp equal 300.0
+fix             3 all                                           &
+                nvt                                             &
+                temp ${finalTemp} ${finalAmorfTemp} $(1.0*dt)
+
+run             20000
+unfix           3
+
+## equivibration
+fix             4 all                                   &
+                nve 
+
+run             10000
+unfix           4
+
+#-------------------------------------------------
