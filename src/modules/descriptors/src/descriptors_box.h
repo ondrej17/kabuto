@@ -27,9 +27,7 @@
 class Box
 {
 protected:
-    double m_pbcX;                              // PBC in x direction
-    double m_pbcY;                              // PBC in y direction
-    double m_pbcZ;                              // PBC in z direction
+    std::map<int, std::vector<double>> m_pbc;   // PBCs foreach timestep
     int m_numOfTimesteps;                       // number of timesteps of system
     double m_rVerletListLimit;                  // cutoff for atoms in the Verlet List 
     std::map<int, VerletList> m_verletLists;    // map of Verlet List for each atom
@@ -38,18 +36,16 @@ protected:
 
 public:
     // constructor
-    Box(double pbcX, double pbcY, double pbcZ)
-        : m_pbcX{pbcX}, m_pbcY{pbcY}, m_pbcZ{pbcZ}
+    Box(std::map<int, std::vector<double>> pbcMap)
+        : m_pbc{pbcMap}
     {
         m_numOfTimesteps = 0;       // no timesteps at the beginning
         m_rVerletListLimit = 7.4;   // because rMaxSym = 6.4 (magical number for now)
     }
 
     // getters
+    inline std::map<int, std::vector<double>> getPbc() { return m_pbc; };
     inline int getNumOfTimesteps() { return m_numOfTimesteps; };
-    inline double getPbcX() { return m_pbcX; };
-    inline double getPbcY() { return m_pbcY; };
-    inline double getPbcZ() { return m_pbcZ; };
     inline double getRVerletListLimit() { return m_rVerletListLimit; };
     inline std::map<int, VerletList> &getVerletLists() { return m_verletLists; };
     inline std::map<int, Timestep> &getTimesteps() { return m_timesteps; };
@@ -63,6 +59,7 @@ public:
     int getNumOfAtoms();
     int getNumOfAtomsInVerletList(int atomId);
     const std::vector<double> &getAtomDescriptors(int timestepId, int atomId);
+    const std::vector<double> &getPbcOfTimestep(int timestepId);
     const std::vector<int> &getTimestepAtomsId(int timestepId);
 };
 

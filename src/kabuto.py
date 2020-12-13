@@ -1,3 +1,6 @@
+# TODO: split kabuto.py to more files. Function sholud be in another file. 
+#       kabuto.py should have only the class Kabuto and you should execute the run.py
+
 import os
 import sys
 
@@ -224,20 +227,18 @@ class Kabuto:
 
         # calculating of the descriptors for each timestep using C++ extension
         logger.info("Calculating of descriptors begins")
-        # TODO: self.pbc_dict[0] ... 0 is id of timestep. It is not always 0
-        # TODO: pass all pbc_dict to compute function
-        self.timesteps = descriptors.compute(*(self.pbc_dict[0]), self.timesteps)
+        self.timesteps = descriptors.compute(self.pbc_dict, self.timesteps)
         logger.info("Calculating of descriptors ended")
 
-        # save dictionary to json file
-        with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
-            json.dump(self.timesteps, json_file)
-            logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
+        # # save dictionary to json file
+        # with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
+        #     json.dump(self.timesteps, json_file)
+        #     logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
-        # save dictionary to json file
-        with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
-            json.dump(self.pbc_dict, json_file)
-            logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
+        # # save dictionary to json file
+        # with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
+        #     json.dump(self.pbc_dict, json_file)
+        #     logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
         # save timesteps to separate files in 'dir_to_train' output_dir
         # create output_dir for saving timesteps (if it does not exist)
@@ -488,20 +489,20 @@ class Kabuto:
                     pass
         # all atoms are loaded in dictionary
 
-        # calculating of the descriptors for each timestep using multiprocessing
+        # calculating of the descriptors for each timestep using C++ extension
         logger.info("Calculating of descriptors begins")
-        self.timesteps = descriptors.compute(*(self.pbc_dict[0]), self.timesteps)
+        self.timesteps = descriptors.compute(self.pbc_dict, self.timesteps)
         logger.info("Calculating of descriptors ended")
 
-        # save dictionary to json file
-        with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
-            json.dump(self.timesteps, json_file)
-            logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
+        # # save dictionary to json file
+        # with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
+        #     json.dump(self.timesteps, json_file)
+        #     logger.info("Dictionary 'timesteps' was saved to: dict_timesteps.json")
 
-        # save dictionary to json file
-        with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
-            json.dump(self.pbc_dict, json_file)
-            logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
+        # # save dictionary to json file
+        # with open(self.config_dir + os.path.sep + "dict_pbc.json", "w") as json_file:
+        #     json.dump(self.pbc_dict, json_file)
+        #     logger.info("Dictionary 'pbc_dict' was saved to: dict_pbc.json")
 
         # save timesteps to separate files in 'dir_to_predict' folder
         # create to_predict_dir for saving timesteps (if it does not exist)
@@ -796,7 +797,7 @@ class Kabuto:
         vector = [0] * self.number_of_phases
         n = len(prediction.tolist())
         logger.debug("Number of atoms in prediction: {}".format(n))
-        for i, q_i in enumerate(prediction.tolist()):  # rows
+        for q_i in prediction.tolist():  # rows
             for j, q_ij in enumerate(q_i):  # columns
                 vector[j] += q_ij
         return [q_i / n for q_i in vector]
@@ -824,7 +825,6 @@ class Kabuto:
         plt.savefig(os.path.join(self.result_dir, "loss-vs-epochs.png"))
         plt.clf()
 
-    # TODO: change accuracy to mae
     def plot_accuracy(self, history):
         """
         summarize history for accuracy

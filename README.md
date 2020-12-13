@@ -53,6 +53,8 @@ The results of the script are stored in `src/result` folder.
 The log of script is both printed to console and written in file `src/kabuto.log`. 
 
 The example run and simulation are located in `example` folder.
+
+TODO: add command that show the stdout to console and also saves it to file
   
  ## Code Structure
  * `README.md`
@@ -131,6 +133,7 @@ The example run and simulation are located in `example` folder.
 ## Requirements
 * `Python`
 * `tensorflow`, `scipy` and `numpy` packages
-* `boost` library
+* `boost` library - included
+* `GoogleTest` framework - included
 * `cmake`
 * compiled `descriptors` C++ extension 

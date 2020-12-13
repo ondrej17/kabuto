@@ -2,64 +2,84 @@
 
 static PyObject *descriptors_compute(PyObject *self, PyObject *args)
 {
+    std::cout << "Parsing arguments ..." << std::endl;
     // parse args
-    PyObject *inputDictionary;
-    double pbcX{0.0};
-    double pbcY{0.0};
-    double pbcZ{0.0};
-    if (!PyArg_ParseTuple(args, "dddO", &pbcX, &pbcY, &pbcZ, &inputDictionary))
+    PyObject *pyTimestepDictionary;
+    PyObject *pyPbcDictionary;
+    if (!PyArg_ParseTuple(args, "OO", &pyPbcDictionary, &pyTimestepDictionary))
     {
-        // TODO: check for incorrect parsing
-        // TODO: throwing exception from C++ to Python?
         return Py_BuildValue("d", 1);
     }
 
-    // create Box object
-    Box box(pbcX, pbcY, pbcZ);
-
-    // parse each timestep in inputDictionary
-    PyObject *timestepId = PyDict_Keys(inputDictionary);
-    PyObject *timestep = PyDict_Values(inputDictionary);
+    std::cout << "Parsing pbc ..." << std::endl;
+    // parse pbc for each timestep in pbcDictionary
+    std::map<int, std::vector<double>> pbcMap; // {timestepId:[pbcX, pbcY, pbcZ]}
+    PyObject *pyTimestepId = PyDict_Keys(pyPbcDictionary);
+    PyObject *pyTimestep = PyDict_Values(pyPbcDictionary);
     Py_ssize_t pos1 = 0;
-    while (PyDict_Next(inputDictionary, &pos1, &timestepId, &timestep))
+    while (PyDict_Next(pyPbcDictionary, &pos1, &pyTimestepId, &pyTimestep))
     {
         // get ID of timestep
-        long int idOfTimestep{PyLong_AsLong(timestepId)};
+        long int idOfTimestep{PyLong_AsLong(pyTimestepId)};
+
+        // get pbc's of this timestep
+        std::vector<double> pbcs = listTupleToVector_Float(PyDict_GetItem(pyPbcDictionary, pyTimestepId));
+
+        // add entry to pbcMap
+        //pbcMap[idOfTimestep] = pbcs;
+        pbcMap.insert(std::make_pair<int, std::vector<double>>(idOfTimestep, std::move(pbcs)));
+    }
+
+    std::cout << "Creating Box object ..." << std::endl;
+    // create Box object
+    Box box(std::move(pbcMap));
+
+    std::cout << "Parsing timestep dictionary ..." << std::endl;
+    // parse each timestep in pyTimestepDictionary
+    pyTimestepId = PyDict_Keys(pyTimestepDictionary);
+    pyTimestep = PyDict_Values(pyTimestepDictionary);
+    pos1 = 0;
+    while (PyDict_Next(pyTimestepDictionary, &pos1, &pyTimestepId, &pyTimestep))
+    {
+        // get ID of timestep
+        long int idOfTimestep{PyLong_AsLong(pyTimestepId)};
         box.addTimestep(idOfTimestep);
 
         // get atoms in timestep
-        PyObject *atoms;
-        if (!PyArg_Parse(timestep, "O", &atoms))
+        PyObject *pyAtoms;
+        if (!PyArg_Parse(pyTimestep, "O", &pyAtoms))
         {
-            // TODO: check for incorrect parsing
             return Py_BuildValue("d", 1);
         }
 
         // parse each atom in atoms
-        PyObject *atomId = PyDict_Keys(atoms);
-        PyObject *atomCoords = PyDict_Values(atoms);
+        PyObject *pyAtomId = PyDict_Keys(pyAtoms);
+        PyObject *pyAtomCoords = PyDict_Values(pyAtoms);
         Py_ssize_t pos2 = 0;
-        while (PyDict_Next(atoms, &pos2, &atomId, &atomCoords))
+        while (PyDict_Next(pyAtoms, &pos2, &pyAtomId, &pyAtomCoords))
         {
             // get current id and coordinates of current atom
-            long int idOfAtom = PyLong_AsLong(atomId);
-            std::vector<double> coordinates = listTupleToVector_Float(PyDict_GetItem(atoms, atomId));
+            long int idOfAtom = PyLong_AsLong(pyAtomId);
+            std::vector<double> coordinates = listTupleToVector_Float(PyDict_GetItem(pyAtoms, pyAtomId));
 
             // add atom to box (and to correct timestep)
             box.addAtomToTimestep(idOfTimestep, idOfAtom, coordinates.at(0), coordinates.at(1), coordinates.at(2));
         }
     }
 
+    std::cout << "Creating Verlet lists ..." << std::endl;
     // create Verlet lists
     box.createVerletLists();
-    std::cout << "Number of atoms:" << box.getNumOfAtoms() << std::endl;
+    std::cout << "Number of atoms in Box: " << box.getNumOfAtoms() << std::endl;
     int atomIndex{box.getTimestepAtomsId(box.getTimestepsId().at(0)).at(0)};
     std::cout << "Number of atoms in Verlet list of atom #" << atomIndex << ": "
               << box.getNumOfAtomsInVerletList(atomIndex) << std::endl;
 
+    std::cout << "Caluculating descriptors ..." << std::endl;
     // calculate descriptors for each atom
     box.calculateDescriptors();
 
+    std::cout << "Creating result object ..." << std::endl;
     // create Python dictionary that will be passed back to Python script
     PyObject *pyResult = PyDict_New();
     std::vector<int> timestepsId{box.getTimestepsId()};
@@ -82,7 +102,6 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
             // add new entry to python dictionary
             if (PyDict_SetItem(pyTimestepDict, pyId, pyDescriptors) != 0)
             {
-                // TODO: check for incorrect setting item in PyDict
                 return Py_BuildValue("d", 2);
             }
         }
@@ -90,7 +109,6 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
         PyObject *pyTimestepId = Py_BuildValue("i", timestepId);
         if (PyDict_SetItem(pyResult, pyTimestepId, pyTimestepDict) != 0)
         {
-            // TODO: check for incorrect setting item in PyDict
             return Py_BuildValue("d", 2);
         }
     }

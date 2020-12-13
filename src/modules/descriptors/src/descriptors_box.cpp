@@ -32,9 +32,16 @@ const std::vector<double> &Box::getAtomDescriptors(int timestepId, int atomId)
     return m_timesteps.at(timestepId).getAtomDescriptors(atomId);
 }
 
+const std::vector<double> &Box::getPbcOfTimestep(int timestepId)
+{
+    return m_pbc.at(timestepId);
+}
+
 void Box::createVerletLists()
 {
-    int timestepId{m_timestepsId[0]}; // use the first timestep
+    // TODO: for now, Verlet lists are calculated ONLY on the beginning of simulation
+    int timestepId{m_timestepsId[0]};
+    std::vector<double> pbc{getPbcOfTimestep(timestepId)};
     std::vector<int> atomsId{m_timesteps.at(timestepId).getAtomsId()};
     std::map<int, Atom> atoms{m_timesteps.at(timestepId).getAtoms()};
 
@@ -64,9 +71,9 @@ void Box::createVerletLists()
                 double z_ij{otherZ - myZ};
 
                 // correction of vector r_ij for PBC (and minimum image convention)
-                x_ij -= m_pbcX * std::round(x_ij / m_pbcX);
-                y_ij -= m_pbcY * std::round(y_ij / m_pbcY);
-                z_ij -= m_pbcZ * std::round(z_ij / m_pbcZ);
+                x_ij -= pbc[0] * std::round(x_ij / pbc[0]);
+                y_ij -= pbc[1] * std::round(y_ij / pbc[1]);
+                z_ij -= pbc[2] * std::round(z_ij / pbc[2]);
 
                 // calculate the correct length of vector r_ij
                 double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
@@ -91,6 +98,7 @@ void Box::calculateDescriptors()
         std::cout << "Calculating timestep #" << timestepId << std::endl;
         std::vector<int> atomsId{m_timesteps.at(timestepId).getAtomsId()};
         std::map<int, Atom> atoms{m_timesteps.at(timestepId).getAtoms()};
+        std::vector<double> pbc{getPbcOfTimestep(timestepId)};
 
         // go through all atoms in given timestep
         for (int atomId : atomsId)
@@ -98,7 +106,7 @@ void Box::calculateDescriptors()
             std::vector<int> atomsInVerletListId{m_verletLists.at(atomId).getAtomIds()};
             // create descriptors vector
             std::vector<double> descriptors{Descriptors(atomId,
-                                                        m_pbcX, m_pbcY, m_pbcZ,
+                                                        pbc[0], pbc[1], pbc[2],
                                                         atomsInVerletListId,
                                                         atoms)
                                                 .getDescriptors()};
