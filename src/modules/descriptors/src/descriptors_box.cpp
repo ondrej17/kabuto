@@ -29,7 +29,7 @@ const std::vector<int> &Box::getTimestepAtomsId(int timestepId)
 
 const std::vector<double> &Box::getAtomDescriptors(int timestepId, int atomId)
 {
-    return m_timesteps.at(timestepId).getAtomDescriptors(atomId);
+    return m_timesteps.at(timestepId).getAtom(atomId).getDescriptors();
 }
 
 const std::vector<double> &Box::getPbcOfTimestep(int timestepId)
@@ -92,27 +92,31 @@ void Box::createVerletLists()
 
 void Box::calculateDescriptors()
 {
+    auto start = std::chrono::steady_clock::now();
+    std::chrono::duration<double> timeFromStart;
+
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << '\t' << timeFromStart.count() << "s - Begining of calculation of descriptors ..." << std::endl;
+
     // go through all timesteps
-    for (int timestepId : m_timestepsId)
+    for (const int &timestepId : m_timestepsId)
     {
-        std::cout << "Calculating timestep #" << timestepId << std::endl;
+        timeFromStart = std::chrono::steady_clock::now() - start;
+        // std::cout << '\t' << timeFromStart.count() << "s - Calculating timestep #" << timestepId << std::endl;
+
         std::vector<int> atomsId{m_timesteps.at(timestepId).getAtomsId()};
-        std::map<int, Atom> atoms{m_timesteps.at(timestepId).getAtoms()};
         std::vector<double> pbc{getPbcOfTimestep(timestepId)};
 
         // go through all atoms in given timestep
-        for (int atomId : atomsId)
+        for (const int &atomId : atomsId)
         {
-            std::vector<int> atomsInVerletListId{m_verletLists.at(atomId).getAtomIds()};
-            // create descriptors vector
-            std::vector<double> descriptors{Descriptors(atomId,
-                                                        pbc[0], pbc[1], pbc[2],
-                                                        atomsInVerletListId,
-                                                        atoms)
-                                                .getDescriptors()};
+            timeFromStart = std::chrono::steady_clock::now() - start;
+            // std::cout << '\t' << timeFromStart.count() << "s - Calculating atom #" << atomId << std::endl;
 
-            // set descriptors for given atom!
-            m_timesteps.at(timestepId).setAtomDescriptors(atomId, descriptors);
+            // calculate descriptors for atom
+            m_timesteps.at(timestepId).getAtom(atomId).calculateDescriptors(pbc[0], pbc[1], pbc[2], 
+                                                                            m_verletLists.at(atomId).getAtomIds(), 
+                                                                            m_timesteps.at(timestepId).getAtoms());
         }
     }
 }

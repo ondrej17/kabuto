@@ -16,8 +16,3 @@ const std::vector<double> &Timestep::getAtomDescriptors(int atom_id)
 {
     return  m_atoms.at(atom_id).getDescriptors();
 }
-
-void Timestep::setAtomDescriptors(int atom_id, std::vector<double> descriptors)
-{
-    m_atoms.at(atom_id).setDescriptors(descriptors);
-}

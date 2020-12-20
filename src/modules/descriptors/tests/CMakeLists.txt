@@ -19,7 +19,7 @@ set(GTEST_FILES
 set(SOURCE_FILES
         ../src/descriptors_atom.cpp
         #../src/descriptors_box.cpp
-        ../src/descriptors_descriptors.cpp
+        #../src/descriptors_descriptors.cpp
         #../src/descriptors_module.cpp
         #../src/descriptors_timestep.cpp
         #../src/descriptors_utility.cpp
@@ -28,7 +28,7 @@ set(SOURCE_FILES
 set(TEST_FILES
         test_atom.cpp
         #test_box.cpp
-        test_descriptors.cpp
+        #test_descriptors.cpp
         #test_timestep.cpp
         test_verlet_list.cpp
 )

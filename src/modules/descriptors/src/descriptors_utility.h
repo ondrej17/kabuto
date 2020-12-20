@@ -18,6 +18,7 @@ extern "C"
 
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 /**
  * Converts PyObject(List/Tuple) to C++ Vector

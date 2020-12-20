@@ -2,7 +2,13 @@
 
 static PyObject *descriptors_compute(PyObject *self, PyObject *args)
 {
-    std::cout << "Parsing arguments ..." << std::endl;
+    std::cout << std::endl;
+
+    auto start = std::chrono::steady_clock::now();
+    std::chrono::duration<double> timeFromStart;
+
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Parsing arguments ..." << std::endl;
     // parse args
     PyObject *pyTimestepDictionary;
     PyObject *pyPbcDictionary;
@@ -11,7 +17,8 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
         return Py_BuildValue("d", 1);
     }
 
-    std::cout << "Parsing pbc ..." << std::endl;
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Parsing pbc ..." << std::endl;
     // parse pbc for each timestep in pbcDictionary
     std::map<int, std::vector<double>> pbcMap; // {timestepId:[pbcX, pbcY, pbcZ]}
     PyObject *pyTimestepId = PyDict_Keys(pyPbcDictionary);
@@ -30,11 +37,13 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
         pbcMap.insert(std::make_pair<int, std::vector<double>>(idOfTimestep, std::move(pbcs)));
     }
 
-    std::cout << "Creating Box object ..." << std::endl;
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Creating Box object ..." << std::endl;
     // create Box object
     Box box(std::move(pbcMap));
 
-    std::cout << "Parsing timestep dictionary ..." << std::endl;
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Parsing timestep dictionary ..." << std::endl;
     // parse each timestep in pyTimestepDictionary
     pyTimestepId = PyDict_Keys(pyTimestepDictionary);
     pyTimestep = PyDict_Values(pyTimestepDictionary);
@@ -67,19 +76,23 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
         }
     }
 
-    std::cout << "Creating Verlet lists ..." << std::endl;
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Creating Verlet lists ..." << std::endl;
     // create Verlet lists
     box.createVerletLists();
-    std::cout << "Number of atoms in Box: " << box.getNumOfAtoms() << std::endl;
-    int atomIndex{box.getTimestepAtomsId(box.getTimestepsId().at(0)).at(0)};
-    std::cout << "Number of atoms in Verlet list of atom #" << atomIndex << ": "
-              << box.getNumOfAtomsInVerletList(atomIndex) << std::endl;
+    // std::cout << "Number of atoms in Box: " << box.getNumOfAtoms() << std::endl;
+    // int atomIndex{box.getTimestepAtomsId(box.getTimestepsId().at(0)).at(0)};
+    // std::cout << "Number of atoms in Verlet list of atom #" << atomIndex << ": "
+            //   << box.getNumOfAtomsInVerletList(atomIndex) << std::endl;
 
-    std::cout << "Caluculating descriptors ..." << std::endl;
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Calculating descriptors ..." << std::endl;
     // calculate descriptors for each atom
     box.calculateDescriptors();
 
-    std::cout << "Creating result object ..." << std::endl;
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Creating result object ..." << std::endl;
+    
     // create Python dictionary that will be passed back to Python script
     PyObject *pyResult = PyDict_New();
     std::vector<int> timestepsId{box.getTimestepsId()};
@@ -112,6 +125,9 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args)
             return Py_BuildValue("d", 2);
         }
     }
+    timeFromStart = std::chrono::steady_clock::now() - start;
+    // std::cout << timeFromStart.count() << "s - Ending ..." << std::endl;
+    // std::cout << std::endl;
 
     // return a Python dictionary {timestepId: {atom_id:descriptors}}
     return pyResult;

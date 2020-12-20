@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 extern "C"
 {
@@ -40,9 +41,8 @@ static PyObject *descriptors_compute(PyObject *self, PyObject *args);
  */
 static PyMethodDef descriptors_methods[] = {
     {"compute", descriptors_compute, METH_VARARGS,
-        "Computes descriptors for given timesteps. Callable from Python script "
-        "using `descriptors.compute(pbc_x, pbc_y, pbc_y, all_timesteps)`."
-    },
+     "Computes descriptors for given timesteps. Callable from Python script "
+     "using `descriptors.compute(pbc_x, pbc_y, pbc_y, all_timesteps)`."},
     {NULL, NULL, 0, NULL}};
 
 /**
@@ -56,8 +56,7 @@ static PyMethodDef descriptors_methods[] = {
  *    * list of methods that can be called from Python
  */
 static struct PyModuleDef descriptors = {
-    PyModuleDef_HEAD_INIT, "descriptors", NULL, -1, descriptors_methods
-};
+    PyModuleDef_HEAD_INIT, "descriptors", NULL, -1, descriptors_methods};
 
 /**
  * Initialization function of C++ extension for Python
