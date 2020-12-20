@@ -30,7 +30,7 @@ Trains everything from files in `dir_to_train` directory.
 Predicts the percentage of each phase that neural network knows. Determines global structure in given dump file for each timestep.
 
 ## Usage
-Compile C++ extension `descriptors` in `src/modules/descriptors` folder:
+Install C++ extension `descriptors` (in `src/modules/descriptors` folder):
     
     (sudo) ./install.sh
 
@@ -46,15 +46,16 @@ In `src` folder:
     
     python kabuto.py predict <name_of_nn> <dump.file>
     
-Phases that we want to be learned must be in file `src/config/phases_to_learn.txt`.
+Phases that you want to be learned must be in file `src/config/phases_to_learn.txt`.
 
 The results of the script are stored in `src/result` folder.
+
+TODO: add command that show the stdout to console and also saves it to file
 
 The log of script is both printed to console and written in file `src/kabuto.log`. 
 
 The example run and simulation are located in `example` folder.
 
-TODO: add command that show the stdout to console and also saves it to file
   
  ## Code Structure
  * `README.md`

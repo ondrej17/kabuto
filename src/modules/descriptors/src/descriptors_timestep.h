@@ -41,7 +41,7 @@ public:
 
     // methods
     void addAtom(int atomId, double x, double y, double z);
-    void setAtomDescriptors(int atom_id, std::vector<double> descriptors);
+    //void setAtomDescriptors(int atom_id, std::vector<double> descriptors);
     Atom &getAtom(int id);
     const std::vector<double> &getAtomDescriptors(int atom_id);
     

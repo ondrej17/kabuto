@@ -18,29 +18,29 @@
 #include <utility>
 #include <map>
 #include <vector>
+#include <chrono>
 
 #include "descriptors_timestep.h"
 #include "descriptors_atom.h"
 #include "descriptors_verlet_list.h"
-#include "descriptors_descriptors.h"
 
 class Box
 {
 protected:
-    std::map<int, std::vector<double>> m_pbc;   // PBCs foreach timestep
-    int m_numOfTimesteps;                       // number of timesteps of system
-    double m_rVerletListLimit;                  // cutoff for atoms in the Verlet List 
-    std::map<int, VerletList> m_verletLists;    // map of Verlet List for each atom
-    std::map<int, Timestep> m_timesteps;        // map of all timesteps of systems
-    std::vector<int> m_timestepsId;             // IDs of all timesteps
+    std::map<int, std::vector<double>> m_pbc; // PBCs foreach timestep
+    int m_numOfTimesteps;                     // number of timesteps of system
+    double m_rVerletListLimit;                // cutoff for atoms in the Verlet List
+    std::map<int, VerletList> m_verletLists;  // map of Verlet List for each atom
+    std::map<int, Timestep> m_timesteps;      // map of all timesteps of systems
+    std::vector<int> m_timestepsId;           // IDs of all timesteps
 
 public:
     // constructor
     Box(std::map<int, std::vector<double>> pbcMap)
         : m_pbc{pbcMap}
     {
-        m_numOfTimesteps = 0;       // no timesteps at the beginning
-        m_rVerletListLimit = 7.4;   // because rMaxSym = 6.4 (magical number for now)
+        m_numOfTimesteps = 0;     // no timesteps at the beginning
+        m_rVerletListLimit = 7.4; // because rMaxSym = 6.4 (magical number for now)
     }
 
     // getters

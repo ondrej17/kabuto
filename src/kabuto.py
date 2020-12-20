@@ -122,13 +122,14 @@ class Kabuto:
 
         elif self.action == "predict":
             if self.option1 is not None and self.option2 is not None:
-                self.predict(self.option1, self.option2)
+                # rerouting predict to test
+                self.test(self.option1, self.option2)
             else:
                 logger.error("Either no file given or name of nn not given")
 
         elif self.action == "test":
             if self.option1 is None and self.option2 is None:
-                self.test()
+                self.test(0, 0)
             else:
                 logger.error("Action \'{}\' takes no arguments".format(self.action))
 
@@ -416,7 +417,7 @@ class Kabuto:
             * predicts the global structure at each timestep that is in given file
             * main result is a dictionary {phase:percentage}, which is stored in 'result' folder
         """
-        logger.info("ACTION: predict\n"
+        logger.debug("ACTION: predict\n"
                     "predicting from file: {}".format(filename))
 
         # processing of file ...
@@ -488,11 +489,12 @@ class Kabuto:
                     # skipping useless lines
                     pass
         # all atoms are loaded in dictionary
-
+        logger.info("All atoms are loaded in dictionary")
+        
         # calculating of the descriptors for each timestep using C++ extension
-        logger.info("Calculating of descriptors begins")
+        logger.debug("Calculating of descriptors begins")
         self.timesteps = descriptors.compute(self.pbc_dict, self.timesteps)
-        logger.info("Calculating of descriptors ended")
+        logger.debug("Calculating of descriptors ended")
 
         # # save dictionary to json file
         # with open(self.config_dir + os.path.sep + "dict_timesteps.json", "w") as json_file:
@@ -507,24 +509,24 @@ class Kabuto:
         # save timesteps to separate files in 'dir_to_predict' folder
         # create to_predict_dir for saving timesteps (if it does not exist)
         if os.path.isdir(self.to_predict_dir):
-            logger.info("Directory {} already exists.".format(self.to_predict_dir))
+            logger.debug("Directory {} already exists.".format(self.to_predict_dir))
         else:
             try:
                 os.mkdir(self.to_predict_dir)
             except OSError:
                 logger.error("Creation of the directory {} failed".format(self.to_predict_dir))
             else:
-                logger.info("Successfully created directory {}".format(self.to_predict_dir))
+                logger.debug("Successfully created directory {}".format(self.to_predict_dir))
 
         # each timestep is saved to different file
         # filename = date_time_timestep, e.g. 2020_03_28_09_42_45_500.txt
-        logger.info("Saving timesteps to separate file begins")
+        logger.debug("Saving timesteps to separate file begins")
 
         for timestep in self.timesteps.keys():
             # create specific filename
             filename = datetime.datetime.today().strftime("%Y_%m_%d_%H_%M_%S_") + str(timestep) + ".txt"
             path_to_file = os.path.join(self.to_predict_dir, filename)
-            logger.info("... saving timestep #{} to file {}".format(timestep, path_to_file))
+            logger.debug("... saving timestep #{} to file {}".format(timestep, path_to_file))
 
             # open file
             with open(path_to_file, 'w') as file:
@@ -536,13 +538,13 @@ class Kabuto:
                     file.write(str(atom_id) + ' ' + ' '.join(map(str, self.timesteps[timestep][atom_id])) + '\n')
 
         # all files are prepared in 'dir_to_predict' folder
-        logger.info("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
+        logger.debug("All timesteps were saved to \'{}\' folder".format(self.to_predict_dir))
 
         # prepare() function would end here.
 
         # check whether the name of NN is in saved_nn directory
         if os.path.isdir(self.saved_nn_dir):
-            logger.info("Directory \'{}\' already exists.".format(self.saved_nn_dir))
+            logger.debug("Directory \'{}\' already exists.".format(self.saved_nn_dir))
         else:
             logger.error("Directory \'{}\' does not exist!".format(self.saved_nn_dir))
             return None
@@ -581,13 +583,13 @@ class Kabuto:
                     prediction = self.nn.predict(input_array)
 
                     # I have a prediction!
-                    logger.info("prediction for file \'{}\'\n{}".format(filename, prediction))
+                    logger.debug("prediction for file \'{}\'\n{}".format(filename, prediction))
 
                     # calculate the vector_Q (global structure) from vector_q (local structures)
                     vector_big_q = self.calculate_vector_big_q(prediction)
 
                     # I have vector Q that has information about global structure at given timestep
-                    logger.info("Q = {}".format(vector_big_q))
+                    logger.debug("Q = {}".format(vector_big_q))
 
                     # add another timestep to results [phase:percentage]
                     global_structure_dict[timestep] = self.create_dict_phase_percentage(vector_big_q)
@@ -601,20 +603,23 @@ class Kabuto:
             # save results to 'results' dir
             self.save_results(global_structure_dict)
 
-            logger.info("End of predicting.")
+            logger.debug("End of predicting.")
 
         else:
             # if 'name' is in 'saved_nn' directory, do nothing
             logger.error("Neural network \'{}\' does not exist!".format(name))
 
-    @staticmethod
-    def test():
+    def test(self, name, filename):
         """
         Documentation for 'test' function:
             * a method for the testing of the features
         """
         logger.info("ACTION: test\n"
                     "Entering TEST mode. Object KABUTO created. ...")
+
+        logger.info("START")
+        self.predict(name, filename)
+        logger.info("STOP")
 
         # test return values of functions in descriptors module
         # test_descriptors = Descriptors(atom_id=1, x=0, y=0, z=0, all_atoms=dict(), pbc=[1, 1, 1])
@@ -652,7 +657,7 @@ class Kabuto:
                 counter = 1
                 for filename in sorted(files):
                     # process each file
-                    logger.info("{}/{} ... processing file: {}".format(counter, num_of_files, filename))
+                    logger.debug("{}/{} ... processing file: {}".format(counter, num_of_files, filename))
                     counter += 1
                     output_vector = None
 
@@ -679,11 +684,11 @@ class Kabuto:
                                 # add descriptors to input array
                                 input_array.append(descriptors_list)
 
-            logger.info("Input and output arrays have the same length: {} ({} vs. {})"
+            logger.debug("Input and output arrays have the same length: {} ({} vs. {})"
                         .format(len(input_array) == len(output_array), len(input_array), len(output_array)))
 
-            logger.info("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
-            logger.info("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
+            logger.debug("... Descriptors:\n{}".format(np.array(input_array, dtype=float)))
+            logger.debug("... Output vector:\n{}".format(np.array(output_array, dtype=float)))
 
             
             input_result = np.array(input_array, dtype=float)
@@ -785,7 +790,7 @@ class Kabuto:
             logger.error("File \'{}\' not found!".format(self.phase_file))
             return None
 
-        logger.info("Available phases: {}".format(phases_dict))
+        logger.debug("Available phases: {}".format(phases_dict))
         return phases_dict
 
     def calculate_vector_big_q(self, prediction):
@@ -890,10 +895,10 @@ class Kabuto:
         """
         moves all files from 'from_dir' to 'to_dir'
         """
-        logger.info("Moving files ...")
+        logger.debug("Moving files ...")
         # create to_dir if it does not exist)
         if os.path.isdir(to_dir):
-            logger.info("Directory {} already exists.".format(to_dir))
+            logger.debug("Directory {} already exists.".format(to_dir))
         else:
             try:
                 os.mkdir(to_dir)
@@ -901,12 +906,12 @@ class Kabuto:
                 logger.error("Creation of the directory {} failed".format(to_dir))
 
             else:
-                logger.info("Successfully created the directory {}".format(to_dir))
+                logger.debug("Successfully created the directory {}".format(to_dir))
         files = os.listdir(from_dir)
         for filename in files:
             shutil.move(os.path.join(from_dir, filename), to_dir)
 
-        logger.info("Files successfully moved from \'{}\' to \'{}\'".format(from_dir, to_dir))
+        logger.debug("Files successfully moved from \'{}\' to \'{}\'".format(from_dir, to_dir))
 
     @staticmethod
     def dict_to_string(dictionary):
@@ -928,7 +933,7 @@ class Kabuto:
         filename = datetime.datetime.today().strftime("results_%Y_%m_%d_%H_%M_%S") + ".txt"
         path_to_file = os.path.join(self.result_dir, filename)
 
-        logger.info("Saving results to file: \'{}\'".format(path_to_file))
+        logger.debug("Saving results to file: \'{}\'".format(path_to_file))
 
         # prepare first descriptive line
         first_line = "timestep\t" + '\t'.join(self.phases_available.keys()) + "\n"
