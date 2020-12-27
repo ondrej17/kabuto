@@ -9,12 +9,12 @@ It is a C++ extension for Python used in the [Kabuto](https://github.com/ondrej1
 The whole library is also my project for the subject "Programovanie (3)" at the university. Since TDD (test-driven development) is the main focus of the course, the whole library is tested using `GoogleTest` testing framework.
 
 
-## Visualisation of object relationship in `descriptors` library
+## Visualisation of object relationship in `descriptors` library 
 
 ![object-relationship](src/common/images/object-relationship.png)
 
 
-## Project structure
+## Project structure 
 
 * `src`
   * `boost`
