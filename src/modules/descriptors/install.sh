@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "Installing \"descriptors\" library for Kabuto"
 
-python setup.py install
+python3 setup.py install

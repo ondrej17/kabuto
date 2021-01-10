@@ -4,36 +4,53 @@ void Atom::calculateDescriptors(const double pbcX,
                                 const double pbcY,
                                 const double pbcZ,
                                 const std::vector<int> &atomsInVerletListIds,
-                                std::map<int, Atom> &atomsInVerletList)
+                                std::map<int, Atom> &atomsInVerletList,
+                                const double rMinSym,
+                                const double rMaxSym,
+                                const double rMinStein,
+                                const double rMaxStein,
+                                const std::vector<std::vector<double>> &g2FunctionParameters,
+                                const std::vector<double> &g3FunctionParameters,
+                                const std::vector<int> &steinhardtFunctionParameters)
 {
     auto start = std::chrono::steady_clock::now();
     evaluateSymmetryFunctions(pbcX,
                               pbcY,
                               pbcZ,
                               atomsInVerletListIds,
-                              atomsInVerletList);
+                              atomsInVerletList,
+                              rMinSym, rMaxSym,
+                              g2FunctionParameters,
+                              g3FunctionParameters);
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> duration = end - start;
-    // std::cout << "\t\t" << duration.count() << "s - Symmetry ..." << std::endl;
+    std::cout << "\t\t" << duration.count() << "s - Symmetry ..." << std::endl;
 
     start = std::chrono::steady_clock::now();
     evaluateSteinhardtParameters(pbcX,
                                  pbcY,
                                  pbcZ,
                                  atomsInVerletListIds,
-                                 atomsInVerletList);
+                                 atomsInVerletList,
+                                 rMinStein,
+                                 rMaxStein,
+                                 steinhardtFunctionParameters);
 
     end = std::chrono::steady_clock::now();
     duration = end - start;
-    // std::cout << "\t\t" << duration.count() << "s - Steinhardt ..." << std::endl
-            //   << std::endl;
+    std::cout << "\t\t" << duration.count() << "s - Steinhardt ..." << std::endl
+              << std::endl;
 }
 
 void Atom::evaluateSymmetryFunctions(const double pbcX,
                                      const double pbcY,
                                      const double pbcZ,
                                      const std::vector<int> &atomsInVerletListIds,
-                                     std::map<int, Atom> &atomsInVerletList)
+                                     std::map<int, Atom> &atomsInVerletList,
+                                     const double rMinSym,
+                                     const double rMaxSym,
+                                     const std::vector<std::vector<double>> &g2FunctionParameters,
+                                     const std::vector<double> &g3FunctionParameters)
 {
     double myX{atomsInVerletList.at(m_id).getX()};
     double myY{atomsInVerletList.at(m_id).getY()};
@@ -60,20 +77,19 @@ void Atom::evaluateSymmetryFunctions(const double pbcX,
             z_ij -= pbcZ * round(z_ij / pbcZ);
 
             // calculate the correct length of vector r_ij
-            //double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
             double r_ij{getSphericalR(x_ij, y_ij, z_ij)};
 
             // calculate value of fcFunction
-            double fcValue{fcFunction(r_ij, m_rMinSym, m_rMaxSym)};
+            double fcValue{fcFunction(r_ij, rMinSym, rMaxSym)};
 
             // add correct contributions to correct descriptors
             int index{0};
-            for (const std::vector<double> &params : m_g2FunctionParameters)
+            for (const std::vector<double> &params : g2FunctionParameters)
             {
                 m_descriptors.at(index) += fcValue * exp(-params.at(0) * pow(r_ij - params.at(1), 2));
                 index++;
             }
-            for (const double &param : m_g3FunctionParameters)
+            for (const double &param : g3FunctionParameters)
             {
                 m_descriptors.at(index) += fcValue * cos(param * r_ij);
                 index++;
@@ -86,7 +102,10 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
                                         const double pbcY,
                                         const double pbcZ,
                                         const std::vector<int> &atomsInVerletListIds,
-                                        std::map<int, Atom> &atomsInVerletList)
+                                        std::map<int, Atom> &atomsInVerletList,
+                                        const double rMinStein,
+                                        const double rMaxStein,
+                                        const std::vector<int> &steinhardtFunctionParameters)
 {
     double myX{atomsInVerletList.at(m_id).getX()};
     double myY{atomsInVerletList.at(m_id).getY()};
@@ -124,7 +143,7 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
             // double r_ij{getSphericalR(x_ij, y_ij, z_ij)};
 
             // calculate value of fcFunction
-            double fcValue{fcFunction(r_ij, m_rMinStein, m_rMaxStein)};
+            double fcValue{fcFunction(r_ij, rMinStein, rMaxStein)};
 
             int index6{0};
             int index7{0};
@@ -184,106 +203,106 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
     // print(m_descriptors);
 }
 
-double Atom::symmetryFunctionG2(const double eta,
-                                const double rs,
-                                const double pbcX,
-                                const double pbcY,
-                                const double pbcZ,
-                                const std::vector<int> &atomsInVerletListIds,
-                                std::map<int, Atom> &atomsInVerletList)
-{
-    double result{0.0};
-    double myX{atomsInVerletList.at(m_id).getX()};
-    double myY{atomsInVerletList.at(m_id).getY()};
-    double myZ{atomsInVerletList.at(m_id).getZ()};
-
-    for (int id : atomsInVerletListIds)
-    {
-        if (m_id != id)
-        { // skip myself
-
-            // coordinates of other atom
-            double otherX{atomsInVerletList.at(id).getX()};
-            double otherY{atomsInVerletList.at(id).getY()};
-            double otherZ{atomsInVerletList.at(id).getZ()};
-
-            // components of the vector r_ij
-            double x_ij{otherX - myX};
-            double y_ij{otherY - myY};
-            double z_ij{otherZ - myZ};
-
-            // correction of vector r_ij for PBC (and minimum image convention)
-            x_ij -= pbcX * round(x_ij / pbcX);
-            y_ij -= pbcY * round(y_ij / pbcY);
-            z_ij -= pbcZ * round(z_ij / pbcZ);
-
-            // calculate the correct length of vector r_ij
-            double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
-
-            // add correct contribution to result
-            result += fcFunction(r_ij, m_rMinSym, m_rMaxSym) * exp(-eta * pow(r_ij - rs, 2));
-        }
-    }
-    return result;
-}
-
-double Atom::symmetryFunctionG3(const double kappa,
-                                const double pbcX,
-                                const double pbcY,
-                                const double pbcZ,
-                                const std::vector<int> &atomsInVerletListIds,
-                                std::map<int, Atom> &atomsInVerletList)
-{
-    double result{0.0};
-    double myX{atomsInVerletList.at(m_id).getX()};
-    double myY{atomsInVerletList.at(m_id).getY()};
-    double myZ{atomsInVerletList.at(m_id).getZ()};
-
-    for (int id : atomsInVerletListIds)
-    {
-        if (m_id != id)
-        { // skip myself
-
-            // coordinates of other atom
-            double otherX{atomsInVerletList.at(id).getX()};
-            double otherY{atomsInVerletList.at(id).getY()};
-            double otherZ{atomsInVerletList.at(id).getZ()};
-
-            // vector r_ij
-            double x_ij{otherX - myX};
-            double y_ij{otherY - myY};
-            double z_ij{otherZ - myZ};
-
-            // correction of vector r_ij for PBC (and minimum image convention)
-            x_ij -= pbcX * round(x_ij / pbcX);
-            y_ij -= pbcY * round(y_ij / pbcY);
-            z_ij -= pbcZ * round(z_ij / pbcZ);
-
-            // calculate the correct length of vector r_ij
-            double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
-
-            // add correct contribution to result
-            result += fcFunction(r_ij, m_rMinSym, m_rMaxSym) * cos(kappa * r_ij);
-        }
-    }
-    return result;
-}
-
-double Atom::steinhardtFunction(const int l,
-                                const double pbcX,
-                                const double pbcY,
-                                const double pbcZ,
-                                const std::vector<int> &atomsInVerletListIds,
-                                std::map<int, Atom> &atomsInVerletList)
-{
-    double result{0.0};
-
-    for (int m = -l; m <= l; m++)
-    {
-        result += pow(fabs(qlmFunction(m, l, pbcX, pbcY, pbcZ, atomsInVerletListIds, atomsInVerletList)), 2);
-    }
-    return sqrt(result * 4 * M_PI / (2 * l + 1));
-}
+//double Atom::symmetryFunctionG2(const double eta,
+//                                const double rs,
+//                                const double pbcX,
+//                                const double pbcY,
+//                                const double pbcZ,
+//                                const std::vector<int> &atomsInVerletListIds,
+//                                std::map<int, Atom> &atomsInVerletList)
+//{
+//    double result{0.0};
+//    double myX{atomsInVerletList.at(m_id).getX()};
+//    double myY{atomsInVerletList.at(m_id).getY()};
+//    double myZ{atomsInVerletList.at(m_id).getZ()};
+//
+//    for (int id : atomsInVerletListIds)
+//    {
+//        if (m_id != id)
+//        { // skip myself
+//
+//            // coordinates of other atom
+//            double otherX{atomsInVerletList.at(id).getX()};
+//            double otherY{atomsInVerletList.at(id).getY()};
+//            double otherZ{atomsInVerletList.at(id).getZ()};
+//
+//            // components of the vector r_ij
+//            double x_ij{otherX - myX};
+//            double y_ij{otherY - myY};
+//            double z_ij{otherZ - myZ};
+//
+//            // correction of vector r_ij for PBC (and minimum image convention)
+//            x_ij -= pbcX * round(x_ij / pbcX);
+//            y_ij -= pbcY * round(y_ij / pbcY);
+//            z_ij -= pbcZ * round(z_ij / pbcZ);
+//
+//            // calculate the correct length of vector r_ij
+//            double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
+//
+//            // add correct contribution to result
+//            result += fcFunction(r_ij, m_rMinSym, m_rMaxSym) * exp(-eta * pow(r_ij - rs, 2));
+//        }
+//    }
+//    return result;
+//}
+//
+//double Atom::symmetryFunctionG3(const double kappa,
+//                                const double pbcX,
+//                                const double pbcY,
+//                                const double pbcZ,
+//                                const std::vector<int> &atomsInVerletListIds,
+//                                std::map<int, Atom> &atomsInVerletList)
+//{
+//    double result{0.0};
+//    double myX{atomsInVerletList.at(m_id).getX()};
+//    double myY{atomsInVerletList.at(m_id).getY()};
+//    double myZ{atomsInVerletList.at(m_id).getZ()};
+//
+//    for (int id : atomsInVerletListIds)
+//    {
+//        if (m_id != id)
+//        { // skip myself
+//
+//            // coordinates of other atom
+//            double otherX{atomsInVerletList.at(id).getX()};
+//            double otherY{atomsInVerletList.at(id).getY()};
+//            double otherZ{atomsInVerletList.at(id).getZ()};
+//
+//            // vector r_ij
+//            double x_ij{otherX - myX};
+//            double y_ij{otherY - myY};
+//            double z_ij{otherZ - myZ};
+//
+//            // correction of vector r_ij for PBC (and minimum image convention)
+//            x_ij -= pbcX * round(x_ij / pbcX);
+//            y_ij -= pbcY * round(y_ij / pbcY);
+//            z_ij -= pbcZ * round(z_ij / pbcZ);
+//
+//            // calculate the correct length of vector r_ij
+//            double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
+//
+//            // add correct contribution to result
+//            result += fcFunction(r_ij, m_rMinSym, m_rMaxSym) * cos(kappa * r_ij);
+//        }
+//    }
+//    return result;
+//}
+//
+//double Atom::steinhardtFunction(const int l,
+//                                const double pbcX,
+//                                const double pbcY,
+//                                const double pbcZ,
+//                                const std::vector<int> &atomsInVerletListIds,
+//                                std::map<int, Atom> &atomsInVerletList)
+//{
+//    double result{0.0};
+//
+//    for (int m = -l; m <= l; m++)
+//    {
+//        result += pow(fabs(qlmFunction(m, l, pbcX, pbcY, pbcZ, atomsInVerletListIds, atomsInVerletList)), 2);
+//    }
+//    return sqrt(result * 4 * M_PI / (2 * l + 1));
+//}
 
 double Atom::fcFunction(const double r,
                         const double rMin,
@@ -309,7 +328,9 @@ double Atom::qlmFunction(const int m,
                          const double pbcY,
                          const double pbcZ,
                          const std::vector<int> &atomsInVerletListIds,
-                         std::map<int, Atom> &atomsInVerletList)
+                         std::map<int, Atom> &atomsInVerletList,
+                         const double rMinStein,
+                         const double rMaxStein)
 {
     double myX{atomsInVerletList.at(m_id).getX()};
     double myY{atomsInVerletList.at(m_id).getY()};
@@ -341,8 +362,8 @@ double Atom::qlmFunction(const int m,
             // calculate the correct length of vector r_ij
             double r_ij{sqrt(pow(x_ij, 2) + pow(y_ij, 2) + pow(z_ij, 2))};
 
-            numerator += fcFunction(r_ij, m_rMinStein, m_rMaxStein) * ylmFunction(m, l, x_ij, y_ij, z_ij);
-            denominator += fcFunction(r_ij, m_rMinStein, m_rMaxStein);
+            numerator += fcFunction(r_ij, rMinStein, rMaxStein) * ylmFunction(m, l, x_ij, y_ij, z_ij);
+            denominator += fcFunction(r_ij, rMinStein, rMaxStein);
         }
     }
     return numerator / denominator;
