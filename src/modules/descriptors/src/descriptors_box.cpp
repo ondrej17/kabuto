@@ -96,13 +96,13 @@ void Box::calculateDescriptors()
     std::chrono::duration<double> timeFromStart;
 
     timeFromStart = std::chrono::steady_clock::now() - start;
-    std::cout << '\t' << timeFromStart.count() << "s - Begining of calculation of descriptors ..." << std::endl;
+//    std::cout << '\t' << timeFromStart.count() << "s - Beginning of calculation of descriptors ..." << std::endl;
 
     // go through all timesteps
     for (const int &timestepId : m_timestepsId)
     {
         timeFromStart = std::chrono::steady_clock::now() - start;
-        std::cout << '\t' << timeFromStart.count() << "s - Calculating timestep #" << timestepId << std::endl;
+//        std::cout << '\t' << timeFromStart.count() << "s - Calculating timestep #" << timestepId << std::endl;
 
         std::vector<int> atomsId{m_timesteps.at(timestepId).getAtomsId()};
         std::vector<double> pbc{getPbcOfTimestep(timestepId)};
@@ -111,7 +111,7 @@ void Box::calculateDescriptors()
         for (const int &atomId : atomsId)
         {
             timeFromStart = std::chrono::steady_clock::now() - start;
-            std::cout << '\t' << timeFromStart.count() << "s - Calculating atom #" << atomId << std::endl;
+//            std::cout << '\t' << timeFromStart.count() << "s - Calculating atom #" << atomId << std::endl;
 
             // calculate descriptors for atom
             m_timesteps .at(timestepId)

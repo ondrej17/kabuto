@@ -8,12 +8,13 @@ from distutils.core import setup, Extension
 
 module1 = Extension(
     "descriptors",
-    sources=[   'src/descriptors_timestep.cpp',
-                'src/descriptors_module.cpp',
-                'src/descriptors_utility.cpp',
-                'src/descriptors_verlet_list.cpp',
-                'src/descriptors_atom.cpp',
-                'src/descriptors_box.cpp'],
+    sources=['src/descriptors_timestep.cpp',
+             'src/descriptors_module.cpp',
+             'src/descriptors_utility.cpp',
+             'src/descriptors_verlet_list.cpp',
+             'src/descriptors_atom.cpp',
+             'src/descriptors_box.cpp'],
+    extra_compile_args=['-std=c++17'],
 )
 
 setup(name="descriptors",

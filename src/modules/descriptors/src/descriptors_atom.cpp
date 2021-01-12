@@ -9,10 +9,9 @@ void Atom::calculateDescriptors(const double pbcX,
                                 const double rMaxSym,
                                 const double rMinStein,
                                 const double rMaxStein,
-                                const std::vector<std::vector<double>> &g2FunctionParameters,
+                                const std::vector <std::vector<double>> &g2FunctionParameters,
                                 const std::vector<double> &g3FunctionParameters,
-                                const std::vector<int> &steinhardtFunctionParameters)
-{
+                                const std::vector<int> &steinhardtFunctionParameters) {
     auto start = std::chrono::steady_clock::now();
     evaluateSymmetryFunctions(pbcX,
                               pbcY,
@@ -24,7 +23,7 @@ void Atom::calculateDescriptors(const double pbcX,
                               g3FunctionParameters);
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> duration = end - start;
-    std::cout << "\t\t" << duration.count() << "s - Symmetry ..." << std::endl;
+//    std::cout << "\t\t" << duration.count() << "s - Symmetry ..." << std::endl;
 
     start = std::chrono::steady_clock::now();
     evaluateSteinhardtParameters(pbcX,
@@ -38,8 +37,8 @@ void Atom::calculateDescriptors(const double pbcX,
 
     end = std::chrono::steady_clock::now();
     duration = end - start;
-    std::cout << "\t\t" << duration.count() << "s - Steinhardt ..." << std::endl
-              << std::endl;
+//    std::cout << "\t\t" << duration.count() << "s - Steinhardt ..." << std::endl
+//              << std::endl;
 }
 
 void Atom::evaluateSymmetryFunctions(const double pbcX,
@@ -49,17 +48,14 @@ void Atom::evaluateSymmetryFunctions(const double pbcX,
                                      std::map<int, Atom> &atomsInVerletList,
                                      const double rMinSym,
                                      const double rMaxSym,
-                                     const std::vector<std::vector<double>> &g2FunctionParameters,
-                                     const std::vector<double> &g3FunctionParameters)
-{
+                                     const std::vector <std::vector<double>> &g2FunctionParameters,
+                                     const std::vector<double> &g3FunctionParameters) {
     double myX{atomsInVerletList.at(m_id).getX()};
     double myY{atomsInVerletList.at(m_id).getY()};
     double myZ{atomsInVerletList.at(m_id).getZ()};
 
-    for (int id : atomsInVerletListIds)
-    {
-        if (m_id != id)
-        { // skip myself
+    for (int id : atomsInVerletListIds) {
+        if (m_id != id) { // skip myself
 
             // coordinates of other atom
             double otherX{atomsInVerletList.at(id).getX()};
@@ -84,13 +80,11 @@ void Atom::evaluateSymmetryFunctions(const double pbcX,
 
             // add correct contributions to correct descriptors
             int index{0};
-            for (const std::vector<double> &params : g2FunctionParameters)
-            {
+            for (const std::vector<double> &params : g2FunctionParameters) {
                 m_descriptors.at(index) += fcValue * exp(-params.at(0) * pow(r_ij - params.at(1), 2));
                 index++;
             }
-            for (const double &param : g3FunctionParameters)
-            {
+            for (const double &param : g3FunctionParameters) {
                 m_descriptors.at(index) += fcValue * cos(param * r_ij);
                 index++;
             }
@@ -105,8 +99,7 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
                                         std::map<int, Atom> &atomsInVerletList,
                                         const double rMinStein,
                                         const double rMaxStein,
-                                        const std::vector<int> &steinhardtFunctionParameters)
-{
+                                        const std::vector<int> &steinhardtFunctionParameters) {
     double myX{atomsInVerletList.at(m_id).getX()};
     double myY{atomsInVerletList.at(m_id).getY()};
     double myZ{atomsInVerletList.at(m_id).getZ()};
@@ -114,14 +107,15 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
     std::array<double, 2 * 6 + 1> numerator6{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     std::array<double, 2 * 6 + 1> denominator6{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     std::array<double, 2 * 7 + 1> numerator7{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 2 * 7 + 1> denominator7{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 2 * 8 + 1> numerator8{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 2 * 8 + 1> denominator8{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    std::array<double, 2 * 7 + 1> denominator7{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                               0.0};
+    std::array<double, 2 * 8 + 1> numerator8{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                             0.0, 0.0};
+    std::array<double, 2 * 8 + 1> denominator8{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                               0.0, 0.0, 0.0};
 
-    for (int id : atomsInVerletListIds)
-    {
-        if (m_id != id)
-        { // skip myself
+    for (int id : atomsInVerletListIds) {
+        if (m_id != id) { // skip myself
 
             // coordinates of other atom
             double otherX{atomsInVerletList.at(id).getX()};
@@ -149,16 +143,13 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
             int index7{0};
             int index8{0};
 
-            for (int m = -8; m <= 8; m++)
-            {
-                if (m >= -6 && m <= 6)
-                {
+            for (int m = -8; m <= 8; m++) {
+                if (m >= -6 && m <= 6) {
                     numerator6[index6] += fcValue * ylmFunction(m, 6, x_ij, y_ij, z_ij);
                     denominator6[index6] += fcValue;
                     index6++;
                 }
-                if (m >= -7 && m <= 7)
-                {
+                if (m >= -7 && m <= 7) {
                     numerator7[index7] += fcValue * ylmFunction(m, 7, x_ij, y_ij, z_ij);
                     denominator7[index7] += fcValue;
                     index7++;
@@ -176,8 +167,7 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
 
     result = 0;
     numOfElements = numerator6.size();
-    for (int index{0}; index < numOfElements; index++)
-    {
+    for (int index{0}; index < numOfElements; index++) {
         result += pow(fabs(numerator6.at(index) / denominator6.at(index)), 2);
     }
     m_descriptors.at(11) = sqrt(result * 4 * M_PI / (2 * 6 + 1));
@@ -185,8 +175,7 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
     // calculate steinhardt parameter for l = 7
     result = 0;
     numOfElements = numerator7.size();
-    for (int index{0}; index < numOfElements; index++)
-    {
+    for (int index{0}; index < numOfElements; index++) {
         result += pow(fabs(numerator7.at(index) / denominator7.at(index)), 2);
     }
     m_descriptors.at(12) = sqrt(result * 4 * M_PI / (2 * 7 + 1));
@@ -194,8 +183,7 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
     // calculate steinhardt parameter for l = 8
     result = 0;
     numOfElements = numerator8.size();
-    for (int index{0}; index < numOfElements; index++)
-    {
+    for (int index{0}; index < numOfElements; index++) {
         result += pow(fabs(numerator8.at(index) / denominator8.at(index)), 2);
     }
     m_descriptors.at(13) = sqrt(result * 4 * M_PI / (2 * 8 + 1));
@@ -306,18 +294,12 @@ void Atom::evaluateSteinhardtParameters(const double pbcX,
 
 double Atom::fcFunction(const double r,
                         const double rMin,
-                        const double rMax)
-{
-    if (r <= rMin)
-    {
+                        const double rMax) {
+    if (r <= rMin) {
         return 1.0;
-    }
-    else if ((rMin < r) && (r <= rMax))
-    {
+    } else if ((rMin < r) && (r <= rMax)) {
         return 0.5 + 0.5 * cos(M_PI * (r - rMin) / (rMax - rMin));
-    }
-    else
-    {
+    } else {
         return 0.0;
     }
 }
@@ -330,8 +312,7 @@ double Atom::qlmFunction(const int m,
                          const std::vector<int> &atomsInVerletListIds,
                          std::map<int, Atom> &atomsInVerletList,
                          const double rMinStein,
-                         const double rMaxStein)
-{
+                         const double rMaxStein) {
     double myX{atomsInVerletList.at(m_id).getX()};
     double myY{atomsInVerletList.at(m_id).getY()};
     double myZ{atomsInVerletList.at(m_id).getZ()};
@@ -339,10 +320,8 @@ double Atom::qlmFunction(const int m,
     double numerator{0.0};
     double denominator{0.0};
 
-    for (int id : atomsInVerletListIds)
-    {
-        if (m_id != id)
-        { // skip myself
+    for (int id : atomsInVerletListIds) {
+        if (m_id != id) { // skip myself
 
             // coordinates of other atom
             double otherX{atomsInVerletList.at(id).getX()};
@@ -373,51 +352,42 @@ double Atom::ylmFunction(const int m,
                          const int l,
                          const double dx,
                          const double dy,
-                         const double dz)
-{
+                         const double dz) {
     // spherical angles of vector (dx, dy, dz)
     double phi{getSphericalPhi(dx, dy, dz)};
     double theta{getSphericalTheta(dx, dy, dz)};
 
     // return real form spherical harmonics in form Y_lm
     //      sph_harm() returns Y_l^m --> wikipedia
-    if (m < 0)
-    {
-        return pow(-1, m) * M_SQRT2 * boost::math::spherical_harmonic_i(l, abs(m), theta, phi);
-    }
-    else if (m > 0)
-    {
-        return pow(-1, m) * M_SQRT2 * boost::math::spherical_harmonic_r(l, m, theta, phi);
+    if (m < 0) {
+        return pow(-1, m) * M_SQRT2 * std::sph_legendre(l, abs(m), theta) * sin(abs(m) * phi);
+    } else if (m > 0) {
+        return pow(-1, m) * M_SQRT2 * std::sph_legendre(l, m, theta) * cos(m * phi);
     }
     // m == 0
-    return boost::math::spherical_harmonic_r(l, m, theta, phi);
+    return std::sph_legendre(l, m, theta);
 }
 
 double Atom::getSphericalR(const double x,
                            const double y,
-                           const double z)
-{
+                           const double z) {
     return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
 double Atom::getSphericalPhi(const double x,
                              const double y,
-                             const double z)
-{
+                             const double z) {
     return atan2(y, x);
 }
 
 double Atom::getSphericalTheta(const double x,
                                const double y,
-                               const double z)
-{
+                               const double z) {
     return acos(z / getSphericalR(x, y, z));
 }
 
-void Atom::print(std::vector<double> const &input)
-{
-    for (long unsigned int i = 0; i < input.size(); i++)
-    {
+void Atom::print(std::vector<double> const &input) {
+    for (long unsigned int i = 0; i < input.size(); i++) {
         std::cout << input.at(i) << ' ';
     }
     std::cout << std::endl;
