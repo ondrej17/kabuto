@@ -31,8 +31,6 @@
 #include <chrono>
 #include <iostream>
 
-#include "boost/math/special_functions/spherical_harmonic.hpp"
-
 class Atom
 {
 private:
